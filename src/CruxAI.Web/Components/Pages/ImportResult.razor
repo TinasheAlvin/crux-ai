@@ -1,0 +1,79 @@
+@page "/imports/{ImportJobId:guid}"
+@attribute [Authorize]
+@inject ImportService Imports
+
+<PageTitle>Imported · Crux AI</PageTitle>
+
+<ImportStepper Current="4" />
+
+@if (job is null)
+{
+    <p>Loading…</p>
+}
+else
+{
+    <section class="panel">
+        <header class="panel-header">
+            <p class="eyebrow">@job.OriginalFileName</p>
+            <h1>@transactions.Count transaction@(transactions.Count == 1 ? "" : "s") persisted</h1>
+            <p class="lede">
+                Each imported line has a stable <code>RowId</code> keyed by import job and source row number.
+                Re-running persist on this import upserts by RowId.
+            </p>
+            @if (!string.IsNullOrWhiteSpace(job.ErrorSummary))
+            {
+                <p class="banner">@job.ErrorSummary</p>
+            }
+        </header>
+
+        <div class="actions">
+            <a class="btn btn-outline" href="/">Back home</a>
+            <a class="btn btn-link" href="@($"/imports/{ImportJobId}/validate")">Review rows</a>
+        </div>
+
+        <div class="table-scroll">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>RowId</th>
+                        <th>#</th>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                        <th>Category</th>
+                        <th>Reference</th>
+                        <th>Counterparty</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var txn in transactions)
+                    {
+                        <tr>
+                            <td><code class="row-id">@txn.RowId</code></td>
+                            <td>@txn.SourceRowNumber</td>
+                            <td>@txn.Date.ToString("dd MMM yyyy")</td>
+                            <td>@txn.Description</td>
+                            <td class="numeric">@txn.Amount.ToString("C")</td>
+                            <td>@txn.Category</td>
+                            <td>@txn.Reference</td>
+                            <td>@txn.Counterparty</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+}
+
+@code {
+    [Parameter] public Guid ImportJobId { get; set; }
+
+    private ImportJob? job;
+    private IReadOnlyList<Transaction> transactions = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        job = await Imports.GetJobAsync(ImportJobId);
+        transactions = await Imports.ListTransactionsAsync(ImportJobId);
+    }
+}

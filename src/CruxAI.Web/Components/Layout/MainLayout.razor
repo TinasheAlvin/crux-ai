@@ -1,0 +1,32 @@
+﻿@inherits LayoutComponentBase
+@inject ICurrentUser CurrentUser
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            @if (CurrentUser.IsAuthenticated)
+            {
+                <span class="org-chip">@CurrentUser.OrganizationName</span>
+                <span class="user-chip">@CurrentUser.DisplayName</span>
+                <form method="post" action="/auth/logout">
+                    <AntiforgeryToken />
+                    <button type="submit" class="btn btn-link sign-out">Sign out</button>
+                </form>
+            }
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+<div id="blazor-error-ui">
+    Something went wrong. Reload to continue.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>

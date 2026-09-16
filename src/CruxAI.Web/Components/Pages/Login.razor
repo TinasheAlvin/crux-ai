@@ -1,0 +1,23 @@
+@page "/login"
+@layout EmptyLayout
+@attribute [AllowAnonymous]
+
+<PageTitle>Sign in · Crux AI</PageTitle>
+
+<section class="auth-card">
+    <h1>See the crux of the numbers</h1>
+    <p class="lede">
+        Local demo sign-in bootstraps an organisation and owner membership.
+        Entra External ID is stubbed — see the TODOs in <code>Program.cs</code> and
+        <code>Auth:EntraExternalId</code> in configuration.
+    </p>
+
+    <form method="post" action="/auth/demo-login">
+        <AntiforgeryToken />
+        <button type="submit" class="btn btn-primary btn-lg">Continue as demo owner</button>
+    </form>
+
+    <p class="hint">
+        Demo tenant: Harbour Street Studio · owner@harbourstreet.local
+    </p>
+</section>

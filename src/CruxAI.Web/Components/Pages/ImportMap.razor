@@ -1,0 +1,130 @@
+@page "/imports/{ImportJobId:guid}/map"
+@attribute [Authorize]
+@inject ImportService Imports
+@inject NavigationManager Navigation
+
+<PageTitle>Map columns · Crux AI</PageTitle>
+
+<ImportStepper Current="2" />
+
+@if (job is null)
+{
+    <p>Loading…</p>
+}
+else
+{
+    <section class="panel">
+        <header class="panel-header">
+            <p class="eyebrow">@job.OriginalFileName</p>
+            <h1>Confirm column mapping</h1>
+            <p class="lede">
+                Headers were auto-guessed from common bank and bookkeeping exports.
+                Override anything that looks wrong — the mapping is saved for this organisation.
+            </p>
+        </header>
+
+        @if (errors.Count > 0)
+        {
+            <ul class="banner banner-error">
+                @foreach (var item in errors)
+                {
+                    <li>@item</li>
+                }
+            </ul>
+        }
+
+        <table class="data-table map-table">
+            <thead>
+                <tr>
+                    <th>CSV column</th>
+                    <th>Sample values</th>
+                    <th>Maps to</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var column in columns)
+                {
+                    <tr>
+                        <td><strong>@column.Header</strong></td>
+                        <td class="muted">@column.Samples</td>
+                        <td>
+                            <InputSelect @bind-Value="column.TargetField" class="form-select">
+                                @foreach (var field in TransactionFields.All)
+                                {
+                                    <option value="@field">@field</option>
+                                }
+                            </InputSelect>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="actions">
+            <a class="btn btn-link" href="/">Cancel</a>
+            <button class="btn btn-primary" type="button" @onclick="ConfirmAsync" disabled="@busy">
+                @(busy ? "Saving…" : "Confirm mapping")
+            </button>
+        </div>
+    </section>
+}
+
+@code {
+    [Parameter] public Guid ImportJobId { get; set; }
+
+    private ImportJob? job;
+    private List<ColumnChoice> columns = [];
+    private List<string> errors = [];
+    private bool busy;
+
+    protected override async Task OnInitializedAsync()
+    {
+        job = await Imports.GetJobAsync(ImportJobId);
+        var table = await Imports.LoadTableAsync(job);
+        var mapping = Imports.GetMapping(job, table);
+        columns = table.Headers.Select(header => new ColumnChoice
+        {
+            Header = header,
+            Samples = string.Join(" · ", Imports.SampleValues(table, header)),
+            TargetField = mapping.TryGetValue(header, out var field) ? field : TransactionFields.Ignore
+        }).ToList();
+    }
+
+    private async Task ConfirmAsync()
+    {
+        if (job is null)
+        {
+            return;
+        }
+
+        busy = true;
+        var mapping = columns.ToDictionary(column => column.Header, column => column.TargetField, StringComparer.OrdinalIgnoreCase);
+        errors = MappingValidator.Validate(mapping).ToList();
+        if (errors.Count > 0)
+        {
+            busy = false;
+            return;
+        }
+
+        try
+        {
+            await Imports.SaveMappingAsync(job, mapping);
+            Navigation.NavigateTo($"/imports/{job.Id}/validate");
+        }
+        catch (Exception ex)
+        {
+            errors = [ex.Message];
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private sealed class ColumnChoice
+    {
+        public string Header { get; set; } = "";
+        public string Samples { get; set; } = "";
+        public string TargetField { get; set; } = TransactionFields.Ignore;
+    }
+}
