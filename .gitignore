@@ -1,0 +1,22 @@
+##
+# Crux AI gitignore
+##
+bin/
+obj/
+.vs/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+App_Data/
+*.db
+*.db-shm
+*.db-wal
+*.log
+.dotnet/
+TestResults/
+*.received.*
+secrets.json
+appsettings.*.local.json
+.DS_Store

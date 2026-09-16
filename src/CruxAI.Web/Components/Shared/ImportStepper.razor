@@ -1,0 +1,13 @@
+<div class="stepper" aria-label="Import steps">
+    <span class="step @(Current >= 1 ? "is-active" : null)">1. Upload</span>
+    <span class="step-rule"></span>
+    <span class="step @(Current >= 2 ? "is-active" : null)">2. Map columns</span>
+    <span class="step-rule"></span>
+    <span class="step @(Current >= 3 ? "is-active" : null)">3. Validate</span>
+    <span class="step-rule"></span>
+    <span class="step @(Current >= 4 ? "is-active" : null)">4. RowIds</span>
+</div>
+
+@code {
+    [Parameter] public int Current { get; set; }
+}

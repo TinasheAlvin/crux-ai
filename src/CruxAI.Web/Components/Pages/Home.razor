@@ -1,0 +1,151 @@
+﻿@page "/"
+@attribute [Authorize]
+@inject ImportService Imports
+@inject NavigationManager Navigation
+@inject ICurrentUser CurrentUser
+@inject IWebHostEnvironment HostEnvironment
+
+<PageTitle>Home · Crux AI</PageTitle>
+
+<section class="hero-card">
+    <p class="eyebrow">@CurrentUser.OrganizationName</p>
+    <h1>No dashboards yet — start with a CSV</h1>
+    <p class="lede">
+        Upload a bank or bookkeeping export. You will map columns, fix any row-level errors
+        without restarting, then persist normalized transactions with a stable RowId per line.
+    </p>
+
+    <label class="upload-button @(busy ? "is-disabled" : null)">
+        <InputFile OnChange="OnFileSelected" accept=".csv,text/csv" disabled="@busy" />
+        @(busy ? "Uploading…" : "Upload CSV")
+    </label>
+    <button type="button" class="btn btn-outline sample-btn" @onclick="UseSampleAsync" disabled="@busy">
+        Use sample CSV
+    </button>
+
+    @if (!string.IsNullOrWhiteSpace(error))
+    {
+        <p class="banner banner-error" role="alert">@error</p>
+    }
+
+    <p class="hint">Try <code>testdata/sample-transactions.csv</code> — it includes a few broken rows so you can exercise validation.</p>
+</section>
+
+@if (recent.Count > 0)
+{
+    <section class="panel">
+        <header class="panel-header">
+            <h2>Recent imports</h2>
+            <p>@transactionCount transaction@(transactionCount == 1 ? "" : "s") persisted for this organisation.</p>
+        </header>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th>Status</th>
+                    <th>Rows</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var job in recent)
+                {
+                    <tr>
+                        <td>@job.OriginalFileName</td>
+                        <td><span class="status-pill">@job.Status</span></td>
+                        <td>@(job.ImportedRowCount?.ToString() ?? "—")</td>
+                        <td>
+                            @if (job.Status == ImportStatus.Imported)
+                            {
+                                <a href="@($"/imports/{job.Id}")">View RowIds</a>
+                            }
+                            else if (job.Status == ImportStatus.Mapped || job.Status == ImportStatus.Validated)
+                            {
+                                <a href="@($"/imports/{job.Id}/validate")">Continue validation</a>
+                            }
+                            else
+                            {
+                                <a href="@($"/imports/{job.Id}/map")">Continue mapping</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </section>
+}
+
+@code {
+    private bool busy;
+    private string? error;
+    private IReadOnlyList<ImportJob> recent = [];
+    private int transactionCount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        recent = await Imports.ListRecentAsync();
+        transactionCount = await Imports.CountTransactionsAsync();
+    }
+
+    private async Task OnFileSelected(InputFileChangeEventArgs args)
+    {
+        busy = true;
+        error = null;
+        try
+        {
+            await using var upload = args.File.OpenReadStream(ImportService.MaxUploadBytes);
+            await using var buffer = new MemoryStream();
+            await upload.CopyToAsync(buffer);
+            buffer.Position = 0;
+            var job = await Imports.CreateFromUploadAsync(buffer, args.File.Name, buffer.Length);
+            Navigation.NavigateTo($"/imports/{job.Id}/map");
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task UseSampleAsync()
+    {
+        busy = true;
+        error = null;
+        try
+        {
+            var path = FindSampleCsv();
+            if (path is null)
+            {
+                error = "Could not find testdata/sample-transactions.csv. Upload the file from the repo instead.";
+                return;
+            }
+
+            await using var upload = File.OpenRead(path);
+            var job = await Imports.CreateFromUploadAsync(upload, Path.GetFileName(path), new FileInfo(path).Length);
+            Navigation.NavigateTo($"/imports/{job.Id}/map");
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private string? FindSampleCsv()
+    {
+        var candidates = new[]
+        {
+            Path.GetFullPath(Path.Combine(HostEnvironment.ContentRootPath, "testdata", "sample-transactions.csv")),
+            Path.GetFullPath(Path.Combine(HostEnvironment.ContentRootPath, "..", "..", "testdata", "sample-transactions.csv")),
+            Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "testdata", "sample-transactions.csv"))
+        };
+
+        return candidates.FirstOrDefault(File.Exists);
+    }
+}
