@@ -69,6 +69,7 @@ using (var scope = app.Services.CreateScope())
     }
 
     await db.Database.EnsureCreatedAsync();
+    await SqliteSchemaPatches.ApplyAsync(db);
 }
 
 if (!app.Environment.IsDevelopment())

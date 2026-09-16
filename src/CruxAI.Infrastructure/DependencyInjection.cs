@@ -3,6 +3,7 @@ using CruxAI.Core.Entities;
 using CruxAI.Core.Storage;
 using CruxAI.Infrastructure.Csv;
 using CruxAI.Infrastructure.Data;
+using CruxAI.Infrastructure.Health;
 using CruxAI.Infrastructure.Imports;
 using CruxAI.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
@@ -55,6 +56,7 @@ public static class DependencyInjection
 
         services.AddSingleton<ICsvReader, CsvHelperReader>();
         services.AddScoped<ImportService>();
+        services.AddScoped<HealthKpiService>();
         services.AddScoped<OrgBootstrapper>();
 
         return services;

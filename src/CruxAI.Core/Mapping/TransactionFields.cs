@@ -11,6 +11,7 @@ public static class TransactionFields
     public const string Category = "Category";
     public const string Reference = "Reference";
     public const string Counterparty = "Counterparty";
+    public const string Balance = "Balance";
 
     public static readonly IReadOnlyList<string> All =
     [
@@ -22,7 +23,8 @@ public static class TransactionFields
         Credit,
         Category,
         Reference,
-        Counterparty
+        Counterparty,
+        Balance
     ];
 
     public static readonly IReadOnlyList<string> Assignable = All.Where(f => f != Ignore).ToArray();

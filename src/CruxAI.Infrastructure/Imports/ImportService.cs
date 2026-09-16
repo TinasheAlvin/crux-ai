@@ -219,6 +219,7 @@ public sealed class ImportService
             transaction.Category = parsed.Category;
             transaction.Reference = parsed.Reference;
             transaction.Counterparty = parsed.Counterparty;
+            transaction.Balance = parsed.Balance;
             transaction.ImportedAt = now;
             persisted.Add(transaction);
         }

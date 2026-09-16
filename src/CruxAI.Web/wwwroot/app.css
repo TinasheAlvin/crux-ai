@@ -330,3 +330,92 @@ a, .btn-link {
 .darker-border-checkbox.form-check-input {
     border-color: #929292;
 }
+
+.health-block {
+    margin-bottom: 1.5rem;
+}
+
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 1rem;
+    margin: 1.25rem 0;
+}
+
+.kpi-card {
+    display: block;
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 1.15rem 1.25rem;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 8px 20px rgba(16, 42, 67, 0.04);
+}
+
+.kpi-card:hover {
+    border-color: var(--teal);
+}
+
+.kpi-label {
+    font-family: "Segoe UI", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    margin-bottom: 0.35rem;
+}
+
+.kpi-value {
+    font-family: "Segoe UI", sans-serif;
+    font-size: 1.7rem;
+    font-weight: 650;
+    letter-spacing: -0.03em;
+    margin: 0;
+}
+
+.kpi-compare {
+    font-family: "Segoe UI", sans-serif;
+    font-size: 0.88rem;
+    margin: 0.45rem 0 0;
+}
+
+.kpi-compare.is-up { color: var(--ok); }
+.kpi-compare.is-down { color: var(--danger); }
+.kpi-compare.is-flat { color: var(--ink-soft); }
+
+.kpi-missing, .kpi-why {
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    margin: 0.4rem 0 0;
+}
+
+.kpi-why {
+    font-family: "Segoe UI", sans-serif;
+    color: var(--teal-dark);
+    font-weight: 600;
+}
+
+.why-prompt {
+    font-size: 1.15rem;
+    border-left: 3px solid var(--teal);
+    padding: 0.4rem 0 0.4rem 1rem;
+    margin: 1rem 0;
+}
+
+.why-split {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.row-id-list {
+    list-style: none;
+    padding: 0;
+    font-family: "Segoe UI", sans-serif;
+}
+
+.row-id-list li {
+    margin-bottom: 0.35rem;
+}

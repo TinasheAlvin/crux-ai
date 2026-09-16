@@ -26,6 +26,10 @@ public static class ColumnGuesser
         (TransactionFields.Counterparty, [
             "client", "customer", "payee", "beneficiary", "name", "counterparty",
             "supplier", "vendor", "contact"
+        ]),
+        (TransactionFields.Balance, [
+            "balance", "running balance", "closing balance", "available balance",
+            "acc balance", "account balance", "zar balance"
         ])
     ];
 

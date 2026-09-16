@@ -114,6 +114,7 @@ internal sealed class TransactionConfiguration : IEntityTypeConfiguration<Transa
         builder.Property(x => x.RowId).HasMaxLength(64).IsRequired();
         builder.Property(x => x.Description).HasMaxLength(500).IsRequired();
         builder.Property(x => x.Amount).HasColumnType("decimal(18,2)");
+        builder.Property(x => x.Balance).HasColumnType("decimal(18,2)");
         builder.Property(x => x.Currency).HasMaxLength(3).IsRequired();
         builder.Property(x => x.Category).HasMaxLength(100);
         builder.Property(x => x.Reference).HasMaxLength(100);

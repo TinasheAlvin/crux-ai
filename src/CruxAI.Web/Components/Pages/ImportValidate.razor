@@ -149,7 +149,7 @@ else
             await Imports.SaveCorrectionsAsync(job, BuildCorrections());
             await LoadValidationAsync();
             await Imports.PersistAsync(job, includeOnlyValid);
-            Navigation.NavigateTo($"/imports/{job.Id}");
+            Navigation.NavigateTo("/health");
         }
         catch (Exception ex)
         {

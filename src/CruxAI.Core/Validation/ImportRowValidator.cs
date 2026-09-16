@@ -19,6 +19,7 @@ public static class ImportRowValidator
         var categoryHeader = MappingValidator.HeaderFor(mapping, TransactionFields.Category);
         var referenceHeader = MappingValidator.HeaderFor(mapping, TransactionFields.Reference);
         var counterpartyHeader = MappingValidator.HeaderFor(mapping, TransactionFields.Counterparty);
+        var balanceHeader = MappingValidator.HeaderFor(mapping, TransactionFields.Balance);
 
         var results = new List<ValidatedImportRow>(table.Rows.Count);
 
@@ -30,6 +31,7 @@ public static class ImportRowValidator
             var amountRaw = Resolve(row, amountHeader, TransactionFields.Amount, rowCorrections);
             var debitRaw = Resolve(row, debitHeader, TransactionFields.Debit, rowCorrections);
             var creditRaw = Resolve(row, creditHeader, TransactionFields.Credit, rowCorrections);
+            var balanceRaw = Resolve(row, balanceHeader, TransactionFields.Balance, rowCorrections);
 
             var errors = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             DateOnly? date = null;
@@ -83,6 +85,19 @@ public static class ImportRowValidator
                 errors[TransactionFields.Amount] = "Amount must be a number, e.g. -450.00 or R 1,250.00.";
             }
 
+            decimal? balance = null;
+            if (!string.IsNullOrWhiteSpace(balanceRaw))
+            {
+                if (!ValueParsers.TryParseAmount(balanceRaw, out var parsedBalance))
+                {
+                    errors[TransactionFields.Balance] = "Balance must be a number, or leave it blank.";
+                }
+                else
+                {
+                    balance = parsedBalance;
+                }
+            }
+
             ParsedTransaction? parsed = null;
             if (errors.Count == 0 && date is not null && amount is not null)
             {
@@ -94,7 +109,8 @@ public static class ImportRowValidator
                     Amount = amount.Value,
                     Category = EmptyToNull(Resolve(row, categoryHeader, TransactionFields.Category, rowCorrections)),
                     Reference = EmptyToNull(Resolve(row, referenceHeader, TransactionFields.Reference, rowCorrections)),
-                    Counterparty = EmptyToNull(Resolve(row, counterpartyHeader, TransactionFields.Counterparty, rowCorrections))
+                    Counterparty = EmptyToNull(Resolve(row, counterpartyHeader, TransactionFields.Counterparty, rowCorrections)),
+                    Balance = balance
                 };
             }
 
@@ -110,7 +126,8 @@ public static class ImportRowValidator
                         : amountRaw,
                     [TransactionFields.Category] = Resolve(row, categoryHeader, TransactionFields.Category, rowCorrections),
                     [TransactionFields.Reference] = Resolve(row, referenceHeader, TransactionFields.Reference, rowCorrections),
-                    [TransactionFields.Counterparty] = Resolve(row, counterpartyHeader, TransactionFields.Counterparty, rowCorrections)
+                    [TransactionFields.Counterparty] = Resolve(row, counterpartyHeader, TransactionFields.Counterparty, rowCorrections),
+                    [TransactionFields.Balance] = balanceRaw
                 },
                 DisplayAmount = string.IsNullOrEmpty(amountHeader)
                     ? FirstNonEmpty(amountRaw, debitRaw, creditRaw)
@@ -180,4 +197,5 @@ public sealed class ParsedTransaction
     public string? Category { get; init; }
     public string? Reference { get; init; }
     public string? Counterparty { get; init; }
+    public decimal? Balance { get; init; }
 }

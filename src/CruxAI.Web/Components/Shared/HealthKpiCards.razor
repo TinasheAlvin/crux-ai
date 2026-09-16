@@ -1,0 +1,87 @@
+@if (Snapshot is not null && Snapshot.HasData)
+{
+    <section class="health-block">
+        <header class="panel-header">
+            <p class="eyebrow">Health · @Snapshot.CurrentPeriod!.Label vs @Snapshot.PreviousPeriod!.Label</p>
+            <h1>@Title</h1>
+            <p class="lede">
+                Computed from persisted transactions and their RowIds.
+                Tap a card to seed a “Why did this change?” prompt. Receipted AI why is not wired yet.
+            </p>
+        </header>
+
+        @foreach (var note in Snapshot.MissingNotes)
+        {
+            <p class="banner">@note</p>
+        }
+
+        <div class="kpi-grid">
+            @foreach (var card in Snapshot.VisibleCards)
+            {
+                <a class="kpi-card" href="@($"/why/{card.Kind.ToString().ToLowerInvariant()}")">
+                    <p class="kpi-label">@LabelFor(card.Kind)</p>
+                    <p class="kpi-value">@card.CurrentValue.ToString("C")</p>
+                    <p class="kpi-compare @DeltaClass(card)">@CompareText(card)</p>
+                    @if (!string.IsNullOrWhiteSpace(card.MissingNote) && card.Kind == HealthMetricKind.Cash)
+                    {
+                        <p class="kpi-missing">@card.MissingNote</p>
+                    }
+                    <p class="kpi-why">Why did this change?</p>
+                </a>
+            }
+        </div>
+
+        <div class="actions">
+            @if (Snapshot.LatestImportJobId is Guid importId)
+            {
+                <a class="btn btn-outline" href="@($"/imports/{importId}/map")">Remap columns</a>
+                <a class="btn btn-link" href="@($"/imports/{importId}")">View RowIds</a>
+            }
+            @if (ShowHomeLink)
+            {
+                <a class="btn btn-link" href="/">Home</a>
+            }
+        </div>
+    </section>
+}
+
+@code {
+    [Parameter] public HealthSnapshot Snapshot { get; set; } = new();
+    [Parameter] public string Title { get; set; } = "This month at a glance";
+    [Parameter] public bool ShowHomeLink { get; set; }
+
+    private static string LabelFor(HealthMetricKind kind) => kind switch
+    {
+        HealthMetricKind.Revenue => "Revenue",
+        HealthMetricKind.Expenses => "Expenses",
+        HealthMetricKind.Profit => "Profit",
+        HealthMetricKind.Cash => "Cash",
+        _ => kind.ToString()
+    };
+
+    private static string CompareText(MetricCard card)
+    {
+        if (card.PreviousValue is null || card.Delta is null)
+        {
+            return "No previous month to compare";
+        }
+
+        var arrow = card.Delta.Value > 0 ? "▲" : card.Delta.Value < 0 ? "▼" : "•";
+        var percent = card.DeltaPercent is null
+            ? string.Empty
+            : $" ({card.DeltaPercent.Value * 100:0.#}%)";
+        return $"{arrow} {card.Delta.Value.ToString("C")} vs {card.PreviousValue.Value.ToString("C")}{percent}";
+    }
+
+    private static string DeltaClass(MetricCard card)
+    {
+        if (card.Delta is null or 0)
+        {
+            return "is-flat";
+        }
+
+        var upIsGood = card.Kind is HealthMetricKind.Revenue or HealthMetricKind.Profit or HealthMetricKind.Cash;
+        var up = card.Delta > 0;
+        return up == upIsGood ? "is-up" : "is-down";
+    }
+}

@@ -1,7 +1,12 @@
 Txn Date,Details,ZAR Amount,Category,Client,Ref
+2026-02-03,Cut and blow dry - Aisha,-380.00,Service,Aisha Naidoo,INV-2041
+2026-02-10,Colour - Thabo,-1400.00,Service,Thabo Mokoena,INV-2048
+2026-02-14,Card machine settlement,R 4,200.00,Income,Absa,SET-08
+2026-02-21,Retail product sale,650.00,Retail,Walk-in,INV-2055
+2026-02-27,Bank service fees,-89.50,Fees,Absa,FEE-08
 2026-03-02,Cut and blow dry - Lerato,-450.00,Service,Lerato Moyo,INV-2104
 16/03/2026,Colour and treatment - Sipho,-1850.00,Service,Sipho Dlamini,INV-2105
-2026-03-03,Wella professional stock,R 2,450.00,Stock,Wella SA,PO-88
+2026-03-03,Wella professional stock,-2450.00,Stock,Wella SA,PO-88
 not-a-date,Card machine settlement,3200.00,Income,Absa,SET-19
 2026-03-05,,-320.00,Service,Walk-in,INV-2106
 2026-03-06,Bank service fees,-89.50,Fees,Absa,FEE-12
