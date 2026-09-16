@@ -1,0 +1,36 @@
+@if (Landing.Verified && Landing.Snapshot is not null)
+{
+    <section class="health-block">
+        <header class="panel-header">
+            <p class="eyebrow">Morning brief · yesterday’s snapshot</p>
+            <h1>@(Landing.Snapshot.CurrentPeriodLabel) vs @(Landing.Snapshot.PreviousPeriodLabel)</h1>
+            <p class="lede">One cited explanation. Never a digest.</p>
+        </header>
+        <MorningBriefKpiStrip Snapshot="Landing.Snapshot" />
+    </section>
+
+    <section class="panel">
+        <p class="eyebrow">Explanation</p>
+        <pre class="why-answer-body">@Landing.Explanation</pre>
+        @if (Landing.Receipt is { Verified: true })
+        {
+            <WhyReceipt Result="Landing.Receipt" />
+        }
+    </section>
+}
+else
+{
+    <section class="hero-card brief-empty" role="status">
+        <p class="eyebrow">Morning brief</p>
+        <h1>@MorningBriefMessages.Empty</h1>
+        <p class="lede">@MorningBriefMessages.EmptyHint</p>
+        <div class="actions">
+            <a class="btn btn-primary" href="/why">@MorningBriefMessages.AskWhy</a>
+            <a class="btn btn-outline" href="/health">Health KPIs</a>
+        </div>
+    </section>
+}
+
+@code {
+    [Parameter, EditorRequired] public MorningBriefLanding Landing { get; set; } = MorningBriefLanding.NotOptedIn();
+}

@@ -1,0 +1,52 @@
+@if (Snapshot?.Metrics.Count > 0)
+{
+    <div class="kpi-grid">
+        @foreach (var card in Snapshot.Metrics)
+        {
+            <div class="kpi-card is-static">
+                <p class="kpi-label">@LabelFor(card.Kind)</p>
+                <p class="kpi-value">@card.CurrentValue.ToString("C")</p>
+                <p class="kpi-compare @DeltaClass(card)">@CompareText(card)</p>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired] public MorningBriefSnapshot Snapshot { get; set; } = new();
+
+    private static string LabelFor(HealthMetricKind kind) => kind switch
+    {
+        HealthMetricKind.Revenue => "Revenue",
+        HealthMetricKind.Expenses => "Expenses",
+        HealthMetricKind.Profit => "Profit",
+        HealthMetricKind.Cash => "Cash",
+        _ => kind.ToString()
+    };
+
+    private static string CompareText(MorningBriefMetric card)
+    {
+        if (card.PreviousValue is null || card.Delta is null)
+        {
+            return "No previous month to compare";
+        }
+
+        var arrow = card.Delta.Value > 0 ? "▲" : card.Delta.Value < 0 ? "▼" : "•";
+        var percent = card.DeltaPercent is null
+            ? string.Empty
+            : $" ({card.DeltaPercent.Value * 100:0.#}%)";
+        return $"{arrow} {card.Delta.Value.ToString("C")} vs {card.PreviousValue.Value.ToString("C")}{percent}";
+    }
+
+    private static string DeltaClass(MorningBriefMetric card)
+    {
+        if (card.Delta is null or 0)
+        {
+            return "is-flat";
+        }
+
+        var upIsGood = card.Kind is HealthMetricKind.Revenue or HealthMetricKind.Profit or HealthMetricKind.Cash;
+        var up = card.Delta > 0;
+        return up == upIsGood ? "is-up" : "is-down";
+    }
+}

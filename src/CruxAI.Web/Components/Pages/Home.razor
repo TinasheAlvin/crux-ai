@@ -2,13 +2,43 @@
 @attribute [Authorize]
 @inject ImportService Imports
 @inject HealthKpiService HealthKpis
+@inject MorningBriefService Briefs
 @inject NavigationManager Navigation
 @inject ICurrentUser CurrentUser
 @inject IWebHostEnvironment HostEnvironment
 
 <PageTitle>Home · Crux AI</PageTitle>
 
-@if (snapshot?.HasData == true)
+@if (briefLanding is { OptedIn: true })
+{
+    <p class="eyebrow">@CurrentUser.OrganizationName</p>
+    <MorningBriefView Landing="briefLanding" />
+
+    <section class="panel">
+        <header class="panel-header">
+            <h2>Import another CSV</h2>
+            <p>Mapping can be remapped at any time without losing persisted RowIds on previous imports.</p>
+        </header>
+        <label class="upload-button @(busy ? "is-disabled" : null)">
+            <InputFile OnChange="OnFileSelected" accept=".csv,text/csv" disabled="@busy" />
+            @(busy ? "Uploading…" : "Upload CSV")
+        </label>
+        <button type="button" class="btn btn-outline sample-btn" @onclick="() => UseSampleAsync(false)" disabled="@busy">
+            Use sample CSV
+        </button>
+        <button type="button" class="btn btn-outline sample-btn" @onclick="() => UseSampleAsync(true)" disabled="@busy">
+            Sample with cash
+        </button>
+        <button type="button" class="btn btn-outline sample-btn" @onclick='() => UseSampleFileAsync("sample-transactions-clean.csv")' disabled="@busy">
+            Clean sample
+        </button>
+        @if (!string.IsNullOrWhiteSpace(error))
+        {
+            <p class="banner banner-error" role="alert">@error</p>
+        }
+    </section>
+}
+else if (snapshot?.HasData == true)
 {
     <p class="eyebrow">@CurrentUser.OrganizationName</p>
     <HealthKpiCards Snapshot="snapshot" />
@@ -44,7 +74,7 @@ else
         <h1>Start with a CSV — then ask why with a receipt</h1>
         <p class="lede">
             Upload a bank or bookkeeping export. Map columns, persist RowIds, see health KPIs,
-            then tap a card to get a cited why — or fail closed if it cannot be verified.
+            then tap a card to get a cited why. After a trusted why, opt in for a morning brief.
         </p>
 
         <label class="upload-button @(busy ? "is-disabled" : null)">
@@ -129,12 +159,18 @@ else
     private IReadOnlyList<ImportJob> recent = [];
     private int transactionCount;
     private HealthSnapshot? snapshot;
+    private MorningBriefLanding? briefLanding;
 
     protected override async Task OnInitializedAsync()
     {
         recent = await Imports.ListRecentAsync();
         transactionCount = await Imports.CountTransactionsAsync();
         snapshot = await HealthKpis.GetSnapshotAsync();
+        var preference = await Briefs.GetPreferenceAsync();
+        if (preference.OptedIn)
+        {
+            briefLanding = await Briefs.GetLandingAsync();
+        }
     }
 
     private async Task OnFileSelected(InputFileChangeEventArgs args)
