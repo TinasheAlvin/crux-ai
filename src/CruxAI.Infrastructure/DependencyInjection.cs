@@ -85,7 +85,7 @@ public sealed class OrgBootstrapper
                 ExternalId = $"demo:{email}",
                 Email = email,
                 DisplayName = displayName,
-                CreatedAt = DateTimeOffset.UtcNow
+                CreatedAt = DateTime.UtcNow
             };
             _db.Users.Add(user);
         }
@@ -105,7 +105,7 @@ public sealed class OrgBootstrapper
             {
                 Id = Guid.NewGuid(),
                 Name = organizationName,
-                CreatedAt = DateTimeOffset.UtcNow
+                CreatedAt = DateTime.UtcNow
             };
             membership = new Membership
             {
@@ -113,7 +113,7 @@ public sealed class OrgBootstrapper
                 OrganizationId = organization.Id,
                 UserId = user.Id,
                 Role = MembershipRole.Owner,
-                CreatedAt = DateTimeOffset.UtcNow
+                CreatedAt = DateTime.UtcNow
             };
             _db.Organizations.Add(organization);
             _db.Memberships.Add(membership);

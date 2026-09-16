@@ -55,9 +55,10 @@ The first run creates `src/CruxAI.Web/App_Data/cruxai.db` and `src/CruxAI.Web/Ap
    - User: `owner@harbourstreet.local`
    - Owner membership
 2. On the empty home, click **Upload CSV**.
-3. Choose `testdata/sample-transactions.csv`. Headers such as `Txn Date`, `Details`, and `ZAR Amount` are auto-guessed; override if needed, then **Confirm mapping**.
-4. The sample file includes broken rows (`not-a-date`, empty description, `abc` amount). Edit those cells, click **Re-validate**, then **Persist**.
-5. The result page lists normalized rows and their stable `RowId` values (`imp_{importId}_r{sourceRowNumber}`).
+3. Choose `testdata/sample-transactions.csv`, or click **Use sample CSV**.
+4. Headers such as `Txn Date`, `Details`, and `ZAR Amount` are auto-guessed; override if needed, then **Confirm mapping**.
+5. The sample file includes broken rows (`not-a-date`, empty description, `abc` amount). Edit those cells, click **Re-validate**, then **Persist**.
+6. The result page lists normalized rows and their stable `RowId` values (`imp_{importId}_r{sourceRowNumber}`).
 
 `testdata/sample-transactions-clean.csv` is a happy-path file with no validation errors.
 

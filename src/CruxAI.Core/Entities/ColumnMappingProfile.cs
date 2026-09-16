@@ -7,7 +7,7 @@ public sealed class ColumnMappingProfile
     public Guid OrganizationId { get; set; }
     public string Name { get; set; } = "Default";
     public string MappingJson { get; set; } = "{}";
-    public DateTimeOffset UpdatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 
     public Organization Organization { get; set; } = null!;
 }

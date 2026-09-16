@@ -130,6 +130,13 @@ a, .btn-link {
     pointer-events: none;
 }
 
+.sample-btn {
+    margin-left: 0.6rem;
+    margin-top: 1.25rem;
+    border-radius: 999px;
+    padding: 0.75rem 1.2rem;
+}
+
 .banner {
     margin-top: 1rem;
     padding: 0.75rem 1rem;

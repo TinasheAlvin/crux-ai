@@ -21,8 +21,8 @@ public sealed class ImportJob
     public int? ImportedRowCount { get; set; }
     public string? ErrorSummary { get; set; }
 
-    public DateTimeOffset CreatedAt { get; set; }
-    public DateTimeOffset UpdatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 
     public Organization Organization { get; set; } = null!;
     public AppUser CreatedByUser { get; set; } = null!;

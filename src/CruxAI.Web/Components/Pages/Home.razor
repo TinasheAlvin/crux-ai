@@ -3,6 +3,7 @@
 @inject ImportService Imports
 @inject NavigationManager Navigation
 @inject ICurrentUser CurrentUser
+@inject IWebHostEnvironment HostEnvironment
 
 <PageTitle>Home · Crux AI</PageTitle>
 
@@ -18,6 +19,9 @@
         <InputFile OnChange="OnFileSelected" accept=".csv,text/csv" disabled="@busy" />
         @(busy ? "Uploading…" : "Upload CSV")
     </label>
+    <button type="button" class="btn btn-outline sample-btn" @onclick="UseSampleAsync" disabled="@busy">
+        Use sample CSV
+    </button>
 
     @if (!string.IsNullOrWhiteSpace(error))
     {
@@ -104,5 +108,44 @@
         {
             busy = false;
         }
+    }
+
+    private async Task UseSampleAsync()
+    {
+        busy = true;
+        error = null;
+        try
+        {
+            var path = FindSampleCsv();
+            if (path is null)
+            {
+                error = "Could not find testdata/sample-transactions.csv. Upload the file from the repo instead.";
+                return;
+            }
+
+            await using var upload = File.OpenRead(path);
+            var job = await Imports.CreateFromUploadAsync(upload, Path.GetFileName(path), new FileInfo(path).Length);
+            Navigation.NavigateTo($"/imports/{job.Id}/map");
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private string? FindSampleCsv()
+    {
+        var candidates = new[]
+        {
+            Path.GetFullPath(Path.Combine(HostEnvironment.ContentRootPath, "testdata", "sample-transactions.csv")),
+            Path.GetFullPath(Path.Combine(HostEnvironment.ContentRootPath, "..", "..", "testdata", "sample-transactions.csv")),
+            Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "testdata", "sample-transactions.csv"))
+        };
+
+        return candidates.FirstOrDefault(File.Exists);
     }
 }

@@ -11,7 +11,7 @@ public sealed class AppUser
 
     public string Email { get; set; } = string.Empty;
     public string DisplayName { get; set; } = string.Empty;
-    public DateTimeOffset CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
     public ICollection<Membership> Memberships { get; set; } = new List<Membership>();
 }

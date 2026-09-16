@@ -32,7 +32,7 @@ public class ImportPersistenceTests
         {
             Id = orgId,
             Name = "Harbour Street Studio",
-            CreatedAt = DateTimeOffset.UtcNow
+            CreatedAt = DateTime.UtcNow
         });
         db.Users.Add(new Core.Entities.AppUser
         {
@@ -40,7 +40,7 @@ public class ImportPersistenceTests
             Email = "owner@harbourstreet.local",
             DisplayName = "Demo Owner",
             ExternalId = "demo:owner@harbourstreet.local",
-            CreatedAt = DateTimeOffset.UtcNow
+            CreatedAt = DateTime.UtcNow
         });
         await db.SaveChangesAsync();
 
@@ -70,6 +70,9 @@ public class ImportPersistenceTests
         Assert.Equal(RowIdFactory.ForImportLine(job.Id, 3), persisted[1].RowId);
         Assert.Equal(-450.00m, persisted[0].Amount);
         Assert.Equal("Cut and blow dry - Lerato", persisted[0].Description);
+
+        var recent = await service.ListRecentAsync();
+        Assert.Contains(recent, item => item.Id == job.Id);
     }
 
     [Fact]

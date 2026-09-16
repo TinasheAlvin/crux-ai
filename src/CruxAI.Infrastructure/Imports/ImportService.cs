@@ -50,8 +50,8 @@ public sealed class ImportService
             OriginalFileName = Path.GetFileName(originalFileName),
             ByteSize = byteSize,
             Status = ImportStatus.Uploaded,
-            CreatedAt = DateTimeOffset.UtcNow,
-            UpdatedAt = DateTimeOffset.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         };
 
         job.StoragePath = await _storage.SaveAsync(
@@ -127,7 +127,7 @@ public sealed class ImportService
 
         job.MappingJson = JsonSerializer.Serialize(mapping);
         job.Status = ImportStatus.Mapped;
-        job.UpdatedAt = DateTimeOffset.UtcNow;
+        job.UpdatedAt = DateTime.UtcNow;
 
         var profile = await GetDefaultProfileAsync(job.OrganizationId, cancellationToken);
         if (profile is null)
@@ -137,13 +137,13 @@ public sealed class ImportService
                 Id = Guid.NewGuid(),
                 OrganizationId = job.OrganizationId,
                 Name = "Default",
-                UpdatedAt = DateTimeOffset.UtcNow
+                UpdatedAt = DateTime.UtcNow
             };
             _db.ColumnMappingProfiles.Add(profile);
         }
 
         profile.MappingJson = job.MappingJson;
-        profile.UpdatedAt = DateTimeOffset.UtcNow;
+        profile.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync(cancellationToken);
     }
@@ -165,7 +165,7 @@ public sealed class ImportService
     {
         job.CorrectionsJson = JsonSerializer.Serialize(corrections);
         job.Status = ImportStatus.Validated;
-        job.UpdatedAt = DateTimeOffset.UtcNow;
+        job.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync(cancellationToken);
     }
 
@@ -189,7 +189,7 @@ public sealed class ImportService
                 $"{invalidCount} row(s) still have errors. Fix them here, or import only the valid rows.");
         }
 
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTime.UtcNow;
         var existing = await _db.Transactions
             .Where(t => t.ImportJobId == job.Id)
             .ToDictionaryAsync(t => t.RowId, cancellationToken);

@@ -17,7 +17,7 @@ public sealed class Transaction
     public string? Category { get; set; }
     public string? Reference { get; set; }
     public string? Counterparty { get; set; }
-    public DateTimeOffset ImportedAt { get; set; }
+    public DateTime ImportedAt { get; set; }
 
     public Organization Organization { get; set; } = null!;
     public ImportJob ImportJob { get; set; } = null!;

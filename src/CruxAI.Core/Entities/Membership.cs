@@ -6,7 +6,7 @@ public sealed class Membership
     public Guid OrganizationId { get; set; }
     public Guid UserId { get; set; }
     public MembershipRole Role { get; set; } = MembershipRole.Owner;
-    public DateTimeOffset CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
     public Organization Organization { get; set; } = null!;
     public AppUser User { get; set; } = null!;
