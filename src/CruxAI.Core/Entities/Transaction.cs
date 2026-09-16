@@ -17,6 +17,10 @@ public sealed class Transaction
     public string? Category { get; set; }
     public string? Reference { get; set; }
     public string? Counterparty { get; set; }
+
+    /// <summary>Optional running/closing balance from the source file. Null when cash was not mapped or the cell was empty.</summary>
+    public decimal? Balance { get; set; }
+
     public DateTime ImportedAt { get; set; }
 
     public Organization Organization { get; set; } = null!;

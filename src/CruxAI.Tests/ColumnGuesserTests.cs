@@ -20,6 +20,14 @@ public class ColumnGuesserTests
     }
 
     [Fact]
+    public void Guesses_balance_headers_for_cash()
+    {
+        var mapping = ColumnGuesser.Guess(["Txn Date", "Details", "ZAR Amount", "Running Balance"]);
+
+        Assert.Equal(TransactionFields.Balance, mapping["Running Balance"]);
+    }
+
+    [Fact]
     public void Does_not_assign_the_same_field_twice()
     {
         var mapping = ColumnGuesser.Guess(["Date", "Transaction Date", "Narrative"]);

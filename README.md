@@ -2,11 +2,11 @@
 
 CSV-first BI for South African service-business owners.
 
-This repository currently contains the **CSV map first slice** of the V1 spine:
+V1 spine in this repo so far:
 
-`CSV upload / map → validate (fix in place) → persist normalized transactions with stable RowIds`
+`CSV upload / map → validate → persist RowIds → health KPIs (period compare)`
 
-Health KPI dashboards, Azure OpenAI “why”, morning brief, Nango connectors, and WhatsApp are **out of scope** for this pass.
+Azure OpenAI receipted “why”, morning brief, Nango connectors, and WhatsApp are **out of scope** for this pass. Tapping a KPI card only **seeds** a why prompt.
 
 ## Stack
 
@@ -26,11 +26,12 @@ Placeholders (not wired yet):
 
 ```
 src/CruxAI.sln
-src/CruxAI.Core/              Domain, mapping, validation
-src/CruxAI.Infrastructure/    EF Core, CSV reader, file storage, import service
+src/CruxAI.Core/              Domain, mapping, validation, health KPI calculator
+src/CruxAI.Infrastructure/    EF Core, CSV reader, file storage, import + health services
 src/CruxAI.Web/               Blazor UI + demo auth
 src/CruxAI.Tests/
 testdata/sample-transactions.csv
+testdata/sample-transactions-with-cash.csv
 ```
 
 ## Run locally
@@ -48,21 +49,29 @@ Open http://localhost:5028
 
 The first run creates `src/CruxAI.Web/App_Data/cruxai.db` and `src/CruxAI.Web/App_Data/uploads/` (gitignored).
 
-### Demo path (CSV map)
+If you already ran the CSV-map slice, delete `src/CruxAI.Web/App_Data/cruxai.db` so SQLite picks up the optional `Balance` column (or just let the startup patch add it).
+
+### Demo path (CSV map → health KPIs)
 
 1. Click **Continue as demo owner**. This signs you in with a cookie and creates:
    - Organisation: `Harbour Street Studio`
    - User: `owner@harbourstreet.local`
    - Owner membership
-2. On the empty home, click **Upload CSV**.
-3. Choose `testdata/sample-transactions.csv`, or click **Use sample CSV**.
-4. Headers such as `Txn Date`, `Details`, and `ZAR Amount` are auto-guessed; override if needed, then **Confirm mapping**.
-5. The sample file includes broken rows (`not-a-date`, empty description, `abc` amount). Edit those cells, click **Re-validate**, then **Persist**.
-6. The result page lists normalized rows and their stable `RowId` values (`imp_{importId}_r{sourceRowNumber}`).
+2. Click **Use sample CSV** (or upload `testdata/sample-transactions.csv`).
+3. Confirm auto-guessed columns, then persist. The sample has Feb + Mar 2026 rows and a few broken March cells — fix those in place, then persist.
+4. You land on **health KPIs**: revenue, expenses, and profit for the latest month in the file vs the previous month.
+5. **Cash is hidden** on this sample — there is no balance column, so Crux never shows a fake R0 cash card.
+6. Tap a KPI card to seed a “Why did this change?” prompt (no AI answer yet). Use **Remap columns** if the mapping was wrong.
+7. To see cash: **Sample with cash** (or `testdata/sample-transactions-with-cash.csv`). `Running Balance` maps to Balance; the cash card uses the latest usable balance in each month.
 
-`testdata/sample-transactions-clean.csv` is a happy-path file with no validation errors.
+`testdata/sample-transactions-clean.csv` is a happy-path file with no validation errors (still no cash).
 
-You can leave validation, come back via **Recent imports**, and keep fixing the same import — you do not need to re-upload.
+## How KPIs are computed
+
+- Periods follow the **latest transaction date** in the org (not today’s calendar), so a March 2026 CSV still compares Mar vs Feb.
+- Revenue = sum of positive amounts; expenses = absolute sum of negative amounts; profit = revenue − expenses.
+- Cash is shown only when the current import mapping includes **Balance** *and* at least one current-month row has a usable balance. Otherwise the card is omitted.
+- Partial metrics still render: if February is missing, March cards stay up with a short compare note.
 
 ## Configuration and secrets
 
@@ -95,7 +104,7 @@ HTTPS is available via `--launch-profile https` once the ASP.NET Core developer 
 
 ## Auth placeholder
 
-Demo login is intentional so the CSV flow can be exercised without an Entra tenant. Replacing it:
+Demo login is intentional so the CSV + KPI flow can be exercised without an Entra tenant. Replacing it:
 
 1. Add `Microsoft.Identity.Web`.
 2. Fill `Auth:EntraExternalId` via user-secrets.

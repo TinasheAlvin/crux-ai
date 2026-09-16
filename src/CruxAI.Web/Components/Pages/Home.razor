@@ -1,35 +1,72 @@
 ﻿@page "/"
 @attribute [Authorize]
 @inject ImportService Imports
+@inject HealthKpiService HealthKpis
 @inject NavigationManager Navigation
 @inject ICurrentUser CurrentUser
 @inject IWebHostEnvironment HostEnvironment
 
 <PageTitle>Home · Crux AI</PageTitle>
 
-<section class="hero-card">
+@if (snapshot?.HasData == true)
+{
     <p class="eyebrow">@CurrentUser.OrganizationName</p>
-    <h1>No dashboards yet — start with a CSV</h1>
-    <p class="lede">
-        Upload a bank or bookkeeping export. You will map columns, fix any row-level errors
-        without restarting, then persist normalized transactions with a stable RowId per line.
-    </p>
+    <HealthKpiCards Snapshot="snapshot" />
 
-    <label class="upload-button @(busy ? "is-disabled" : null)">
-        <InputFile OnChange="OnFileSelected" accept=".csv,text/csv" disabled="@busy" />
-        @(busy ? "Uploading…" : "Upload CSV")
-    </label>
-    <button type="button" class="btn btn-outline sample-btn" @onclick="UseSampleAsync" disabled="@busy">
-        Use sample CSV
-    </button>
+    <section class="panel">
+        <header class="panel-header">
+            <h2>Import another CSV</h2>
+            <p>Mapping can be remapped at any time without losing persisted RowIds on previous imports.</p>
+        </header>
+        <label class="upload-button @(busy ? "is-disabled" : null)">
+            <InputFile OnChange="OnFileSelected" accept=".csv,text/csv" disabled="@busy" />
+            @(busy ? "Uploading…" : "Upload CSV")
+        </label>
+        <button type="button" class="btn btn-outline sample-btn" @onclick="() => UseSampleAsync(false)" disabled="@busy">
+            Use sample CSV
+        </button>
+        <button type="button" class="btn btn-outline sample-btn" @onclick="() => UseSampleAsync(true)" disabled="@busy">
+            Sample with cash
+        </button>
+        @if (!string.IsNullOrWhiteSpace(error))
+        {
+            <p class="banner banner-error" role="alert">@error</p>
+        }
+    </section>
+}
+else
+{
+    <section class="hero-card">
+        <p class="eyebrow">@CurrentUser.OrganizationName</p>
+        <h1>Start with a CSV — then see health KPIs</h1>
+        <p class="lede">
+            Upload a bank or bookkeeping export. Map columns, fix anything that looks off,
+            persist RowIds, then land on revenue, expenses, and profit with a period compare.
+        </p>
 
-    @if (!string.IsNullOrWhiteSpace(error))
-    {
-        <p class="banner banner-error" role="alert">@error</p>
-    }
+        <label class="upload-button @(busy ? "is-disabled" : null)">
+            <InputFile OnChange="OnFileSelected" accept=".csv,text/csv" disabled="@busy" />
+            @(busy ? "Uploading…" : "Upload CSV")
+        </label>
+        <button type="button" class="btn btn-outline sample-btn" @onclick="() => UseSampleAsync(false)" disabled="@busy">
+            Use sample CSV
+        </button>
+        <button type="button" class="btn btn-outline sample-btn" @onclick="() => UseSampleAsync(true)" disabled="@busy">
+            Sample with cash
+        </button>
 
-    <p class="hint">Try <code>testdata/sample-transactions.csv</code> — it includes a few broken rows so you can exercise validation.</p>
-</section>
+        @if (!string.IsNullOrWhiteSpace(error))
+        {
+            <p class="banner banner-error" role="alert">@error</p>
+        }
+
+        <p class="hint">
+            <code>testdata/sample-transactions.csv</code> covers two months and includes a few broken rows.
+            Cash stays hidden unless a balance column is mapped — try
+            <code>testdata/sample-transactions-with-cash.csv</code>.
+        </p>
+    </section>
+}
 
 @if (recent.Count > 0)
 {
@@ -57,7 +94,11 @@
                         <td>
                             @if (job.Status == ImportStatus.Imported)
                             {
-                                <a href="@($"/imports/{job.Id}")">View RowIds</a>
+                                <a href="/health">Health KPIs</a>
+                                <span> · </span>
+                                <a href="@($"/imports/{job.Id}")">RowIds</a>
+                                <span> · </span>
+                                <a href="@($"/imports/{job.Id}/map")">Remap</a>
                             }
                             else if (job.Status == ImportStatus.Mapped || job.Status == ImportStatus.Validated)
                             {
@@ -80,11 +121,13 @@
     private string? error;
     private IReadOnlyList<ImportJob> recent = [];
     private int transactionCount;
+    private HealthSnapshot? snapshot;
 
     protected override async Task OnInitializedAsync()
     {
         recent = await Imports.ListRecentAsync();
         transactionCount = await Imports.CountTransactionsAsync();
+        snapshot = await HealthKpis.GetSnapshotAsync();
     }
 
     private async Task OnFileSelected(InputFileChangeEventArgs args)
@@ -110,16 +153,17 @@
         }
     }
 
-    private async Task UseSampleAsync()
+    private async Task UseSampleAsync(bool withCash)
     {
         busy = true;
         error = null;
         try
         {
-            var path = FindSampleCsv();
+            var fileName = withCash ? "sample-transactions-with-cash.csv" : "sample-transactions.csv";
+            var path = FindSampleCsv(fileName);
             if (path is null)
             {
-                error = "Could not find testdata/sample-transactions.csv. Upload the file from the repo instead.";
+                error = $"Could not find testdata/{fileName}. Upload the file from the repo instead.";
                 return;
             }
 
@@ -137,13 +181,13 @@
         }
     }
 
-    private string? FindSampleCsv()
+    private string? FindSampleCsv(string fileName)
     {
         var candidates = new[]
         {
-            Path.GetFullPath(Path.Combine(HostEnvironment.ContentRootPath, "testdata", "sample-transactions.csv")),
-            Path.GetFullPath(Path.Combine(HostEnvironment.ContentRootPath, "..", "..", "testdata", "sample-transactions.csv")),
-            Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "testdata", "sample-transactions.csv"))
+            Path.GetFullPath(Path.Combine(HostEnvironment.ContentRootPath, "testdata", fileName)),
+            Path.GetFullPath(Path.Combine(HostEnvironment.ContentRootPath, "..", "..", "testdata", fileName)),
+            Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "testdata", fileName))
         };
 
         return candidates.FirstOrDefault(File.Exists);

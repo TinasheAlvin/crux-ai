@@ -1,0 +1,34 @@
+@page "/health"
+@attribute [Authorize]
+@inject HealthKpiService HealthKpis
+@inject ICurrentUser CurrentUser
+
+<PageTitle>Health · Crux AI</PageTitle>
+
+@if (snapshot is null)
+{
+    <p>Loading…</p>
+}
+else if (!snapshot.HasData)
+{
+    <section class="hero-card">
+        <p class="eyebrow">@CurrentUser.OrganizationName</p>
+        <h1>No transactions yet</h1>
+        <p class="lede">Upload a CSV first. Health KPIs are computed from persisted RowIds.</p>
+        <a class="btn btn-primary" href="/">Upload CSV</a>
+    </section>
+}
+else
+{
+    <p class="eyebrow">@CurrentUser.OrganizationName</p>
+    <HealthKpiCards Snapshot="snapshot" Title="Health KPIs" ShowHomeLink="true" />
+}
+
+@code {
+    private HealthSnapshot? snapshot;
+
+    protected override async Task OnInitializedAsync()
+    {
+        snapshot = await HealthKpis.GetSnapshotAsync();
+    }
+}

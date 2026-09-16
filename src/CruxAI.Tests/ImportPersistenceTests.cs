@@ -76,6 +76,75 @@ public class ImportPersistenceTests
     }
 
     [Fact]
+    public async Task Persist_stores_balance_and_health_hides_cash_without_it()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "cruxai-tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(root);
+        var orgId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        var currentUser = new StubCurrentUser(orgId, userId);
+        var options = new DbContextOptionsBuilder<CruxDbContext>()
+            .UseSqlite($"Data Source={Path.Combine(root, "test.db")}")
+            .Options;
+
+        await using var db = new CruxDbContext(options);
+        await db.Database.EnsureCreatedAsync();
+        db.Organizations.Add(new Core.Entities.Organization { Id = orgId, Name = "Harbour Street Studio", CreatedAt = DateTime.UtcNow });
+        db.Users.Add(new Core.Entities.AppUser
+        {
+            Id = userId,
+            Email = "owner@harbourstreet.local",
+            DisplayName = "Demo Owner",
+            ExternalId = "demo:owner@harbourstreet.local",
+            CreatedAt = DateTime.UtcNow
+        });
+        await db.SaveChangesAsync();
+
+        var imports = new ImportService(db, new LocalFileStorage(Path.Combine(root, "uploads")), new CsvHelperReader(), currentUser);
+        var health = new CruxAI.Infrastructure.Health.HealthKpiService(db, currentUser);
+
+        const string withoutCash = """
+            Txn Date,Details,ZAR Amount
+            2026-02-10,Colour,-2000.00
+            2026-03-02,Cut,-450.00
+            2026-03-14,Settlement,3200.00
+            """;
+        await using (var upload = new MemoryStream(Encoding.UTF8.GetBytes(withoutCash)))
+        {
+            var job = await imports.CreateFromUploadAsync(upload, "no-cash.csv", upload.Length);
+            await imports.SaveMappingAsync(job, imports.GetMapping(job, await imports.LoadTableAsync(job)));
+            await imports.PersistAsync(job, includeOnlyValid: false);
+        }
+
+        var hidden = await health.GetSnapshotAsync();
+        Assert.True(hidden.HasData);
+        Assert.Null(hidden.Cash);
+        Assert.Equal(3200m, hidden.Revenue!.CurrentValue);
+        Assert.Equal(2000m, hidden.Expenses!.PreviousValue);
+
+        const string withCash = """
+            Txn Date,Details,ZAR Amount,Running Balance
+            2026-02-10,Colour,-2000.00,10000.00
+            2026-03-02,Cut,-450.00,9550.00
+            2026-03-14,Settlement,3200.00,12750.00
+            """;
+        await using (var upload = new MemoryStream(Encoding.UTF8.GetBytes(withCash)))
+        {
+            var job = await imports.CreateFromUploadAsync(upload, "with-cash.csv", upload.Length);
+            var mapping = imports.GetMapping(job, await imports.LoadTableAsync(job));
+            Assert.Equal(TransactionFields.Balance, mapping["Running Balance"]);
+            await imports.SaveMappingAsync(job, mapping);
+            var persisted = await imports.PersistAsync(job, includeOnlyValid: false);
+            Assert.Equal(12750.00m, persisted.Last().Balance);
+        }
+
+        var shown = await health.GetSnapshotAsync();
+        Assert.NotNull(shown.Cash);
+        Assert.Equal(12750.00m, shown.Cash!.CurrentValue);
+        Assert.Equal(10000.00m, shown.Cash.PreviousValue);
+    }
+
+    [Fact]
     public async Task Csv_reader_accepts_semicolon_delimited_exports()
     {
         const string csv = "Date;Description;Amount\n2026-03-01;Cut;-100.00\n";
