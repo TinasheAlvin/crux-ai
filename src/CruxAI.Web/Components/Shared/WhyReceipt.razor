@@ -1,0 +1,35 @@
+@if (Result.Verified)
+{
+    <section class="receipt" aria-label="Answer receipt">
+        <header class="receipt-header">
+            <p class="eyebrow">Receipt</p>
+            <h2>@Result.CitedRows.Count cited RowId@(Result.CitedRows.Count == 1 ? "" : "s")</h2>
+            <p class="lede">
+                Columns: @ColumnsSummary.
+                These are the persisted transaction lines that support the answer — not a model guess.
+            </p>
+            <div class="receipt-ids">
+                @foreach (var row in Result.CitedRows)
+                {
+                    <code class="row-id">@row.RowId</code>
+                }
+            </div>
+            <div class="actions">
+                <a class="btn btn-primary" href="@($"/receipts/{Result.AnswerId}")">Open receipt</a>
+            </div>
+        </header>
+
+        <details class="receipt-details">
+            <summary>Show cited rows</summary>
+            <WhyReceiptTable Rows="Result.CitedRows" />
+        </details>
+    </section>
+}
+
+@code {
+    [Parameter, EditorRequired] public WhyAskResult Result { get; set; } = default!;
+
+    private string ColumnsSummary =>
+        Result.CitedRows.Select(row => row.Columns).FirstOrDefault(columns => !string.IsNullOrWhiteSpace(columns))
+        ?? "Date, Description, Amount";
+}

@@ -419,3 +419,85 @@ a, .btn-link {
 .row-id-list li {
     margin-bottom: 0.35rem;
 }
+
+.why-chat {
+    margin-top: 1rem;
+}
+
+.why-chat-label {
+    display: block;
+    font-family: "Segoe UI", sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+}
+
+.why-chat-input {
+    min-height: 5.5rem;
+    width: 100%;
+    max-width: 44rem;
+}
+
+.why-answer {
+    margin-top: 1.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--line);
+}
+
+.why-answer-body {
+    white-space: pre-wrap;
+    font-family: "Iowan Old Style", Palatino, Georgia, serif;
+    font-size: 1.02rem;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    margin: 0.4rem 0 1rem;
+    color: var(--ink);
+}
+
+.why-unverified {
+    background: #f4efe8;
+    color: var(--ink);
+    font-size: 1.05rem;
+}
+
+.receipt {
+    background: #f3f7f5;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 1rem 1.15rem 1.15rem;
+}
+
+.receipt-header h2 {
+    margin: 0.15rem 0 0.4rem;
+}
+
+.receipt-ids {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0.75rem 0 0.25rem;
+}
+
+.receipt-ids .row-id {
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.15rem 0.55rem;
+}
+
+.receipt-details {
+    margin-top: 0.5rem;
+    font-family: "Segoe UI", sans-serif;
+}
+
+.receipt-details summary {
+    cursor: pointer;
+    color: var(--teal-dark);
+    font-weight: 600;
+}
+
+.status-pill.is-unverified {
+    background: #f4efe8;
+    color: var(--ink-soft);
+}

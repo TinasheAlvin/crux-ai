@@ -16,6 +16,8 @@ public sealed class CruxDbContext : DbContext
     public DbSet<ImportJob> ImportJobs => Set<ImportJob>();
     public DbSet<ColumnMappingProfile> ColumnMappingProfiles => Set<ColumnMappingProfile>();
     public DbSet<Transaction> Transactions => Set<Transaction>();
+    public DbSet<WhyAnswer> WhyAnswers => Set<WhyAnswer>();
+    public DbSet<WhyCitation> WhyCitations => Set<WhyCitation>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -129,5 +131,40 @@ internal sealed class TransactionConfiguration : IEntityTypeConfiguration<Transa
             .WithMany(x => x.Transactions)
             .HasForeignKey(x => x.ImportJobId)
             .OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+internal sealed class WhyAnswerConfiguration : IEntityTypeConfiguration<WhyAnswer>
+{
+    public void Configure(EntityTypeBuilder<WhyAnswer> builder)
+    {
+        builder.ToTable("WhyAnswers");
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.Question).IsRequired();
+        builder.Property(x => x.Answer).IsRequired();
+        builder.Property(x => x.Metric).HasMaxLength(32);
+        builder.HasIndex(x => x.OrganizationId);
+        builder.HasIndex(x => x.CreatedAt);
+        builder.HasOne(x => x.Organization)
+            .WithMany(x => x.WhyAnswers)
+            .HasForeignKey(x => x.OrganizationId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+internal sealed class WhyCitationConfiguration : IEntityTypeConfiguration<WhyCitation>
+{
+    public void Configure(EntityTypeBuilder<WhyCitation> builder)
+    {
+        builder.ToTable("WhyCitations");
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.RowId).HasMaxLength(64).IsRequired();
+        builder.Property(x => x.Columns).HasMaxLength(200).IsRequired();
+        builder.Property(x => x.PeriodLabel).HasMaxLength(32);
+        builder.HasIndex(x => new { x.WhyAnswerId, x.RowId }).IsUnique();
+        builder.HasOne(x => x.WhyAnswer)
+            .WithMany(x => x.Citations)
+            .HasForeignKey(x => x.WhyAnswerId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

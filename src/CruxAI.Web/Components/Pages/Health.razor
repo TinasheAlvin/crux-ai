@@ -2,6 +2,7 @@
 @attribute [Authorize]
 @inject HealthKpiService HealthKpis
 @inject ICurrentUser CurrentUser
+@inject NavigationManager Navigation
 
 <PageTitle>Health · Crux AI</PageTitle>
 
@@ -22,13 +23,42 @@ else
 {
     <p class="eyebrow">@CurrentUser.OrganizationName</p>
     <HealthKpiCards Snapshot="snapshot" Title="Health KPIs" ShowHomeLink="true" />
+
+    <section class="panel">
+        <header class="panel-header">
+            <h2>Ask why</h2>
+            <p>Type a question, or tap a KPI card to seed one. Uncited answers are never shown.</p>
+        </header>
+        <div class="why-chat">
+            <label class="why-chat-label" for="health-why-question">Question</label>
+            <InputTextArea id="health-why-question" @bind-Value="chatQuestion" class="form-control why-chat-input"
+                           placeholder="Why did expenses go up?" />
+            <div class="actions">
+                <button class="btn btn-primary" type="button" @onclick="AskWhy" disabled="@string.IsNullOrWhiteSpace(chatQuestion)">
+                    Ask why
+                </button>
+                <a class="btn btn-link" href="/why">Open why chat</a>
+            </div>
+        </div>
+    </section>
 }
 
 @code {
     private HealthSnapshot? snapshot;
+    private string chatQuestion = "";
 
     protected override async Task OnInitializedAsync()
     {
         snapshot = await HealthKpis.GetSnapshotAsync();
+    }
+
+    private void AskWhy()
+    {
+        if (string.IsNullOrWhiteSpace(chatQuestion))
+        {
+            return;
+        }
+
+        Navigation.NavigateTo($"/why?q={Uri.EscapeDataString(chatQuestion.Trim())}");
     }
 }
