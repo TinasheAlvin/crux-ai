@@ -503,7 +503,14 @@ a, .btn-link {
 .receipt-strip-meta {
     font-family: "Segoe UI", sans-serif;
     font-weight: 650;
-    margin: 0.15rem 0 0.55rem;
+    margin: 0.15rem 0 0.35rem;
+}
+
+.receipt-strip-columns {
+    font-family: "Segoe UI", sans-serif;
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    margin: 0.65rem 0 0;
 }
 
 .receipt-strip-hint {
@@ -511,7 +518,15 @@ a, .btn-link {
     font-size: 0.82rem;
     color: var(--teal-dark);
     font-weight: 600;
-    margin: 0.65rem 0 0;
+    margin: 0.4rem 0 0;
+}
+
+.why-fail-closed {
+    margin-top: 1.25rem;
+}
+
+.why-fail-closed .btn {
+    margin-top: 0.35rem;
 }
 
 .receipt-details {

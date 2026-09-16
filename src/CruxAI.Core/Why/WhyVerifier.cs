@@ -218,13 +218,6 @@ public static class WhyVerifier
         sb.AppendLine();
         AppendValueBasis(sb, metric, currentPeriod.Label, current, currentRows);
         AppendValueBasis(sb, metric, previousPeriod.Label, previous, previousRows);
-        sb.AppendLine();
-        AppendRowLines(sb, currentPeriod.Label, metric, currentRows);
-        sb.AppendLine();
-        AppendRowLines(sb, previousPeriod.Label, metric, previousRows);
-        sb.AppendLine();
-        sb.Append("Every figure is taken from those persisted RowIds. Open the receipt to see the cited columns.");
-
         return sb.ToString();
     }
 
@@ -244,10 +237,6 @@ public static class WhyVerifier
         sb.AppendLine();
         sb.AppendLine();
         AppendValueBasis(sb, metric, currentPeriod.Label, current, currentRows);
-        sb.AppendLine();
-        AppendRowLines(sb, currentPeriod.Label, metric, currentRows);
-        sb.AppendLine();
-        sb.Append("Every figure is taken from those persisted RowIds. Open the receipt to see the cited columns.");
         return sb.ToString();
     }
 
@@ -260,17 +249,10 @@ public static class WhyVerifier
     {
         if (metric == HealthMetricKind.Cash)
         {
-            var latest = rows
-                .Where(t => t.Balance.HasValue)
-                .OrderBy(t => t.Date)
-                .ThenBy(t => t.SourceRowNumber)
-                .Last();
             sb.Append(periodLabel)
                 .Append(" cash is the latest Balance on ")
-                .Append(latest.RowId)
-                .Append(" (")
-                .Append(latest.Date.ToString("dd MMM yyyy", Za))
-                .Append(", Balance ")
+                .Append(rows.Count)
+                .Append(" cited row(s) (")
                 .Append(Money(value))
                 .AppendLine(").");
             return;
@@ -292,46 +274,6 @@ public static class WhyVerifier
             .Append(" (")
             .Append(rows.Count)
             .AppendLine(").");
-    }
-
-    private static void AppendRowLines(
-        StringBuilder sb,
-        string periodLabel,
-        HealthMetricKind metric,
-        IReadOnlyList<Transaction> rows)
-    {
-        sb.Append(periodLabel).Append(" cited RowIds:");
-        sb.AppendLine();
-        var ordered = metric == HealthMetricKind.Cash
-            ? rows.OrderBy(t => t.Date).ThenBy(t => t.SourceRowNumber)
-            : rows.OrderByDescending(t => Math.Abs(t.Amount)).ThenBy(t => t.Date);
-
-        foreach (var row in ordered.Take(8))
-        {
-            sb.Append("- ")
-                .Append(row.RowId)
-                .Append(" · ")
-                .Append(row.Date.ToString("dd MMM yyyy", Za))
-                .Append(" · ")
-                .Append(row.Description);
-            if (metric == HealthMetricKind.Cash && row.Balance.HasValue)
-            {
-                sb.Append(" · Balance ").Append(Money(row.Balance.Value));
-            }
-            else
-            {
-                sb.Append(" · Amount ").Append(Money(row.Amount));
-            }
-
-            sb.AppendLine();
-        }
-
-        if (rows.Count > 8)
-        {
-            sb.Append("- … ")
-                .Append(rows.Count - 8)
-                .AppendLine(" more in the receipt");
-        }
     }
 
     private static string LabelFor(HealthMetricKind metric) => metric switch

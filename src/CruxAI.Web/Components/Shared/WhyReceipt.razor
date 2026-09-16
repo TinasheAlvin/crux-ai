@@ -2,14 +2,15 @@
 {
     <a class="receipt-strip" href="@($"/receipts/{Result.AnswerId}")" aria-label="Open receipt to see cited rows">
         <p class="eyebrow">Receipt</p>
-        <p class="receipt-strip-meta">@Result.CitedRows.Count RowId@(Result.CitedRows.Count == 1 ? "" : "s") · @ColumnsSummary</p>
+        <p class="receipt-strip-meta">Row IDs</p>
         <div class="receipt-ids">
             @foreach (var row in Result.CitedRows)
             {
                 <code class="row-id">@row.RowId</code>
             }
         </div>
-        <p class="receipt-strip-hint">Tap to see the cited rows</p>
+        <p class="receipt-strip-columns">Columns: @ColumnsSummary</p>
+        <p class="receipt-strip-hint">Tap to see rows</p>
     </a>
 }
 

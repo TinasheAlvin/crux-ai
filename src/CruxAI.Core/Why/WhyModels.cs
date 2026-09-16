@@ -5,6 +5,8 @@ namespace CruxAI.Core.Why;
 public static class WhyMessages
 {
     public const string Unverified = "Can't verify that yet.";
+    public const string TryAnother = "Try another question";
+    public const string Checking = "Checking persisted rows…";
 }
 
 public sealed class WhyIntent

@@ -9,7 +9,7 @@
 
 @if (snapshot is null)
 {
-    <p>Loading…</p>
+    <p>@WhyMessages.Checking</p>
 }
 else if (!snapshot.HasData)
 {
@@ -22,21 +22,17 @@ else if (!snapshot.HasData)
 }
 else
 {
-    <section class="panel">
+    <section class="panel" aria-busy="@checking">
         <p class="eyebrow">@CurrentUser.OrganizationName · receipted why</p>
         <h1>@(card is null ? "Ask why" : $"Why {LabelFor(card.Kind).ToLowerInvariant()}?")</h1>
-        <p class="lede">
-            Answers are computed from persisted transactions. If a claim cannot be cited to RowIds,
-            Crux fails closed instead of guessing.
-        </p>
 
-        @if (card is not null)
+        @if (ShowSeededPrompt)
         {
-            <blockquote class="why-prompt">@card.WhyPrompt</blockquote>
+            <blockquote class="why-prompt">@card!.WhyPrompt</blockquote>
         }
-        else if (!string.IsNullOrWhiteSpace(MetricName))
+        else if (!string.IsNullOrWhiteSpace(MetricName) && card is null)
         {
-            <p class="banner">That KPI is not available to seed. Try another question, or go back to health.</p>
+            <p class="banner">That KPI is not available to seed. @WhyMessages.TryAnother, or go back to health.</p>
         }
 
         <div class="why-chat">
@@ -53,11 +49,11 @@ else
 
         @if (checking)
         {
-            <p class="banner" role="status">Checking persisted rows…</p>
+            <p class="banner" role="status">@WhyMessages.Checking</p>
         }
         else if (result is not null && result.Verified)
         {
-            <article class="why-answer" aria-live="polite">
+            <article class="why-answer">
                 <p class="eyebrow">Answer</p>
                 <pre class="why-answer-body">@result.Answer</pre>
                 <WhyReceipt Result="result" />
@@ -65,12 +61,14 @@ else
         }
         else if (result is not null)
         {
-            <p class="banner why-unverified" role="status">@WhyMessages.Unverified</p>
-            <p class="hint">Try another question, or tap a KPI card for a seeded why with period context.</p>
+            <div class="why-fail-closed" role="status">
+                <p class="banner why-unverified">@WhyMessages.Unverified</p>
+                <button class="btn btn-outline" type="button" @onclick="TryAnother">@WhyMessages.TryAnother</button>
+            </div>
         }
     </section>
 
-    @if (recent.Count > 0)
+    @if (ShowLog)
     {
         <section class="panel">
             <header class="panel-header">
@@ -127,6 +125,9 @@ else
     private string? lastAutoKey;
     private IReadOnlyList<WhyAnswer> recent = [];
     private bool checking => busy || pendingAutoAsk;
+    private bool ShowLog => !checking && result is { Verified: true } && recent.Count > 0;
+    private bool ShowSeededPrompt =>
+        card is not null && (result is null || result.Question == card.WhyPrompt);
 
     protected override async Task OnParametersSetAsync()
     {
@@ -162,6 +163,7 @@ else
         {
             lastAutoKey = autoKey;
             pendingAutoAsk = true;
+            result = null;
         }
     }
 
@@ -196,6 +198,12 @@ else
         {
             busy = false;
         }
+    }
+
+    private void TryAnother()
+    {
+        result = null;
+        question = card?.WhyPrompt ?? "";
     }
 
     private static string LabelFor(HealthMetricKind kind) => kind switch

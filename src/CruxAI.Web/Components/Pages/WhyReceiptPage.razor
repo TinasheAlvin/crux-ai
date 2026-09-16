@@ -7,40 +7,33 @@
 
 @if (loading)
 {
-    <p>Loading…</p>
+    <p>@WhyMessages.Checking</p>
 }
 else if (result is null)
 {
     <section class="panel">
         <h1>Receipt not found</h1>
         <p class="lede">That Q&amp;A is not in this organisation, or it was never logged.</p>
-        <a class="btn btn-primary" href="/why">Ask why</a>
+        <a class="btn btn-primary" href="/why">@WhyMessages.TryAnother</a>
     </section>
 }
 else if (!result.Verified)
 {
     <section class="panel">
-        <p class="eyebrow">@CurrentUser.OrganizationName · receipt</p>
-        <h1>No cited rows</h1>
         <p class="banner why-unverified" role="status">@WhyMessages.Unverified</p>
-        <p class="hint">Try another question, or tap a KPI card for a seeded why with period context.</p>
-        <a class="btn btn-primary" href="/why">Try another question</a>
+        <a class="btn btn-outline" href="/why">@WhyMessages.TryAnother</a>
     </section>
 }
 else
 {
     <section class="panel">
         <p class="eyebrow">@CurrentUser.OrganizationName · receipt</p>
-        <h1>Cited transaction rows</h1>
+        <h1>Cited rows</h1>
         <blockquote class="why-prompt">@result.Question</blockquote>
-        <pre class="why-answer-body">@result.Answer</pre>
-        <p class="lede">
-            @result.CitedRows.Count RowId@(result.CitedRows.Count == 1 ? "" : "s") ·
-            columns @ColumnsSummary.
-        </p>
+        <p class="lede">@result.CitedRows.Count RowId@(result.CitedRows.Count == 1 ? "" : "s") · columns @ColumnsSummary.</p>
         <WhyReceiptTable Rows="result.CitedRows" />
         <div class="actions">
-            <a class="btn btn-primary" href="/why">Ask another why</a>
+            <a class="btn btn-primary" href="/why">@WhyMessages.TryAnother</a>
             <a class="btn btn-outline" href="/health">Health KPIs</a>
         </div>
     </section>

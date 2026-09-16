@@ -64,7 +64,7 @@ If you already ran an earlier slice, delete `src/CruxAI.Web/App_Data/cruxai.db` 
 4. You land on **health KPIs**: revenue, expenses, and profit for the latest month in the file vs the previous month.
 5. **Cash is hidden** on this sample — there is no balance column, so Crux never shows a fake R0 cash card.
 6. Tap a KPI card. Crux seeds “Why did this change?” and answers from the Transaction store. The answer includes a **receipt** of the exact persisted RowIds (and columns such as Date, Description, Amount).
-7. Open the receipt to see those rows. Type a different question in the chat box (on Health or Why). If the question cannot be cited to RowIds, you get **Can't verify that yet.** — never an uncited number.
+7. Open the receipt to see those rows. Type a different question in the chat box (on Health or Why). If the question cannot be cited to RowIds, you get **Can't verify that yet.** and **Try another question** — never an uncited number or draft answer.
 8. Use **Remap columns** if the mapping was wrong. To see cash: **Sample with cash** (or `testdata/sample-transactions-with-cash.csv`). `Running Balance` maps to Balance; the cash card uses the latest usable balance in each month, and cash-why cites those Balance rows.
 
 ## How KPIs are computed

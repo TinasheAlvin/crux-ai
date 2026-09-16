@@ -140,6 +140,25 @@ public class WhyVerifierTests
     }
 
     [Fact]
+    public void Cited_answer_does_not_embed_row_ids_that_belong_on_the_receipt()
+    {
+        var transactions = new List<Transaction>
+        {
+            Row("r-feb-in", new DateOnly(2026, 2, 14), 2800m, "Card machine settlement"),
+            Row("r-mar-in", new DateOnly(2026, 3, 5), 3500m, "Card machine settlement")
+        };
+        var snapshot = HealthKpiCalculator.Compute(transactions, cashFieldMapped: false);
+
+        var result = WhyVerifier.Verify(snapshot.Revenue!.WhyPrompt, transactions, snapshot);
+
+        Assert.True(result.Verified);
+        Assert.DoesNotContain("r-feb-in", result.Answer, StringComparison.Ordinal);
+        Assert.DoesNotContain("r-mar-in", result.Answer, StringComparison.Ordinal);
+        Assert.Contains("r-feb-in", result.Citations.Select(c => c.RowId));
+        Assert.Contains("r-mar-in", result.Citations.Select(c => c.RowId));
+    }
+
+    [Fact]
     public void Never_returns_a_verified_answer_without_citations()
     {
         var empty = WhyVerifier.Verify("Why did revenue change?", [], new HealthSnapshot { HasData = false });
