@@ -70,6 +70,7 @@ public static class DependencyInjection
         services.AddSingleton<ICsvReader, CsvHelperReader>();
         services.AddSingleton<IAzureOpenAIIntentClassifier, AzureOpenAIIntentClassifier>();
         services.AddSingleton<IClock, SystemClock>();
+        services.AddCruxAnalytics(configuration);
         services.AddScoped<ImportService>();
         services.AddScoped<HealthKpiService>();
         services.AddScoped<WhyService>();

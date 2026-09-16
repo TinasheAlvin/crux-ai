@@ -40,6 +40,7 @@ public sealed class MorningBriefPreferenceState
     public bool HasTrustedWhy { get; init; }
     public bool OptedIn { get; init; }
     public bool Dismissed { get; init; }
+    public DateTime? OptedInAt { get; init; }
 
     public bool ShowOptInSheet => HasTrustedWhy && !OptedIn && !Dismissed;
 }

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CruxAI.Core.Analytics;
 using CruxAI.Core.Csv;
 using CruxAI.Core.Entities;
 using CruxAI.Core.Identity;
@@ -20,17 +21,20 @@ public sealed class ImportService
     private readonly IFileStorage _storage;
     private readonly ICsvReader _csvReader;
     private readonly ICurrentUser _currentUser;
+    private readonly IAnalytics _analytics;
 
     public ImportService(
         CruxDbContext db,
         IFileStorage storage,
         ICsvReader csvReader,
-        ICurrentUser currentUser)
+        ICurrentUser currentUser,
+        IAnalytics? analytics = null)
     {
         _db = db;
         _storage = storage;
         _csvReader = csvReader;
         _currentUser = currentUser;
+        _analytics = analytics ?? NullAnalytics.Instance;
     }
 
     public async Task<ImportJob> CreateFromUploadAsync(
@@ -232,6 +236,7 @@ public sealed class ImportService
             : null;
 
         await _db.SaveChangesAsync(cancellationToken);
+        _analytics.TrackFinishesUpload(job.Id, persisted.Count);
         return persisted.OrderBy(t => t.SourceRowNumber).ToList();
     }
 

@@ -1,3 +1,4 @@
+using CruxAI.Core.Analytics;
 using CruxAI.Core.Entities;
 using CruxAI.Core.Health;
 using CruxAI.Core.Identity;
@@ -14,17 +15,20 @@ public sealed class WhyService
     private readonly ICurrentUser _currentUser;
     private readonly HealthKpiService _health;
     private readonly IAzureOpenAIIntentClassifier _azure;
+    private readonly IAnalytics _analytics;
 
     public WhyService(
         CruxDbContext db,
         ICurrentUser currentUser,
         HealthKpiService health,
-        IAzureOpenAIIntentClassifier azure)
+        IAzureOpenAIIntentClassifier azure,
+        IAnalytics? analytics = null)
     {
         _db = db;
         _currentUser = currentUser;
         _health = health;
         _azure = azure;
+        _analytics = analytics ?? NullAnalytics.Instance;
     }
 
     public async Task<WhyAskResult> AskAsync(
@@ -79,6 +83,7 @@ public sealed class WhyService
 
         _db.WhyAnswers.Add(log);
         await _db.SaveChangesAsync(cancellationToken);
+        _analytics.TrackAsksWhySessionOne();
 
         return ToResult(log, AttachRows(log.Citations, transactions));
     }

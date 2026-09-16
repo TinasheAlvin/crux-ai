@@ -1,0 +1,38 @@
+@inject IAnalytics Analytics
+@inject PartnerSession Session
+
+@if (AnswerId != Guid.Empty)
+{
+    <div class="trust-prompt" role="group" aria-label="Trust rating">
+        @if (!AlreadyRated)
+        {
+            <p class="trust-prompt-q">Was this trustworthy enough to act on?</p>
+            <div class="actions trust-prompt-actions">
+                <button class="btn btn-outline btn-sm" type="button" @onclick="() => Rate(true)">Yes</button>
+                <button class="btn btn-outline btn-sm" type="button" @onclick="() => Rate(false)">No</button>
+            </div>
+        }
+        else
+        {
+            <p class="trust-prompt-q muted">Thanks.</p>
+        }
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired] public Guid AnswerId { get; set; }
+
+    private bool localRated;
+    private bool AlreadyRated => localRated || Session.RatedAnswers.Contains(AnswerId);
+
+    private void Rate(bool trustworthy)
+    {
+        if (AlreadyRated)
+        {
+            return;
+        }
+
+        localRated = true;
+        Analytics.TrackTrustRating(AnswerId, trustworthy);
+    }
+}

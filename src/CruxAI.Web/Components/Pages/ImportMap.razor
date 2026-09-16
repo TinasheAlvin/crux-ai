@@ -1,7 +1,9 @@
 @page "/imports/{ImportJobId:guid}/map"
 @attribute [Authorize]
+@implements IDisposable
 @inject ImportService Imports
 @inject NavigationManager Navigation
+@inject IAnalytics Analytics
 
 <PageTitle>Map columns · Crux AI</PageTitle>
 
@@ -76,6 +78,7 @@ else
     private List<ColumnChoice> columns = [];
     private List<string> errors = [];
     private bool busy;
+    private readonly MapAbandonGuard abandon = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -88,6 +91,23 @@ else
             Samples = string.Join(" · ", Imports.SampleValues(table, header)),
             TargetField = mapping.TryGetValue(header, out var field) ? field : TransactionFields.Ignore
         }).ToList();
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        // OnAfterRender runs only on the interactive circuit, not static prerender.
+        if (firstRender)
+        {
+            abandon.MarkInteractive();
+        }
+    }
+
+    public void Dispose()
+    {
+        if (abandon.ShouldTrackAbandon && job is not null)
+        {
+            Analytics.TrackMapAbandon(job.Id);
+        }
     }
 
     private async Task ConfirmAsync()
@@ -109,6 +129,7 @@ else
         try
         {
             await Imports.SaveMappingAsync(job, mapping);
+            abandon.MarkSaved();
             Navigation.NavigateTo($"/imports/{job.Id}/validate");
         }
         catch (Exception ex)
