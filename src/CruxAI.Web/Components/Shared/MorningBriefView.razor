@@ -15,6 +15,7 @@
         @if (Landing.Receipt is { Verified: true })
         {
             <WhyReceipt Result="Landing.Receipt" />
+            <TrustPrompt AnswerId="Landing.Receipt.AnswerId" />
         }
     </section>
 }

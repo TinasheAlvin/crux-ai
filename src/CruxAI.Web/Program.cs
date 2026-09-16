@@ -1,4 +1,5 @@
 using System.Globalization;
+using CruxAI.Core.Analytics;
 using CruxAI.Core.Identity;
 using CruxAI.Infrastructure;
 using CruxAI.Infrastructure.Data;
@@ -84,6 +85,22 @@ app.UseAuthorization();
 app.UseAntiforgery();
 
 app.MapDemoAuthEndpoints();
+app.MapGet("/internal/partner-events", (IEventLog log) =>
+{
+    var events = log.Read();
+    return Results.Json(new
+    {
+        count = events.Count,
+        events = events.Select(evt => new
+        {
+            evt.Name,
+            evt.OrgId,
+            evt.UserId,
+            timestamp = evt.Timestamp,
+            evt.Properties
+        })
+    });
+}).RequireAuthorization();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 

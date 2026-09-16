@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CruxAI.Core.Analytics;
 using CruxAI.Core.Brief;
 using CruxAI.Core.Entities;
 using CruxAI.Core.Health;
@@ -29,19 +30,22 @@ public sealed class MorningBriefService
     private readonly HealthKpiService _health;
     private readonly WhyService _why;
     private readonly IClock _clock;
+    private readonly IAnalytics _analytics;
 
     public MorningBriefService(
         CruxDbContext db,
         ICurrentUser currentUser,
         HealthKpiService health,
         WhyService why,
-        IClock clock)
+        IClock clock,
+        IAnalytics? analytics = null)
     {
         _db = db;
         _currentUser = currentUser;
         _health = health;
         _why = why;
         _clock = clock;
+        _analytics = analytics ?? NullAnalytics.Instance;
     }
 
     public async Task<MorningBriefPreferenceState> GetPreferenceAsync(CancellationToken cancellationToken = default)
@@ -85,6 +89,7 @@ public sealed class MorningBriefService
             await _db.SaveChangesAsync(cancellationToken);
         }
 
+        _analytics.MarkOptedInThisSession();
         return new MorningBriefOptInResult
         {
             Succeeded = true,
@@ -116,7 +121,9 @@ public sealed class MorningBriefService
             return MorningBriefLanding.NotOptedIn();
         }
 
-        return await EnsureTodaysBriefAsync(cancellationToken);
+        var landing = await EnsureTodaysBriefAsync(cancellationToken);
+        _analytics.TrackBriefReturnIfEligible(preference.OptedInAt);
+        return landing;
     }
 
     /// <summary>
@@ -380,7 +387,8 @@ public sealed class MorningBriefService
         {
             HasTrustedWhy = trusted,
             OptedIn = row?.OptedIn == true,
-            Dismissed = row?.Dismissed == true
+            Dismissed = row?.Dismissed == true,
+            OptedInAt = row?.OptedInAt
         };
 
     private static string Serialize(MorningBriefSnapshot snapshot) =>

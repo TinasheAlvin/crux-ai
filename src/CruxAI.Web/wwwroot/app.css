@@ -577,3 +577,34 @@ a, .btn-link {
 .brief-empty .actions {
     margin-top: 1rem;
 }
+
+.trust-prompt {
+    margin-top: 1rem;
+    padding: 0.75rem 0 0;
+}
+
+.trust-prompt-q {
+    font-family: "Segoe UI", sans-serif;
+    font-size: 0.92rem;
+    margin: 0 0 0.45rem;
+}
+
+.trust-prompt-actions {
+    margin-top: 0;
+}
+
+.partner-instrumentation {
+    margin: 1.5rem 0 2rem;
+    padding: 0.85rem 1rem;
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+    background: #f4efe8;
+    max-width: 28rem;
+}
+
+.partner-instrumentation-copy {
+    font-family: "Segoe UI", sans-serif;
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    margin: 0 0 0.55rem;
+}

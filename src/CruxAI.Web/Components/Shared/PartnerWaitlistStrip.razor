@@ -1,0 +1,36 @@
+@inject IAnalytics Analytics
+@inject PartnerSession Session
+
+<aside class="partner-instrumentation" aria-label="Design partner waitlist">
+    @if (!Joined)
+    {
+        <p class="eyebrow">Design partner only</p>
+        <p class="partner-instrumentation-copy">
+            Placeholder interest control — not a product checkout.
+        </p>
+        <button class="btn btn-outline btn-sm" type="button" @onclick="Join">Join waitlist</button>
+    }
+    else
+    {
+        <p class="eyebrow">Design partner only</p>
+        <p class="partner-instrumentation-copy">Waitlist interest recorded.</p>
+    }
+</aside>
+
+@code {
+    [Parameter] public string Surface { get; set; } = "home";
+
+    private bool localJoined;
+    private bool Joined => localJoined || Session.WaitlistSignaled;
+
+    private void Join()
+    {
+        if (Joined)
+        {
+            return;
+        }
+
+        localJoined = true;
+        Analytics.TrackWaitlist(Surface);
+    }
+}

@@ -2,6 +2,7 @@
 @attribute [Authorize]
 @inject WhyService Why
 @inject ICurrentUser CurrentUser
+@inject IAnalytics Analytics
 
 <PageTitle>Receipt · Crux AI</PageTitle>
 
@@ -32,6 +33,7 @@ else
         <blockquote class="why-prompt">@result.Question</blockquote>
         <p class="lede">@result.CitedRows.Count RowId@(result.CitedRows.Count == 1 ? "" : "s") · columns @ColumnsSummary.</p>
         <WhyReceiptTable Rows="result.CitedRows" />
+        <TrustPrompt AnswerId="result.AnswerId" />
         <div class="actions">
             <a class="btn btn-primary" href="/why">@WhyMessages.TryAnother</a>
             <a class="btn btn-outline" href="/health">Health KPIs</a>
@@ -50,6 +52,10 @@ else
         loading = true;
         result = await Why.GetAsync(AnswerId);
         loading = false;
+        if (result is { Verified: true })
+        {
+            Analytics.TrackReceiptOpen(result.AnswerId);
+        }
     }
 
     private string ColumnsSummary =>

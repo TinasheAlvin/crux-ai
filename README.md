@@ -27,9 +27,9 @@ Placeholders (not wired as the trust boundary):
 
 ```
 src/CruxAI.sln
-src/CruxAI.Core/              Domain, mapping, validation, health KPI calculator, why verifier, brief composer
-src/CruxAI.Infrastructure/    EF Core, CSV reader, file storage, import + health + why + morning brief services
-src/CruxAI.Web/               Blazor UI + demo auth
+src/CruxAI.Core/              Domain, mapping, validation, health KPI calculator, why verifier, brief composer, analytics contracts
+src/CruxAI.Infrastructure/    EF Core, CSV reader, file storage, import + health + why + morning brief + event log
+src/CruxAI.Web/               Blazor UI + demo auth + partner dump endpoint
 src/CruxAI.Tests/
 testdata/sample-transactions.csv
 testdata/sample-transactions-with-cash.csv
@@ -90,6 +90,59 @@ If you already ran an earlier slice, delete `src/CruxAI.Web/App_Data/cruxai.db` 
 - Next visit (Home or Brief) generates or reads today’s `MorningBrief`: frozen snapshot KPIs + **one** explanation + RowId citations. Same fail-closed rules as why — no citations means **No verified brief today**, never a fabricated digest.
 - Generation is on-demand at next visit (`MorningBriefService.EnsureTodaysBriefAsync`). `MorningBriefFunctionsStub` is the Azure Functions timer hook; local demo does not need Functions.
 
+## Design-partner instrumentation
+
+Lightweight scoreboard events for design-partner sessions. **No new product features** — a tiny trust prompt after a cited why, and a clearly labelled partner-only waitlist stub. There is no paid analytics vendor.
+
+`IAnalytics` stamps `orgId`, `userId`, `timestamp`, and optional properties, then appends to `IEventLog`. Local demo default is a **JSONL file**; tests use an in-memory sink. `Analytics:Sink` can also be `Sqlite` (`App_Data/partner-events.db`) or `Memory`.
+
+### Event names
+
+| Event | When |
+| --- | --- |
+| `finishes_upload` | CSV import is persisted (RowIds written) |
+| `asks_why_session_one` | First why ask in this browser circuit |
+| `rates_explanation_trustworthy` | Yes on “Was this trustworthy enough to act on?” after a cited why |
+| `receipt_distrust` | No on that trust prompt |
+| `returns_for_brief_within_7_days` | Opted-in next visit shows the brief, and opt-in was ≤ 7 days ago (not the same circuit as opt-in) |
+| `pay_or_waitlist_signal` | Partner-only **Join waitlist** on Home or Brief |
+| `map_abandon` | Leaves column map/confirm without saving (interactive circuit only; prerender dispose is ignored) |
+| `receipt_open` | Opens the receipt / cited row list |
+
+### How to dump events after a partner session
+
+Default sink (from the Web project directory):
+
+```bash
+cat src/CruxAI.Web/App_Data/partner-events.jsonl
+```
+
+Count by name:
+
+```bash
+python3 -c "import json,collections,pathlib
+p=pathlib.Path('src/CruxAI.Web/App_Data/partner-events.jsonl')
+c=collections.Counter(json.loads(l)['name'] for l in p.read_text().splitlines() if l.strip())
+print('\n'.join(f'{n:4} {k}' for k,n in c.most_common()))"
+```
+
+While signed in, `GET http://localhost:5028/internal/partner-events` returns the same events as JSON.
+
+If you set `Analytics:Sink` to `Sqlite`:
+
+```bash
+sqlite3 src/CruxAI.Web/App_Data/partner-events.db \
+  "SELECT name, org_id, user_id, timestamp, properties_json FROM partner_events ORDER BY id;"
+```
+
+Each JSONL line looks like:
+
+```json
+{"name":"finishes_upload","orgId":"...","userId":"...","timestamp":"2026-09-16T21:04:00.0000000Z","properties":{"importJobId":"...","rowCount":"12"}}
+```
+
+The file lives under gitignored `App_Data/`. Delete it between partner sessions if you want a clean dump.
+
 ## Configuration and secrets
 
 Committed files contain **placeholders only**. Do not put real connection strings, client secrets, or account keys in git.
@@ -107,6 +160,9 @@ Committed files contain **placeholders only**. Do not put real connection string
 | `AzureOpenAI:Endpoint` | placeholder / empty | user-secrets |
 | `AzureOpenAI:DeploymentName` | placeholder / empty | user-secrets |
 | `AzureOpenAI:ApiKey` | empty | user-secrets |
+| `Analytics:Sink` | `File` (JSONL) | `Memory` or `Sqlite` |
+| `Analytics:FilePath` | `App_Data/partner-events.jsonl` | unused if Sink is Memory |
+| `Analytics:SqlitePath` | `App_Data/partner-events.db` | used when Sink is Sqlite |
 
 Copy `src/CruxAI.Web/appsettings.Example.json` for a full list of keys, then store real values in user secrets:
 
