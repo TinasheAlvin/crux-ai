@@ -36,35 +36,37 @@ else
         }
         else if (!string.IsNullOrWhiteSpace(MetricName))
         {
-            <p class="banner">That KPI is not available to seed. Ask another why question, or go back to health.</p>
+            <p class="banner">That KPI is not available to seed. Try another question, or go back to health.</p>
         }
 
         <div class="why-chat">
             <label class="why-chat-label" for="why-question">Question</label>
             <InputTextArea id="why-question" @bind-Value="question" class="form-control why-chat-input"
-                           placeholder="Why did revenue change?" disabled="@busy" />
+                           placeholder="Why did revenue change?" disabled="@checking" />
             <div class="actions">
-                <button class="btn btn-primary" type="button" @onclick="AskAsync" disabled="@busy">
-                    @(busy ? "Verifying…" : "Ask why")
+                <button class="btn btn-primary" type="button" @onclick="AskAsync" disabled="@checking">
+                    @(checking ? "Checking…" : "Ask why")
                 </button>
                 <a class="btn btn-outline" href="/health">Back to health</a>
             </div>
         </div>
 
-        @if (result is not null)
+        @if (checking)
         {
-            @if (result.Verified)
-            {
-                <article class="why-answer" aria-live="polite">
-                    <p class="eyebrow">Verified answer</p>
-                    <pre class="why-answer-body">@result.Answer</pre>
-                    <WhyReceipt Result="result" />
-                </article>
-            }
-            else
-            {
-                <p class="banner why-unverified" role="status">@result.Answer</p>
-            }
+            <p class="banner" role="status">Checking persisted rows…</p>
+        }
+        else if (result is not null && result.Verified)
+        {
+            <article class="why-answer" aria-live="polite">
+                <p class="eyebrow">Answer</p>
+                <pre class="why-answer-body">@result.Answer</pre>
+                <WhyReceipt Result="result" />
+            </article>
+        }
+        else if (result is not null)
+        {
+            <p class="banner why-unverified" role="status">@WhyMessages.Unverified</p>
+            <p class="hint">Try another question, or tap a KPI card for a seeded why with period context.</p>
         }
     </section>
 
@@ -124,6 +126,7 @@ else
     private bool pendingAutoAsk;
     private string? lastAutoKey;
     private IReadOnlyList<WhyAnswer> recent = [];
+    private bool checking => busy || pendingAutoAsk;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -182,6 +185,8 @@ else
         }
 
         busy = true;
+        result = null;
+        await InvokeAsync(StateHasChanged);
         try
         {
             result = await WhyAnswers.AskAsync(question, seededMetric);

@@ -1,29 +1,16 @@
 @if (Result.Verified)
 {
-    <section class="receipt" aria-label="Answer receipt">
-        <header class="receipt-header">
-            <p class="eyebrow">Receipt</p>
-            <h2>@Result.CitedRows.Count cited RowId@(Result.CitedRows.Count == 1 ? "" : "s")</h2>
-            <p class="lede">
-                Columns: @ColumnsSummary.
-                These are the persisted transaction lines that support the answer — not a model guess.
-            </p>
-            <div class="receipt-ids">
-                @foreach (var row in Result.CitedRows)
-                {
-                    <code class="row-id">@row.RowId</code>
-                }
-            </div>
-            <div class="actions">
-                <a class="btn btn-primary" href="@($"/receipts/{Result.AnswerId}")">Open receipt</a>
-            </div>
-        </header>
-
-        <details class="receipt-details">
-            <summary>Show cited rows</summary>
-            <WhyReceiptTable Rows="Result.CitedRows" />
-        </details>
-    </section>
+    <a class="receipt-strip" href="@($"/receipts/{Result.AnswerId}")" aria-label="Open receipt to see cited rows">
+        <p class="eyebrow">Receipt</p>
+        <p class="receipt-strip-meta">@Result.CitedRows.Count RowId@(Result.CitedRows.Count == 1 ? "" : "s") · @ColumnsSummary</p>
+        <div class="receipt-ids">
+            @foreach (var row in Result.CitedRows)
+            {
+                <code class="row-id">@row.RowId</code>
+            }
+        </div>
+        <p class="receipt-strip-hint">Tap to see the cited rows</p>
+    </a>
 }
 
 @code {

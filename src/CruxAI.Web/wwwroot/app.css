@@ -486,6 +486,34 @@ a, .btn-link {
     padding: 0.15rem 0.55rem;
 }
 
+.receipt-strip {
+    display: block;
+    background: #f3f7f5;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 0.9rem 1.1rem 1rem;
+    text-decoration: none;
+    color: inherit;
+}
+
+.receipt-strip:hover {
+    border-color: var(--teal);
+}
+
+.receipt-strip-meta {
+    font-family: "Segoe UI", sans-serif;
+    font-weight: 650;
+    margin: 0.15rem 0 0.55rem;
+}
+
+.receipt-strip-hint {
+    font-family: "Segoe UI", sans-serif;
+    font-size: 0.82rem;
+    color: var(--teal-dark);
+    font-weight: 600;
+    margin: 0.65rem 0 0;
+}
+
 .receipt-details {
     margin-top: 0.5rem;
     font-family: "Segoe UI", sans-serif;

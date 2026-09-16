@@ -22,8 +22,9 @@ else if (!result.Verified)
     <section class="panel">
         <p class="eyebrow">@CurrentUser.OrganizationName · receipt</p>
         <h1>No cited rows</h1>
-        <p class="banner why-unverified" role="status">@result.Answer</p>
-        <a class="btn btn-primary" href="/why">Ask why</a>
+        <p class="banner why-unverified" role="status">@WhyMessages.Unverified</p>
+        <p class="hint">Try another question, or tap a KPI card for a seeded why with period context.</p>
+        <a class="btn btn-primary" href="/why">Try another question</a>
     </section>
 }
 else
