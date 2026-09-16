@@ -3,6 +3,7 @@
 @attribute [Authorize]
 @inject WhyService WhyAnswers
 @inject HealthKpiService HealthKpis
+@inject MorningBriefService Briefs
 @inject ICurrentUser CurrentUser
 
 <PageTitle>Why · Crux AI</PageTitle>
@@ -58,6 +59,9 @@ else
                 <pre class="why-answer-body">@result.Answer</pre>
                 <WhyReceipt Result="result" />
             </article>
+            <MorningBriefOptInSheet Preference="preference"
+                                    PreferenceChanged="OnPreferenceChanged"
+                                    ShowConfirmation="justOptedIn" />
         }
         else if (result is not null)
         {
@@ -124,6 +128,8 @@ else
     private bool pendingAutoAsk;
     private string? lastAutoKey;
     private IReadOnlyList<WhyAnswer> recent = [];
+    private MorningBriefPreferenceState preference = new();
+    private bool justOptedIn;
     private bool checking => busy || pendingAutoAsk;
     private bool ShowLog => !checking && result is { Verified: true } && recent.Count > 0;
     private bool ShowSeededPrompt =>
@@ -143,6 +149,7 @@ else
         }
 
         recent = snapshot?.HasData == true ? await WhyAnswers.ListRecentAsync() : [];
+        preference = await Briefs.GetPreferenceAsync();
 
         var autoKey = $"{MetricName}|{QueryQuestion}";
         if (lastAutoKey == autoKey)
@@ -193,6 +200,7 @@ else
         {
             result = await WhyAnswers.AskAsync(question, seededMetric);
             recent = await WhyAnswers.ListRecentAsync();
+            preference = await Briefs.GetPreferenceAsync();
         }
         finally
         {
@@ -204,6 +212,12 @@ else
     {
         result = null;
         question = card?.WhyPrompt ?? "";
+    }
+
+    private void OnPreferenceChanged(MorningBriefPreferenceState state)
+    {
+        justOptedIn = state.OptedIn;
+        preference = state;
     }
 
     private static string LabelFor(HealthMetricKind kind) => kind switch

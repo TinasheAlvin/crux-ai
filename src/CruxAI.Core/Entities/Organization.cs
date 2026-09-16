@@ -11,4 +11,6 @@ public sealed class Organization
     public ICollection<ColumnMappingProfile> MappingProfiles { get; set; } = new List<ColumnMappingProfile>();
     public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
     public ICollection<WhyAnswer> WhyAnswers { get; set; } = new List<WhyAnswer>();
+    public ICollection<MorningBriefPreference> MorningBriefPreferences { get; set; } = new List<MorningBriefPreference>();
+    public ICollection<MorningBrief> MorningBriefs { get; set; } = new List<MorningBrief>();
 }

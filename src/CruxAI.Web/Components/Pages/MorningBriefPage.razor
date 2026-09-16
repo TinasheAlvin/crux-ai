@@ -1,0 +1,37 @@
+@page "/brief"
+@attribute [Authorize]
+@inject MorningBriefService Briefs
+@inject ICurrentUser CurrentUser
+
+<PageTitle>Morning brief · Crux AI</PageTitle>
+
+@if (landing is null)
+{
+    <p>Loading…</p>
+}
+else if (!landing.OptedIn)
+{
+    <section class="hero-card">
+        <p class="eyebrow">@CurrentUser.OrganizationName</p>
+        <h1>Morning brief is opt-in</h1>
+        <p class="lede">
+            Ask a question first. After a trusted (cited) why, Crux offers one primary CTA:
+            @MorningBriefMessages.Cta. Dismiss it once and it will not come back.
+        </p>
+        <a class="btn btn-primary" href="/why">@MorningBriefMessages.AskWhy</a>
+    </section>
+}
+else
+{
+    <p class="eyebrow">@CurrentUser.OrganizationName</p>
+    <MorningBriefView Landing="landing" />
+}
+
+@code {
+    private MorningBriefLanding? landing;
+
+    protected override async Task OnInitializedAsync()
+    {
+        landing = await Briefs.GetLandingAsync();
+    }
+}

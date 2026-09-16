@@ -1,7 +1,9 @@
 using CruxAI.Core.Csv;
 using CruxAI.Core.Entities;
 using CruxAI.Core.Storage;
+using CruxAI.Core.Time;
 using CruxAI.Core.Why;
+using CruxAI.Infrastructure.Brief;
 using CruxAI.Infrastructure.Csv;
 using CruxAI.Infrastructure.Data;
 using CruxAI.Infrastructure.Health;
@@ -67,9 +69,11 @@ public static class DependencyInjection
             }));
         services.AddSingleton<ICsvReader, CsvHelperReader>();
         services.AddSingleton<IAzureOpenAIIntentClassifier, AzureOpenAIIntentClassifier>();
+        services.AddSingleton<IClock, SystemClock>();
         services.AddScoped<ImportService>();
         services.AddScoped<HealthKpiService>();
         services.AddScoped<WhyService>();
+        services.AddScoped<MorningBriefService>();
         services.AddScoped<OrgBootstrapper>();
 
         return services;

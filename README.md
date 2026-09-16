@@ -2,11 +2,11 @@
 
 CSV-first BI for South African service-business owners.
 
-V1 spine in this repo so far:
+V1 spine in this repo:
 
-`CSV upload / map → validate → persist RowIds → health KPIs (period compare) → receipted why`
+`CSV upload / map → validate → persist RowIds → health KPIs (period compare) → receipted why → morning brief`
 
-Morning brief, Nango connectors, and WhatsApp remain **out of scope**. Azure OpenAI is optional (intent classification only); the local demo uses a deterministic verifier and still **fails closed** without RowId citations.
+Nango connectors, WhatsApp, email, and multi-story digests remain **out of scope**. Azure OpenAI is optional (intent classification only); the local demo uses a deterministic verifier and still **fails closed** without RowId citations. Morning brief generation is **on-demand at next visit** — Azure Functions are not required.
 
 ## Stack
 
@@ -27,8 +27,8 @@ Placeholders (not wired as the trust boundary):
 
 ```
 src/CruxAI.sln
-src/CruxAI.Core/              Domain, mapping, validation, health KPI calculator, why verifier
-src/CruxAI.Infrastructure/    EF Core, CSV reader, file storage, import + health + why services
+src/CruxAI.Core/              Domain, mapping, validation, health KPI calculator, why verifier, brief composer
+src/CruxAI.Infrastructure/    EF Core, CSV reader, file storage, import + health + why + morning brief services
 src/CruxAI.Web/               Blazor UI + demo auth
 src/CruxAI.Tests/
 testdata/sample-transactions.csv
@@ -51,9 +51,9 @@ Open http://localhost:5028
 
 The first run creates `src/CruxAI.Web/App_Data/cruxai.db` and `src/CruxAI.Web/App_Data/uploads/` (gitignored).
 
-If you already ran an earlier slice, delete `src/CruxAI.Web/App_Data/cruxai.db` so SQLite picks up WhyAnswers / WhyCitations (or let the startup patch create those tables).
+If you already ran an earlier slice, delete `src/CruxAI.Web/App_Data/cruxai.db` so SQLite picks up Why / morning-brief tables (or let the startup patch create those tables).
 
-### Demo path (CSV map → health KPIs → receipted why)
+### Demo path (CSV map → health KPIs → receipted why → morning brief)
 
 1. Click **Continue as demo owner**. This signs you in with a cookie and creates:
    - Organisation: `Harbour Street Studio`
@@ -65,7 +65,9 @@ If you already ran an earlier slice, delete `src/CruxAI.Web/App_Data/cruxai.db` 
 5. **Cash is hidden** on this sample — there is no balance column, so Crux never shows a fake R0 cash card.
 6. Tap a KPI card. Crux seeds “Why did this change?” and answers from the Transaction store. The answer includes a **receipt** of the exact persisted RowIds (and columns such as Date, Description, Amount).
 7. Open the receipt to see those rows. Type a different question in the chat box (on Health or Why). If the question cannot be cited to RowIds, you get **Can't verify that yet.** and **Try another question** — never an uncited number or draft answer.
-8. Use **Remap columns** if the mapping was wrong. To see cash: **Sample with cash** (or `testdata/sample-transactions-with-cash.csv`). `Running Balance` maps to Balance; the cash card uses the latest usable balance in each month, and cash-why cites those Balance rows.
+8. After a **cited** why, an opt-in sheet appears with one primary CTA: **Send me the morning brief**. Dismiss it once with **Not now** and it will not come back (it is not buried in settings).
+9. Open **Home** or **Brief** (next visit). You get **yesterday’s snapshot KPIs** plus **one** receipted explanation and a receipt strip. If nothing can be cited: **No verified brief today** and a path back to **Ask why** — never a fake or multi-story digest.
+10. Use **Remap columns** if the mapping was wrong. To see cash: **Sample with cash** (or `testdata/sample-transactions-with-cash.csv`). `Running Balance` maps to Balance; the cash card uses the latest usable balance in each month, and cash-why cites those Balance rows.
 
 ## How KPIs are computed
 
@@ -80,6 +82,13 @@ If you already ran an earlier slice, delete `src/CruxAI.Web/App_Data/cruxai.db` 
 - Every verified answer stores Q&A (question, answer, organisation, timestamps) plus a citation table (`WhyAnswer` → `RowId[]` and the columns that support the claim).
 - If the verifier cannot produce that citation trail — unknown question, hidden cash, missing comparison rows — it returns **Can't verify that yet.** and logs the Q&A with an empty citation list.
 - Azure OpenAI is not required. When configured it may only label the KPI; it is not allowed to invent financial facts.
+
+## How the morning brief works
+
+- Opt-in appears only after a **trusted (cited) why**, as a sheet with one primary CTA (**Send me the morning brief**). Dismiss once and it does not return.
+- Flags are stored per organisation + user (`MorningBriefPreference`).
+- Next visit (Home or Brief) generates or reads today’s `MorningBrief`: frozen snapshot KPIs + **one** explanation + RowId citations. Same fail-closed rules as why — no citations means **No verified brief today**, never a fabricated digest.
+- Generation is on-demand at next visit (`MorningBriefService.EnsureTodaysBriefAsync`). `MorningBriefFunctionsStub` is the Azure Functions timer hook; local demo does not need Functions.
 
 ## Configuration and secrets
 
@@ -118,7 +127,7 @@ HTTPS is available via `--launch-profile https` once the ASP.NET Core developer 
 
 ## Auth placeholder
 
-Demo login is intentional so the CSV + KPI + why flow can be exercised without an Entra tenant. Replacing it:
+Demo login is intentional so the CSV + KPI + why + morning brief flow can be exercised without an Entra tenant. Replacing it:
 
 1. Add `Microsoft.Identity.Web`.
 2. Fill `Auth:EntraExternalId` via user-secrets.

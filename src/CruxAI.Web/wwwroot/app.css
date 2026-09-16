@@ -544,3 +544,36 @@ a, .btn-link {
     background: #f4efe8;
     color: var(--ink-soft);
 }
+
+.brief-sheet {
+    margin-top: 1.5rem;
+    padding: 1.35rem 1.4rem 1.2rem;
+    border: 2px solid var(--teal);
+    border-radius: 18px;
+    background: #f3f7f5;
+}
+
+.brief-sheet h2 {
+    margin: 0.15rem 0 0.4rem;
+    font-size: 1.35rem;
+}
+
+.brief-sheet.is-confirmed {
+    border-style: dashed;
+}
+
+.brief-sheet-actions {
+    margin-bottom: 0.25rem;
+}
+
+.kpi-card.is-static {
+    cursor: default;
+}
+
+.kpi-card.is-static:hover {
+    border-color: var(--line);
+}
+
+.brief-empty .actions {
+    margin-top: 1rem;
+}
