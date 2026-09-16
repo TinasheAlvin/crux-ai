@@ -28,6 +28,9 @@
         <button type="button" class="btn btn-outline sample-btn" @onclick="() => UseSampleAsync(true)" disabled="@busy">
             Sample with cash
         </button>
+        <button type="button" class="btn btn-outline sample-btn" @onclick='() => UseSampleFileAsync("sample-transactions-clean.csv")' disabled="@busy">
+            Clean sample
+        </button>
         @if (!string.IsNullOrWhiteSpace(error))
         {
             <p class="banner banner-error" role="alert">@error</p>
@@ -38,10 +41,10 @@ else
 {
     <section class="hero-card">
         <p class="eyebrow">@CurrentUser.OrganizationName</p>
-        <h1>Start with a CSV — then see health KPIs</h1>
+        <h1>Start with a CSV — then ask why with a receipt</h1>
         <p class="lede">
-            Upload a bank or bookkeeping export. Map columns, fix anything that looks off,
-            persist RowIds, then land on revenue, expenses, and profit with a period compare.
+            Upload a bank or bookkeeping export. Map columns, persist RowIds, see health KPIs,
+            then tap a card to get a cited why — or fail closed if it cannot be verified.
         </p>
 
         <label class="upload-button @(busy ? "is-disabled" : null)">
@@ -54,6 +57,9 @@ else
         <button type="button" class="btn btn-outline sample-btn" @onclick="() => UseSampleAsync(true)" disabled="@busy">
             Sample with cash
         </button>
+        <button type="button" class="btn btn-outline sample-btn" @onclick='() => UseSampleFileAsync("sample-transactions-clean.csv")' disabled="@busy">
+            Clean sample
+        </button>
 
         @if (!string.IsNullOrWhiteSpace(error))
         {
@@ -61,7 +67,8 @@ else
         }
 
         <p class="hint">
-            <code>testdata/sample-transactions.csv</code> covers two months and includes a few broken rows.
+            <code>testdata/sample-transactions-clean.csv</code> is the fastest path to a cited why.
+            The default sample includes a few broken March rows to exercise validation.
             Cash stays hidden unless a balance column is mapped — try
             <code>testdata/sample-transactions-with-cash.csv</code>.
         </p>
@@ -153,13 +160,15 @@ else
         }
     }
 
-    private async Task UseSampleAsync(bool withCash)
+    private async Task UseSampleAsync(bool withCash) =>
+        await UseSampleFileAsync(withCash ? "sample-transactions-with-cash.csv" : "sample-transactions.csv");
+
+    private async Task UseSampleFileAsync(string fileName)
     {
         busy = true;
         error = null;
         try
         {
-            var fileName = withCash ? "sample-transactions-with-cash.csv" : "sample-transactions.csv";
             var path = FindSampleCsv(fileName);
             if (path is null)
             {

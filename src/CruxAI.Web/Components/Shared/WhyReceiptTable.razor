@@ -1,0 +1,39 @@
+<div class="table-scroll">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>RowId</th>
+                <th>Period</th>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Balance</th>
+                <th>Cited columns</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in Rows)
+            {
+                <tr>
+                    <td><code class="row-id">@row.RowId</code></td>
+                    <td>@row.PeriodLabel</td>
+                    <td>@row.Date.ToString("dd MMM yyyy")</td>
+                    <td>
+                        @row.Description
+                        @if (!string.IsNullOrWhiteSpace(row.Counterparty))
+                        {
+                            <div class="muted">@row.Counterparty</div>
+                        }
+                    </td>
+                    <td class="numeric">@row.Amount.ToString("C")</td>
+                    <td class="numeric">@(row.Balance?.ToString("C") ?? "—")</td>
+                    <td>@row.Columns</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    [Parameter] public IReadOnlyList<WhyCitedRow> Rows { get; set; } = [];
+}

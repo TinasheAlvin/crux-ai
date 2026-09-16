@@ -1,0 +1,58 @@
+@page "/receipts/{AnswerId:guid}"
+@attribute [Authorize]
+@inject WhyService Why
+@inject ICurrentUser CurrentUser
+
+<PageTitle>Receipt · Crux AI</PageTitle>
+
+@if (loading)
+{
+    <p>@WhyMessages.Checking</p>
+}
+else if (result is null)
+{
+    <section class="panel">
+        <h1>Receipt not found</h1>
+        <p class="lede">That Q&amp;A is not in this organisation, or it was never logged.</p>
+        <a class="btn btn-primary" href="/why">@WhyMessages.TryAnother</a>
+    </section>
+}
+else if (!result.Verified)
+{
+    <section class="panel">
+        <p class="banner why-unverified" role="status">@WhyMessages.Unverified</p>
+        <a class="btn btn-outline" href="/why">@WhyMessages.TryAnother</a>
+    </section>
+}
+else
+{
+    <section class="panel">
+        <p class="eyebrow">@CurrentUser.OrganizationName · receipt</p>
+        <h1>Cited rows</h1>
+        <blockquote class="why-prompt">@result.Question</blockquote>
+        <p class="lede">@result.CitedRows.Count RowId@(result.CitedRows.Count == 1 ? "" : "s") · columns @ColumnsSummary.</p>
+        <WhyReceiptTable Rows="result.CitedRows" />
+        <div class="actions">
+            <a class="btn btn-primary" href="/why">@WhyMessages.TryAnother</a>
+            <a class="btn btn-outline" href="/health">Health KPIs</a>
+        </div>
+    </section>
+}
+
+@code {
+    [Parameter] public Guid AnswerId { get; set; }
+
+    private bool loading = true;
+    private WhyAskResult? result;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        loading = true;
+        result = await Why.GetAsync(AnswerId);
+        loading = false;
+    }
+
+    private string ColumnsSummary =>
+        result?.CitedRows.Select(row => row.Columns).FirstOrDefault(columns => !string.IsNullOrWhiteSpace(columns))
+        ?? "Date, Description, Amount";
+}

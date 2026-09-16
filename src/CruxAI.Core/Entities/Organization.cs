@@ -10,4 +10,5 @@ public sealed class Organization
     public ICollection<ImportJob> ImportJobs { get; set; } = new List<ImportJob>();
     public ICollection<ColumnMappingProfile> MappingProfiles { get; set; } = new List<ColumnMappingProfile>();
     public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
+    public ICollection<WhyAnswer> WhyAnswers { get; set; } = new List<WhyAnswer>();
 }

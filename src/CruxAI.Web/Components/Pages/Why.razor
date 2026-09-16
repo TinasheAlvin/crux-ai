@@ -1,0 +1,220 @@
+@page "/why"
+@page "/why/{MetricName}"
+@attribute [Authorize]
+@inject WhyService WhyAnswers
+@inject HealthKpiService HealthKpis
+@inject ICurrentUser CurrentUser
+
+<PageTitle>Why · Crux AI</PageTitle>
+
+@if (snapshot is null)
+{
+    <p>@WhyMessages.Checking</p>
+}
+else if (!snapshot.HasData)
+{
+    <section class="hero-card">
+        <p class="eyebrow">@CurrentUser.OrganizationName</p>
+        <h1>No transactions to verify yet</h1>
+        <p class="lede">Upload and persist a CSV first. Why answers are computed from RowIds — never guessed.</p>
+        <a class="btn btn-primary" href="/">Upload CSV</a>
+    </section>
+}
+else
+{
+    <section class="panel" aria-busy="@checking">
+        <p class="eyebrow">@CurrentUser.OrganizationName · receipted why</p>
+        <h1>@(card is null ? "Ask why" : $"Why {LabelFor(card.Kind).ToLowerInvariant()}?")</h1>
+
+        @if (ShowSeededPrompt)
+        {
+            <blockquote class="why-prompt">@card!.WhyPrompt</blockquote>
+        }
+        else if (!string.IsNullOrWhiteSpace(MetricName) && card is null)
+        {
+            <p class="banner">That KPI is not available to seed. @WhyMessages.TryAnother, or go back to health.</p>
+        }
+
+        <div class="why-chat">
+            <label class="why-chat-label" for="why-question">Question</label>
+            <InputTextArea id="why-question" @bind-Value="question" class="form-control why-chat-input"
+                           placeholder="Why did revenue change?" disabled="@checking" />
+            <div class="actions">
+                <button class="btn btn-primary" type="button" @onclick="AskAsync" disabled="@checking">
+                    @(checking ? "Checking…" : "Ask why")
+                </button>
+                <a class="btn btn-outline" href="/health">Back to health</a>
+            </div>
+        </div>
+
+        @if (checking)
+        {
+            <p class="banner" role="status">@WhyMessages.Checking</p>
+        }
+        else if (result is not null && result.Verified)
+        {
+            <article class="why-answer">
+                <p class="eyebrow">Answer</p>
+                <pre class="why-answer-body">@result.Answer</pre>
+                <WhyReceipt Result="result" />
+            </article>
+        }
+        else if (result is not null)
+        {
+            <div class="why-fail-closed" role="status">
+                <p class="banner why-unverified">@WhyMessages.Unverified</p>
+                <button class="btn btn-outline" type="button" @onclick="TryAnother">@WhyMessages.TryAnother</button>
+            </div>
+        }
+    </section>
+
+    @if (ShowLog)
+    {
+        <section class="panel">
+            <header class="panel-header">
+                <h2>Logged Q&amp;A</h2>
+                <p class="lede">Each question is stored with its answer, organisation, timestamps, and citation RowIds.</p>
+            </header>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>When</th>
+                        <th>Question</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in recent)
+                    {
+                        <tr>
+                            <td>@item.CreatedAt.ToString("dd MMM HH:mm")</td>
+                            <td>@Truncate(item.Question)</td>
+                            <td>
+                                <span class="status-pill @(item.Verified ? null : "is-unverified")">
+                                    @(item.Verified ? "Cited" : "Unverified")
+                                </span>
+                            </td>
+                            <td>
+                                @if (item.Verified)
+                                {
+                                    <a href="@($"/receipts/{item.Id}")">Receipt</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </section>
+    }
+}
+
+@code {
+    [Parameter] public string? MetricName { get; set; }
+
+    [SupplyParameterFromQuery(Name = "q")]
+    public string? QueryQuestion { get; set; }
+
+    private HealthSnapshot? snapshot;
+    private MetricCard? card;
+    private HealthMetricKind? seededMetric;
+    private string question = "";
+    private WhyAskResult? result;
+    private bool busy;
+    private bool pendingAutoAsk;
+    private string? lastAutoKey;
+    private IReadOnlyList<WhyAnswer> recent = [];
+    private bool checking => busy || pendingAutoAsk;
+    private bool ShowLog => !checking && result is { Verified: true } && recent.Count > 0;
+    private bool ShowSeededPrompt =>
+        card is not null && (result is null || result.Question == card.WhyPrompt);
+
+    protected override async Task OnParametersSetAsync()
+    {
+        snapshot = await HealthKpis.GetSnapshotAsync();
+        card = null;
+        seededMetric = null;
+
+        if (snapshot?.HasData == true
+            && Enum.TryParse<HealthMetricKind>(MetricName, ignoreCase: true, out var kind))
+        {
+            seededMetric = kind;
+            card = snapshot.Card(kind);
+        }
+
+        recent = snapshot?.HasData == true ? await WhyAnswers.ListRecentAsync() : [];
+
+        var autoKey = $"{MetricName}|{QueryQuestion}";
+        if (lastAutoKey == autoKey)
+        {
+            return;
+        }
+
+        if (card is not null)
+        {
+            question = card.WhyPrompt;
+        }
+        else if (!string.IsNullOrWhiteSpace(QueryQuestion))
+        {
+            question = QueryQuestion;
+        }
+
+        if (card is not null || !string.IsNullOrWhiteSpace(QueryQuestion))
+        {
+            lastAutoKey = autoKey;
+            pendingAutoAsk = true;
+            result = null;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!pendingAutoAsk || snapshot?.HasData != true)
+        {
+            return;
+        }
+
+        pendingAutoAsk = false;
+        await AskAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task AskAsync()
+    {
+        if (busy || snapshot?.HasData != true)
+        {
+            return;
+        }
+
+        busy = true;
+        result = null;
+        await InvokeAsync(StateHasChanged);
+        try
+        {
+            result = await WhyAnswers.AskAsync(question, seededMetric);
+            recent = await WhyAnswers.ListRecentAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private void TryAnother()
+    {
+        result = null;
+        question = card?.WhyPrompt ?? "";
+    }
+
+    private static string LabelFor(HealthMetricKind kind) => kind switch
+    {
+        HealthMetricKind.Revenue => "Revenue",
+        HealthMetricKind.Expenses => "Expenses",
+        HealthMetricKind.Profit => "Profit",
+        HealthMetricKind.Cash => "Cash",
+        _ => kind.ToString()
+    };
+
+    private static string Truncate(string value) =>
+        value.Length <= 90 ? value : value[..87] + "…";
+}
