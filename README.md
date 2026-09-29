@@ -190,6 +190,10 @@ Demo login is intentional so the CSV + KPI + why + morning brief flow can be exe
 3. Follow the commented block in `src/CruxAI.Web/Program.cs`.
 4. Map the Entra `oid` onto `AppUser.ExternalId` and keep using `Membership` for org access.
 
+## Marketing site
+
+Public landing page: [https://tinashealvin.github.io/crux-ai/](https://tinashealvin.github.io/crux-ai/) — source in [`docs/`](docs/).
+
 ## License / product
 
 Product name: **Crux AI**.
