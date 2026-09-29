@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Crux AI — Real-Time Business Intelligence for South African SMBs</title>
+  <meta name="description" content="Connect your tools, ask questions in plain English, and get instant AI-powered insights. Built for South African businesses." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #070a12;
+      --bg2: #0c1220;
+      --card: #121a2b;
+      --border: rgba(255,255,255,0.08);
+      --text: #e8eef8;
+      --muted: #94a3b8;
+      --blue: #3b82f6;
+      --violet: #8b5cf6;
+      --green: #34d399;
+      --red: #f87171;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    a { color: inherit; text-decoration: none; }
+    .wrap { max-width: 70rem; margin: 0 auto; padding: 0 1.25rem; }
+    .nav {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(7,10,18,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 4rem; }
+    .brand { display: flex; align-items: center; gap: 0.6rem; font-weight: 900; font-size: 1.25rem; letter-spacing: -0.02em; }
+    .mark {
+      width: 2.25rem; height: 2.25rem; border-radius: 0.7rem;
+      background: linear-gradient(135deg, var(--blue), var(--violet));
+      display: grid; place-items: center; font-weight: 900; color: #fff; box-shadow: 0 8px 24px rgba(59,130,246,0.35);
+    }
+    .brand span.accent { color: #60a5fa; }
+    .nav-links { display: none; gap: 1.75rem; }
+    .nav-links a { color: var(--muted); font-size: 0.875rem; font-weight: 500; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta { display: none; gap: 0.75rem; align-items: center; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 0.7rem 1.25rem; border-radius: 0.75rem; font-weight: 600; font-size: 0.875rem;
+      border: 1px solid transparent; transition: opacity .15s, background .15s, border-color .15s;
+    }
+    .btn:hover { opacity: 0.92; }
+    .btn-primary {
+      background: linear-gradient(90deg, #2563eb, #7c3aed);
+      color: #fff; box-shadow: 0 12px 32px rgba(37,99,235,0.35);
+    }
+    .btn-ghost {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.12);
+      color: var(--text);
+    }
+    .btn-lg { padding: 1rem 1.75rem; font-size: 1.05rem; font-weight: 700; }
+    .hero {
+      position: relative; overflow: hidden;
+      padding: 5.5rem 0 4.5rem;
+      background: radial-gradient(ellipse 80% 60% at 20% 40%, rgba(59,130,246,0.22), transparent 55%),
+                  radial-gradient(ellipse 70% 50% at 85% 15%, rgba(139,92,246,0.2), transparent 50%),
+                  linear-gradient(160deg, #05080f 0%, #0a1630 45%, #12082a 100%);
+    }
+    .pill {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.45rem 1rem; border-radius: 999px;
+      background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.25);
+      color: #93c5fd; font-size: 0.85rem; font-weight: 500; margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+      font-size: clamp(2.25rem, 5vw, 4.25rem); font-weight: 900; letter-spacing: -0.03em;
+      line-height: 1.1; max-width: 18ch; margin-bottom: 1.25rem;
+    }
+    .grad { background: linear-gradient(90deg, #60a5fa, #a78bfa); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .hero-lead { font-size: clamp(1.1rem, 2vw, 1.4rem); color: #cbd5e1; font-weight: 300; max-width: 40rem; margin-bottom: 0.75rem; }
+    .hero-sub { color: var(--muted); margin-bottom: 2rem; max-width: 34rem; }
+    .hero-sub strong { color: #fff; font-weight: 600; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 0.85rem; margin-bottom: 2.5rem; }
+    .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; max-width: 36rem; }
+    .stat {
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      border-radius: 1rem; padding: 1rem 1.1rem;
+    }
+    .stat strong { display: block; color: #60a5fa; font-size: 1.35rem; font-weight: 900; }
+    .stat span { color: var(--muted); font-size: 0.75rem; }
+    section { padding: 4rem 0; }
+    .section-label {
+      display: inline-block; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: #93c5fd; background: rgba(59,130,246,0.12);
+      border: 1px solid rgba(59,130,246,0.2); padding: 0.35rem 0.75rem; border-radius: 999px; margin-bottom: 1rem;
+    }
+    h2 { font-size: clamp(1.6rem, 3vw, 2.25rem); font-weight: 900; letter-spacing: -0.02em; margin-bottom: 0.75rem; }
+    .muted { color: var(--muted); }
+    .center { text-align: center; }
+    .center .muted { max-width: 36rem; margin: 0 auto 2rem; }
+    .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.55rem 0.9rem; border-radius: 0.75rem;
+      background: var(--card); border: 1px solid var(--border); font-size: 0.85rem; font-weight: 600;
+    }
+    .grid-2 { display: grid; gap: 1.5rem; }
+    .grid-3 { display: grid; gap: 1.25rem; }
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 1.1rem; padding: 1.4rem;
+    }
+    .card:hover { border-color: rgba(96,165,250,0.35); }
+    .pain { background: rgba(248,113,113,0.06); border-color: rgba(248,113,113,0.15); }
+    .win { background: rgba(59,130,246,0.08); border-color: rgba(59,130,246,0.2); }
+    .row { display: flex; gap: 0.7rem; align-items: flex-start; margin-top: 0.65rem; font-size: 0.9rem; color: #cbd5e1; }
+    .icon-box {
+      width: 2.75rem; height: 2.75rem; border-radius: 0.8rem; display: grid; place-items: center;
+      background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2));
+      font-size: 1.25rem; margin-bottom: 0.9rem;
+    }
+    .step-num { font-size: 3.5rem; font-weight: 900; color: rgba(59,130,246,0.25); line-height: 1; margin-bottom: 0.5rem; }
+    .price { font-size: 2.25rem; font-weight: 900; }
+    .price span { font-size: 0.9rem; color: var(--muted); font-weight: 500; }
+    .plan-hot {
+      background: linear-gradient(145deg, #1d4ed8, #6d28d9);
+      border: none; transform: scale(1.02); box-shadow: 0 20px 50px rgba(37,99,235,0.35);
+    }
+    .plan-hot .muted, .plan-hot li { color: #dbeafe; }
+    .plan-list { list-style: none; margin: 1.25rem 0 1.5rem; display: grid; gap: 0.55rem; }
+    .plan-list li { font-size: 0.9rem; display: flex; gap: 0.5rem; }
+    .plan-list li::before { content: "✓"; color: #93c5fd; }
+    .cta-band {
+      background: radial-gradient(ellipse at 30% 50%, rgba(59,130,246,0.25), transparent 55%),
+                  radial-gradient(ellipse at 70% 30%, rgba(139,92,246,0.22), transparent 45%),
+                  #05080f;
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      padding: 5rem 0; text-align: center;
+    }
+    footer { padding: 3rem 0; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85rem; }
+    footer .brand { margin-bottom: 0.75rem; }
+    .foot-grid { display: grid; gap: 2rem; margin-bottom: 2rem; }
+    .foot-grid a { display: block; color: #64748b; margin-top: 0.45rem; }
+    .foot-grid a:hover { color: #cbd5e1; }
+    .foot-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.75rem; padding-top: 1.5rem; border-top: 1px solid var(--border); font-size: 0.75rem; color: #475569; }
+    @media (min-width: 768px) {
+      .nav-links, .nav-cta { display: flex; }
+      .stats { grid-template-columns: repeat(4, 1fr); max-width: 48rem; }
+      .grid-2 { grid-template-columns: 1fr 1fr; }
+      .grid-3 { grid-template-columns: repeat(3, 1fr); }
+      .foot-grid { grid-template-columns: 2fr 1fr 1fr; }
+      .hero h1 { max-width: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="#">
+        <div class="mark">X</div>
+        Crux <span class="accent">AI</span>
+      </a>
+      <nav class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#integrations">Integrations</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#pricing">Pricing</a>
+      </nav>
+      <div class="nav-cta">
+        <a class="btn btn-ghost" href="#waitlist">Join waitlist</a>
+        <a class="btn btn-primary" href="#waitlist">Start free trial</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="wrap">
+      <div class="pill">🇿🇦 Built for South African businesses · POPIA minded</div>
+      <h1>Turn your data into<br /><span class="grad">the crux, in seconds.</span></h1>
+      <p class="hero-lead">Crux AI connects to your tools — Google Sheets, Xero, QuickBooks, Shopify — and gives you AI-powered insights without the complexity.</p>
+      <p class="hero-sub">No CSV hell. No data scientists. Just <strong>real-time answers</strong> in plain English. (MVP starts with CSV upload; live connectors follow.)</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary btn-lg" href="#waitlist">Start 14-day free trial →</a>
+        <a class="btn btn-ghost btn-lg" href="#how-it-works">See how it works</a>
+      </div>
+      <div class="stats">
+        <div class="stat"><strong>6+</strong><span>Data integrations (roadmap)</span></div>
+        <div class="stat"><strong>10hrs</strong><span>Saved per week on reporting</span></div>
+        <div class="stat"><strong>14 days</strong><span>Free trial, no card</span></div>
+        <div class="stat"><strong>R499</strong><span>Starting from / month</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="integrations">
+    <div class="wrap center">
+      <p class="muted" style="font-size:0.75rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1.25rem;">Connects to the tools you already use</p>
+      <div class="chips">
+        <div class="chip">🟢 Google Sheets</div>
+        <div class="chip">🔵 Xero</div>
+        <div class="chip">🟢 QuickBooks</div>
+        <div class="chip">🟣 Shopify</div>
+        <div class="chip">🟢 Excel / CSV</div>
+        <div class="chip">🔵 Wave</div>
+        <div class="chip">💬 WhatsApp</div>
+        <div class="chip">⚡ Slack</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap grid-2">
+      <div>
+        <span class="section-label" style="color:#fca5a5;background:rgba(248,113,113,0.12);border-color:rgba(248,113,113,0.25);">The old way</span>
+        <h2>Your numbers live in six different tools</h2>
+        <div class="card pain">
+          <div class="row"><span style="color:var(--red)">✗</span> Manual CSV exports into spreadsheets</div>
+          <div class="row"><span style="color:var(--red)">✗</span> Month-end takes days and nobody trusts the sheet</div>
+          <div class="row"><span style="color:var(--red)">✗</span> Expensive dashboards that go stale</div>
+          <div class="row"><span style="color:var(--red)">✗</span> Insight arrives after the opportunity is gone</div>
+        </div>
+      </div>
+      <div>
+        <span class="section-label">The Crux AI way</span>
+        <h2>One place that tells you what matters</h2>
+        <div class="card win">
+          <div class="row"><span style="color:var(--green)">✓</span> Upload or connect — always current enough to act</div>
+          <div class="row"><span style="color:var(--green)">✓</span> Health KPIs with receipted “why” answers</div>
+          <div class="row"><span style="color:var(--green)">✓</span> Plain-English questions, cited to your rows</div>
+          <div class="row"><span style="color:var(--green)">✓</span> Morning brief when you come back</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" style="background:var(--bg2);border-block:1px solid var(--border);">
+    <div class="wrap">
+      <div class="center">
+        <span class="section-label">Everything you need</span>
+        <h2>Built for answers, not complexity</h2>
+        <p class="muted">Crux AI does the heavy lifting so you can run the business.</p>
+      </div>
+      <div class="grid-3">
+        <div class="card"><div class="icon-box">📊</div><h3 style="margin-bottom:0.4rem">Live data integrations</h3><p class="muted" style="font-size:0.9rem">Sheets, Xero, QuickBooks, Excel, Shopify, Wave — CSV-first today, connectors next.</p></div>
+        <div class="card"><div class="icon-box">🤖</div><h3 style="margin-bottom:0.4rem">Receipted AI insights</h3><p class="muted" style="font-size:0.9rem">Ask “why” and get answers tied to specific transactions you can verify.</p></div>
+        <div class="card"><div class="icon-box">📈</div><h3 style="margin-bottom:0.4rem">Health KPIs</h3><p class="muted" style="font-size:0.9rem">Revenue, expenses, profit — with period comparison at a glance.</p></div>
+        <div class="card"><div class="icon-box">📱</div><h3 style="margin-bottom:0.4rem">WhatsApp &amp; Slack</h3><p class="muted" style="font-size:0.9rem">Delivery where SA teams already work — on the V2 roadmap.</p></div>
+        <div class="card"><div class="icon-box">🏆</div><h3 style="margin-bottom:0.4rem">Industry benchmarking</h3><p class="muted" style="font-size:0.9rem">See how you stack up against other South African SMBs — later release.</p></div>
+        <div class="card"><div class="icon-box">🔒</div><h3 style="margin-bottom:0.4rem">POPIA-minded</h3><p class="muted" style="font-size:0.9rem">Built with South African compliance and audit-friendly trails in mind.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how-it-works">
+    <div class="wrap">
+      <div class="center">
+        <span class="section-label" style="color:#c4b5fd;background:rgba(139,92,246,0.12);border-color:rgba(139,92,246,0.25);">Simple setup</span>
+        <h2>Up and running fast</h2>
+        <p class="muted">No IT department. No training seminar.</p>
+      </div>
+      <div class="grid-3">
+        <div class="card"><div class="step-num">01</div><h3>Connect or upload</h3><p class="muted" style="font-size:0.9rem;margin-top:0.5rem">Map your CSV (or later, link Xero / Sheets) in a few clicks.</p></div>
+        <div class="card"><div class="step-num">02</div><h3>Ask any question</h3><p class="muted" style="font-size:0.9rem;margin-top:0.5rem">“Why did profit drop?” in plain English.</p></div>
+        <div class="card"><div class="step-num">03</div><h3>Get receipted answers</h3><p class="muted" style="font-size:0.9rem;margin-top:0.5rem">Insight plus the rows behind it — then a morning brief on return.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing" style="background:var(--bg2);border-block:1px solid var(--border);">
+    <div class="wrap">
+      <div class="center">
+        <span class="section-label">Pricing</span>
+        <h2>Simple pricing in Rands</h2>
+        <p class="muted">14-day free trial on all plans. Indicative — finalise before launch.</p>
+      </div>
+      <div class="grid-3">
+        <div class="card">
+          <h3>Starter</h3>
+          <p class="muted" style="font-size:0.85rem;margin:0.35rem 0 1rem">Solo operators</p>
+          <div class="price">R499 <span>/month</span></div>
+          <ul class="plan-list">
+            <li>1 user</li><li>2 integrations</li><li>20 AI queries / month</li><li>Basic charts</li><li>Email support</li>
+          </ul>
+          <a class="btn btn-primary" style="width:100%" href="#waitlist">Start free trial</a>
+        </div>
+        <div class="card plan-hot">
+          <div style="font-size:0.7rem;font-weight:700;margin-bottom:0.6rem;opacity:0.9">★ Most popular</div>
+          <h3>Pro</h3>
+          <p class="muted" style="font-size:0.85rem;margin:0.35rem 0 1rem">Small teams</p>
+          <div class="price">R1,199 <span>/month</span></div>
+          <ul class="plan-list">
+            <li>3 users</li><li>All integrations</li><li>Unlimited AI queries</li><li>WhatsApp &amp; Slack</li><li>Priority support</li>
+          </ul>
+          <a class="btn" style="width:100%;background:#fff;color:#1d4ed8;font-weight:700" href="#waitlist">Start free trial</a>
+        </div>
+        <div class="card">
+          <h3>Business</h3>
+          <p class="muted" style="font-size:0.85rem;margin:0.35rem 0 1rem">Multiple teams</p>
+          <div class="price">R2,499 <span>/month</span></div>
+          <ul class="plan-list">
+            <li>10 users</li><li>Unlimited everything</li><li>Benchmarking</li><li>Automated alerts</li><li>Dedicated support</li>
+          </ul>
+          <a class="btn btn-primary" style="width:100%" href="#waitlist">Contact us</a>
+        </div>
+      </div>
+      <p class="center muted" style="margin-top:1.5rem;font-size:0.8rem">Prices exclude VAT. Cancel anytime. Billed monthly in ZAR.</p>
+    </div>
+  </section>
+
+  <section class="cta-band" id="waitlist">
+    <div class="wrap">
+      <h2>Ready to find the crux in your numbers?</h2>
+      <p class="muted" style="margin:1rem auto 1.75rem;max-width:32rem">Join South African businesses getting clearer answers from the data they already have.</p>
+      <a class="btn btn-primary btn-lg" href="mailto:tnyawasha@gmail.com?subject=Crux%20AI%20waitlist">Join the waitlist →</a>
+      <p class="muted" style="margin-top:1rem;font-size:0.8rem">No credit card. Cancel anytime.</p>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <div class="foot-grid">
+        <div>
+          <div class="brand"><div class="mark">X</div>Crux <span class="accent">AI</span></div>
+          <p>Real-time AI business intelligence for South African SMBs.</p>
+          <p style="margin-top:0.75rem;color:#475569;font-size:0.75rem">🇿🇦 Built in South Africa</p>
+        </div>
+        <div>
+          <strong style="color:#cbd5e1">Product</strong>
+          <a href="#features">Features</a>
+          <a href="#integrations">Integrations</a>
+          <a href="#pricing">Pricing</a>
+        </div>
+        <div>
+          <strong style="color:#cbd5e1">Contact</strong>
+          <a href="mailto:tnyawasha@gmail.com">Email</a>
+          <a href="#waitlist">Waitlist</a>
+        </div>
+      </div>
+      <div class="foot-bottom">
+        <span>© 2026 Crux AI. All rights reserved.</span>
+        <span>Built for SA businesses that want answers, not complexity.</span>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
