@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Vhona AI — Real-Time Business Intelligence for South African SMBs</title>
-  <meta name="description" content="Connect your tools, ask questions in plain English, and get instant AI-powered insights. Built for South African businesses." />
+  <title>Vhona AI: business intelligence for South African service SMBs</title>
+  <meta name="description" content="Vhona AI helps South African service SMBs upload a CSV, see health KPIs, and get a trusted why cited to the rows. If it cannot cite them, it shows nothing. SQL, Sheets, and WhatsApp come later." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -80,12 +80,12 @@
       color: #93c5fd; font-size: 0.85rem; font-weight: 500; margin-bottom: 1.5rem;
     }
     .hero h1 {
-      font-size: clamp(2.25rem, 5vw, 4.25rem); font-weight: 900; letter-spacing: -0.03em;
-      line-height: 1.1; max-width: 28ch; margin-bottom: 1.25rem;
+      font-size: clamp(2.15rem, 4.6vw, 3.75rem); font-weight: 900; letter-spacing: -0.03em;
+      line-height: 1.1; max-width: none; margin-bottom: 1.25rem;
     }
     .grad { background: linear-gradient(90deg, #60a5fa, #a78bfa); -webkit-background-clip: text; background-clip: text; color: transparent; }
     .hero-lead { font-size: clamp(1.1rem, 2vw, 1.4rem); color: #cbd5e1; font-weight: 300; max-width: 40rem; margin-bottom: 0.75rem; }
-    .hero-sub { color: var(--muted); margin-bottom: 2rem; max-width: 34rem; }
+    .hero-sub { color: var(--muted); margin-bottom: 2rem; max-width: 42rem; }
     .hero-sub strong { color: #fff; font-weight: 600; }
     .hero-actions { display: flex; flex-wrap: wrap; gap: 0.85rem; margin-bottom: 2.5rem; }
     .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; max-width: 36rem; }
@@ -104,13 +104,20 @@
     h2 { font-size: clamp(1.6rem, 3vw, 2.25rem); font-weight: 900; letter-spacing: -0.02em; margin-bottom: 0.75rem; }
     .muted { color: var(--muted); }
     .center { text-align: center; }
-    .center .muted { max-width: 36rem; margin: 0 auto 2rem; }
+    .center .muted { max-width: 40rem; margin: 0 auto 2rem; }
     .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; }
     .chip {
       display: inline-flex; align-items: center; gap: 0.4rem;
       padding: 0.55rem 0.9rem; border-radius: 0.75rem;
       background: var(--card); border: 1px solid var(--border); font-size: 0.85rem; font-weight: 600;
     }
+    .when {
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 0.12rem 0.4rem; border-radius: 999px;
+      background: rgba(52,211,153,0.15); color: #6ee7b7;
+    }
+    .when.next { background: rgba(59,130,246,0.18); color: #93c5fd; }
+    .when.later { background: rgba(255,255,255,0.06); color: #94a3b8; }
     .grid-2 { display: grid; gap: 1.5rem; }
     .grid-3 { display: grid; gap: 1.25rem; }
     .card {
@@ -133,6 +140,7 @@
       border: none; transform: scale(1.02); box-shadow: 0 20px 50px rgba(37,99,235,0.35);
     }
     .plan-hot .muted, .plan-hot li { color: #dbeafe; }
+    .plan-hot .price span { color: #dbeafe; }
     .plan-list { list-style: none; margin: 1.25rem 0 1.5rem; display: grid; gap: 0.55rem; }
     .plan-list li { font-size: 0.9rem; display: flex; gap: 0.5rem; }
     .plan-list li::before { content: "✓"; color: #93c5fd; }
@@ -155,7 +163,7 @@
       .grid-2 { grid-template-columns: 1fr 1fr; }
       .grid-3 { grid-template-columns: repeat(3, 1fr); }
       .foot-grid { grid-template-columns: 2fr 1fr 1fr; }
-      .hero h1 { max-width: none; }
+      .hero h1 { max-width: 20em; }
     }
   </style>
 </head>
@@ -167,49 +175,80 @@
         Vhona <span class="accent">AI</span>
       </a>
       <nav class="nav-links">
+        <a href="#today">Today</a>
+        <a href="#integrations">Data sources</a>
         <a href="#features">Features</a>
-        <a href="#integrations">Integrations</a>
-        <a href="#how-it-works">How It Works</a>
+        <a href="#how-it-works">How it works</a>
         <a href="#pricing">Pricing</a>
       </nav>
       <div class="nav-cta">
-        <a class="btn btn-ghost" href="#waitlist">Join waitlist</a>
-        <a class="btn btn-primary" href="#waitlist">Start free trial</a>
+        <a class="btn btn-ghost" href="#pricing">Pricing</a>
+        <a class="btn btn-primary" href="#waitlist">Join waitlist</a>
       </div>
     </div>
   </header>
 
   <section class="hero">
     <div class="wrap">
-      <div class="pill">🇿🇦 Built for South African businesses · POPIA minded</div>
+      <div class="pill">🇿🇦 Built for South African service businesses. POPIA minded.</div>
       <h1>Turn your data into<br /><span class="grad">a trusted why, in seconds.</span></h1>
-      <p class="hero-lead">Vhona AI connects to your tools — Google Sheets, Xero, QuickBooks, Shopify — and gives you AI-powered insights without the complexity.</p>
-      <p class="hero-sub">No CSV hell. No data scientists. Just <strong>real-time answers</strong> in plain English. (MVP starts with CSV upload; live connectors follow.)</p>
+      <p class="hero-lead">Vhona AI is business intelligence for South African service SMBs.</p>
+      <p class="hero-sub"><strong>Today:</strong> upload a CSV, map the columns, read health KPIs, ask why, and get a morning brief. Every figure is cited to your rows. When Vhona cannot cite them, it stops. <strong>Later:</strong> a SQL database, then Google Sheets and accounting apps. WhatsApp follows those connectors.</p>
       <div class="hero-actions">
-        <a class="btn btn-primary btn-lg" href="#waitlist">Start 14-day free trial →</a>
+        <a class="btn btn-primary btn-lg" href="#waitlist">Join the waitlist →</a>
         <a class="btn btn-ghost btn-lg" href="#how-it-works">See how it works</a>
       </div>
       <div class="stats">
-        <div class="stat"><strong>6+</strong><span>Data integrations (roadmap)</span></div>
-        <div class="stat"><strong>10hrs</strong><span>Saved per week on reporting</span></div>
-        <div class="stat"><strong>14 days</strong><span>Free trial, no card</span></div>
-        <div class="stat"><strong>R499</strong><span>Starting from / month</span></div>
+        <div class="stat"><strong>CSV</strong><span>Upload and map, today</span></div>
+        <div class="stat"><strong>KPIs</strong><span>Revenue, expenses, profit</span></div>
+        <div class="stat"><strong>Cited</strong><span>Why answers name the rows</span></div>
+        <div class="stat"><strong>R499</strong><span>Starter, indicative / month</span></div>
       </div>
     </div>
   </section>
 
   <section id="integrations">
     <div class="wrap center">
-      <p class="muted" style="font-size:0.75rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1.25rem;">Connects to the tools you already use</p>
+      <span class="section-label">Data sources</span>
+      <h2>CSV today. SQL next. Live apps after that.</h2>
+      <p class="muted">Excel and CSV work in this release. A SQL database is the next source, alongside CSV. Google Sheets, Xero, QuickBooks, Shopify, and Wave are later live connectors. WhatsApp and Slack are later delivery channels.</p>
       <div class="chips">
-        <div class="chip">🟢 Google Sheets</div>
-        <div class="chip">🔵 Xero</div>
-        <div class="chip">🟢 QuickBooks</div>
-        <div class="chip">🟣 Shopify</div>
-        <div class="chip">🟢 Excel / CSV</div>
-        <div class="chip">🔵 Wave</div>
-        <div class="chip">💬 WhatsApp</div>
-        <div class="chip">⚡ Slack</div>
+        <div class="chip">🟢 Excel / CSV <span class="when">Today</span></div>
+        <div class="chip">🗄️ SQL database <span class="when next">Next source</span></div>
+        <div class="chip">🟢 Google Sheets <span class="when later">Later</span></div>
+        <div class="chip">🔵 Xero <span class="when later">Later</span></div>
+        <div class="chip">🟢 QuickBooks <span class="when later">Later</span></div>
+        <div class="chip">🟣 Shopify <span class="when later">Later</span></div>
+        <div class="chip">🔵 Wave <span class="when later">Later</span></div>
+        <div class="chip">💬 WhatsApp <span class="when later">Later</span></div>
+        <div class="chip">⚡ Slack <span class="when later">Later</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="today" style="background:var(--bg2);border-block:1px solid var(--border);">
+    <div class="wrap">
+      <div class="center">
+        <span class="section-label">Now and next</span>
+        <h2>What works today, and what comes later</h2>
+        <p class="muted">The current release is one path: upload and map a CSV, then health KPIs, a receipted why, and a morning brief. Later items are named here in full.</p>
+      </div>
+      <div class="grid-2">
+        <div class="card win">
+          <h3>Works today</h3>
+          <div class="row"><span style="color:var(--green)">✓</span> Upload a CSV and map the columns</div>
+          <div class="row"><span style="color:var(--green)">✓</span> Health KPIs for this period against the last</div>
+          <div class="row"><span style="color:var(--green)">✓</span> Receipted why, cited to the exact rows</div>
+          <div class="row"><span style="color:var(--green)">✓</span> One morning brief on your next visit</div>
+          <div class="row"><span style="color:var(--green)">✓</span> Fail closed: cite the rows, or show nothing</div>
+        </div>
+        <div class="card">
+          <h3>Comes later</h3>
+          <div class="row"><span style="color:#93c5fd">→</span> SQL database as a data source, next to CSV</div>
+          <div class="row"><span style="color:#93c5fd">→</span> Live connectors: Google Sheets, Xero, QuickBooks, Shopify, Wave</div>
+          <div class="row"><span style="color:#93c5fd">→</span> WhatsApp and Slack, after those connectors</div>
+          <div class="row"><span style="color:#93c5fd">→</span> Benchmarking against other South African SMBs</div>
+        </div>
       </div>
     </div>
   </section>
@@ -218,22 +257,22 @@
     <div class="wrap grid-2">
       <div>
         <span class="section-label" style="color:#fca5a5;background:rgba(248,113,113,0.12);border-color:rgba(248,113,113,0.25);">The old way</span>
-        <h2>Your numbers live in six different tools</h2>
+        <h2>A spreadsheet, and a story with no rows</h2>
         <div class="card pain">
-          <div class="row"><span style="color:var(--red)">✗</span> Manual CSV exports into spreadsheets</div>
-          <div class="row"><span style="color:var(--red)">✗</span> Month-end takes days and nobody trusts the sheet</div>
-          <div class="row"><span style="color:var(--red)">✗</span> Expensive dashboards that go stale</div>
-          <div class="row"><span style="color:var(--red)">✗</span> Insight arrives after the opportunity is gone</div>
+          <div class="row"><span style="color:var(--red)">✗</span> Month-end lives in a file the bank export does not match</div>
+          <div class="row"><span style="color:var(--red)">✗</span> Profit moved, and nobody can point at the transactions</div>
+          <div class="row"><span style="color:var(--red)">✗</span> Dashboards that look finished and go stale</div>
+          <div class="row"><span style="color:var(--red)">✗</span> The answer arrives after the client conversation</div>
         </div>
       </div>
       <div>
-        <span class="section-label">The Vhona AI way</span>
-        <h2>One place that tells you what matters</h2>
+        <span class="section-label">The Vhona way</span>
+        <h2>One CSV path you can trust</h2>
         <div class="card win">
-          <div class="row"><span style="color:var(--green)">✓</span> Upload or connect — always current enough to act</div>
-          <div class="row"><span style="color:var(--green)">✓</span> Health KPIs with receipted “why” answers</div>
-          <div class="row"><span style="color:var(--green)">✓</span> Plain-English questions, cited to your rows</div>
-          <div class="row"><span style="color:var(--green)">✓</span> Morning brief when you come back</div>
+          <div class="row"><span style="color:var(--green)">✓</span> Upload the export you already have, and map it once</div>
+          <div class="row"><span style="color:var(--green)">✓</span> Health KPIs with a comparison to the previous period</div>
+          <div class="row"><span style="color:var(--green)">✓</span> Plain-language why, with a receipt of the rows</div>
+          <div class="row"><span style="color:var(--green)">✓</span> A morning brief when you come back, or a clear stop</div>
         </div>
       </div>
     </div>
@@ -242,17 +281,17 @@
   <section id="features" style="background:var(--bg2);border-block:1px solid var(--border);">
     <div class="wrap">
       <div class="center">
-        <span class="section-label">Everything you need</span>
-        <h2>Built for answers, not complexity</h2>
-        <p class="muted">Vhona AI does the heavy lifting so you can run the business.</p>
+        <span class="section-label">The current release</span>
+        <h2>Upload, map, KPIs, why, brief</h2>
+        <p class="muted">Built for owners of South African service businesses. The heavy lifting is the citation, so a number you cannot check does not appear.</p>
       </div>
       <div class="grid-3">
-        <div class="card"><div class="icon-box">📊</div><h3 style="margin-bottom:0.4rem">Live data integrations</h3><p class="muted" style="font-size:0.9rem">Sheets, Xero, QuickBooks, Excel, Shopify, Wave — CSV-first today, connectors next.</p></div>
-        <div class="card"><div class="icon-box">🤖</div><h3 style="margin-bottom:0.4rem">Receipted AI insights</h3><p class="muted" style="font-size:0.9rem">Ask “why” and get answers tied to specific transactions you can verify.</p></div>
-        <div class="card"><div class="icon-box">📈</div><h3 style="margin-bottom:0.4rem">Health KPIs</h3><p class="muted" style="font-size:0.9rem">Revenue, expenses, profit — with period comparison at a glance.</p></div>
-        <div class="card"><div class="icon-box">📱</div><h3 style="margin-bottom:0.4rem">WhatsApp &amp; Slack</h3><p class="muted" style="font-size:0.9rem">Delivery where SA teams already work — on the V2 roadmap.</p></div>
-        <div class="card"><div class="icon-box">🏆</div><h3 style="margin-bottom:0.4rem">Industry benchmarking</h3><p class="muted" style="font-size:0.9rem">See how you stack up against other South African SMBs — later release.</p></div>
-        <div class="card"><div class="icon-box">🔒</div><h3 style="margin-bottom:0.4rem">POPIA-minded</h3><p class="muted" style="font-size:0.9rem">Built with South African compliance and audit-friendly trails in mind.</p></div>
+        <div class="card"><div class="icon-box">📄</div><h3 style="margin-bottom:0.4rem">CSV upload and map</h3><p class="muted" style="font-size:0.9rem">Bring an Excel or CSV export. Confirm the columns Vhona guessed, including a balance column when the file has one.</p></div>
+        <div class="card"><div class="icon-box">📈</div><h3 style="margin-bottom:0.4rem">Health KPIs</h3><p class="muted" style="font-size:0.9rem">Revenue, expenses, and profit for the latest period against the one before. Cash appears only when a usable balance is in the file.</p></div>
+        <div class="card"><div class="icon-box">🧾</div><h3 style="margin-bottom:0.4rem">Receipted why</h3><p class="muted" style="font-size:0.9rem">Ask why a number moved. The answer cites the transactions. Open the receipt and read those rows.</p></div>
+        <div class="card"><div class="icon-box">🌅</div><h3 style="margin-bottom:0.4rem">Morning brief</h3><p class="muted" style="font-size:0.9rem">On the next visit, one verified snapshot and one explanation. The same citation rule as why.</p></div>
+        <div class="card"><div class="icon-box">🛡️</div><h3 style="margin-bottom:0.4rem">Fail closed</h3><p class="muted" style="font-size:0.9rem">When the rows cannot support the answer, Vhona says "Can't verify that yet." The brief says "No verified brief today."</p></div>
+        <div class="card"><div class="icon-box">🔒</div><h3 style="margin-bottom:0.4rem">POPIA minded</h3><p class="muted" style="font-size:0.9rem">Built for South African businesses, with an audit-friendly trail from the question back to the rows.</p></div>
       </div>
     </div>
   </section>
@@ -260,14 +299,14 @@
   <section id="how-it-works">
     <div class="wrap">
       <div class="center">
-        <span class="section-label" style="color:#c4b5fd;background:rgba(139,92,246,0.12);border-color:rgba(139,92,246,0.25);">Simple setup</span>
-        <h2>Up and running fast</h2>
-        <p class="muted">No IT department. No training seminar.</p>
+        <span class="section-label" style="color:#c4b5fd;background:rgba(139,92,246,0.12);border-color:rgba(139,92,246,0.25);">The path</span>
+        <h2>From a CSV to a morning brief</h2>
+        <p class="muted">Upload and map, health KPIs, a receipted why, then a morning brief. SQL, Sheets, and WhatsApp wait for a later release.</p>
       </div>
       <div class="grid-3">
-        <div class="card"><div class="step-num">01</div><h3>Connect or upload</h3><p class="muted" style="font-size:0.9rem;margin-top:0.5rem">Map your CSV (or later, link Xero / Sheets) in a few clicks.</p></div>
-        <div class="card"><div class="step-num">02</div><h3>Ask any question</h3><p class="muted" style="font-size:0.9rem;margin-top:0.5rem">“Why did profit drop?” in plain English.</p></div>
-        <div class="card"><div class="step-num">03</div><h3>Get receipted answers</h3><p class="muted" style="font-size:0.9rem;margin-top:0.5rem">Insight plus the rows behind it — then a morning brief on return.</p></div>
+        <div class="card"><div class="step-num">01</div><h3>Upload and map</h3><p class="muted" style="font-size:0.9rem;margin-top:0.5rem">Export a CSV from Excel or your books. Confirm the columns. That mapped file is the source that works today.</p></div>
+        <div class="card"><div class="step-num">02</div><h3>Read health KPIs</h3><p class="muted" style="font-size:0.9rem;margin-top:0.5rem">Revenue, expenses, and profit, compared with the previous period. Cash stays on the page only when the balance column has usable values.</p></div>
+        <div class="card"><div class="step-num">03</div><h3>Why, then the brief</h3><p class="muted" style="font-size:0.9rem;margin-top:0.5rem">Ask why a KPI moved and get a receipt of the rows. Come back for one morning brief. Missing rows end the answer.</p></div>
       </div>
     </div>
   </section>
@@ -276,8 +315,8 @@
     <div class="wrap">
       <div class="center">
         <span class="section-label">Pricing</span>
-        <h2>Simple pricing in Rands</h2>
-        <p class="muted">14-day free trial on all plans. Indicative — finalise before launch.</p>
+        <h2>Simple pricing in rands</h2>
+        <p class="muted">Indicative monthly prices. We will confirm them before launch. A 14-day trial is planned for that launch.</p>
       </div>
       <div class="grid-3">
         <div class="card">
@@ -285,9 +324,13 @@
           <p class="muted" style="font-size:0.85rem;margin:0.35rem 0 1rem">Solo operators</p>
           <div class="price">R499 <span>/month</span></div>
           <ul class="plan-list">
-            <li>1 user</li><li>2 integrations</li><li>20 AI queries / month</li><li>Basic charts</li><li>Email support</li>
+            <li>1 user</li>
+            <li>CSV upload and column mapping</li>
+            <li>Health KPIs and receipted why</li>
+            <li>Morning brief</li>
+            <li>Email support</li>
           </ul>
-          <a class="btn btn-primary" style="width:100%" href="#waitlist">Start free trial</a>
+          <a class="btn btn-primary" style="width:100%" href="#waitlist">Join the waitlist</a>
         </div>
         <div class="card plan-hot">
           <div style="font-size:0.7rem;font-weight:700;margin-bottom:0.6rem;opacity:0.9">★ Most popular</div>
@@ -295,30 +338,37 @@
           <p class="muted" style="font-size:0.85rem;margin:0.35rem 0 1rem">Small teams</p>
           <div class="price">R1,199 <span>/month</span></div>
           <ul class="plan-list">
-            <li>3 users</li><li>All integrations</li><li>Unlimited AI queries</li><li>WhatsApp &amp; Slack</li><li>Priority support</li>
+            <li>3 users</li>
+            <li>Everything in Starter</li>
+            <li>SQL database, when it connects</li>
+            <li>Live connectors, when they connect</li>
+            <li>Priority support</li>
           </ul>
-          <a class="btn" style="width:100%;background:#fff;color:#1d4ed8;font-weight:700" href="#waitlist">Start free trial</a>
+          <a class="btn" style="width:100%;background:#fff;color:#1d4ed8;font-weight:700" href="#waitlist">Join the waitlist</a>
         </div>
         <div class="card">
           <h3>Business</h3>
           <p class="muted" style="font-size:0.85rem;margin:0.35rem 0 1rem">Multiple teams</p>
           <div class="price">R2,499 <span>/month</span></div>
           <ul class="plan-list">
-            <li>10 users</li><li>Unlimited everything</li><li>Benchmarking</li><li>Automated alerts</li><li>Dedicated support</li>
+            <li>10 users</li>
+            <li>Everything in Pro</li>
+            <li>WhatsApp and Slack, when they ship</li>
+            <li>Benchmarking, when it ships</li>
+            <li>Dedicated support</li>
           </ul>
           <a class="btn btn-primary" style="width:100%" href="#waitlist">Contact us</a>
         </div>
       </div>
-      <p class="center muted" style="margin-top:1.5rem;font-size:0.8rem">Prices exclude VAT. Cancel anytime. Billed monthly in ZAR.</p>
+      <p class="center muted" style="margin-top:1.5rem;font-size:0.8rem">Prices exclude VAT. Billed monthly in ZAR. SQL, live connectors, WhatsApp, Slack, and benchmarking are later additions.</p>
     </div>
   </section>
 
   <section class="cta-band" id="waitlist">
     <div class="wrap">
       <h2>Ready for a trusted why in your numbers?</h2>
-      <p class="muted" style="margin:1rem auto 1.75rem;max-width:32rem">Join South African businesses getting clearer answers from the data they already have.</p>
+      <p class="muted" style="margin:1rem auto 1.75rem;max-width:36rem">Join the waitlist for South African service SMBs. We will show you the current path: upload and map a CSV, health KPIs, a receipted why, and a morning brief.</p>
       <a class="btn btn-primary btn-lg" href="mailto:tnyawasha@gmail.com?subject=Vhona%20AI%20waitlist">Join the waitlist →</a>
-      <p class="muted" style="margin-top:1rem;font-size:0.8rem">No credit card. Cancel anytime.</p>
     </div>
   </section>
 
@@ -327,13 +377,14 @@
       <div class="foot-grid">
         <div>
           <div class="brand"><div class="mark">V</div>Vhona <span class="accent">AI</span></div>
-          <p>Real-time AI business intelligence for South African SMBs.</p>
+          <p>Business intelligence for South African service SMBs. CSV today. Cited answers, or no answer.</p>
           <p style="margin-top:0.75rem;color:#475569;font-size:0.75rem">🇿🇦 Built in South Africa</p>
         </div>
         <div>
           <strong style="color:#cbd5e1">Product</strong>
+          <a href="#today">Today and later</a>
+          <a href="#integrations">Data sources</a>
           <a href="#features">Features</a>
-          <a href="#integrations">Integrations</a>
           <a href="#pricing">Pricing</a>
         </div>
         <div>
@@ -344,7 +395,7 @@
       </div>
       <div class="foot-bottom">
         <span>© 2026 Vhona AI. All rights reserved.</span>
-        <span>Built for SA businesses that want answers, not complexity.</span>
+        <span>For SA service businesses that want the rows behind the number.</span>
       </div>
     </div>
   </footer>
