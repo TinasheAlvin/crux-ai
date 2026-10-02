@@ -4,333 +4,626 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Vhona AI: business intelligence for South African service SMBs</title>
-  <meta name="description" content="Vhona AI helps South African service SMBs upload a CSV, see health KPIs, and get a trusted why cited to the rows. If it cannot cite them, it shows nothing. SQL, Sheets, and WhatsApp come later." />
+  <meta name="description" content="Vhona AI helps South African service SMBs upload a CSV, see health KPIs, and get a trusted why cited to the rows. If it cannot cite them, it shows nothing." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,560;0,9..144,640;1,9..144,560&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #070a12;
-      --bg2: #0c1220;
-      --card: #121a2b;
-      --border: rgba(255,255,255,0.08);
-      --text: #e8eef8;
-      --muted: #94a3b8;
-      --blue: #3b82f6;
-      --violet: #8b5cf6;
-      --green: #34d399;
-      --red: #f87171;
+      --cream: #F5F0E6;
+      --cream-deep: #F3EEE4;
+      --paper: #FFFcf8;
+      --teal: #0D9488;
+      --teal-dark: #0F766E;
+      --brass: #B8956A;
+      --indigo: #1E293B;
+      --charcoal: #1A1816;
+      --muted: #5C574F;
+      --stone: #6B6560;
+      --line: rgba(26, 24, 22, 0.1);
+      --serif: "Fraunces", Georgia, "Times New Roman", serif;
+      --sans: "Source Sans 3", "Segoe UI", sans-serif;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
     body {
-      font-family: Inter, system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      font-family: var(--sans);
+      background: var(--cream);
+      color: var(--charcoal);
       line-height: 1.5;
       min-height: 100vh;
     }
     a { color: inherit; text-decoration: none; }
-    .wrap { max-width: 70rem; margin: 0 auto; padding: 0 1.25rem; }
+    :focus-visible { outline: 2px solid var(--teal-dark); outline-offset: 3px; }
+    .wrap { max-width: 72rem; margin: 0 auto; padding: 0 1.25rem; }
+    .wordmark {
+      font-family: var(--serif);
+      font-weight: 640;
+      font-size: 1.55rem;
+      letter-spacing: -0.03em;
+      color: var(--charcoal);
+      line-height: 1;
+    }
     .nav {
-      position: sticky; top: 0; z-index: 50;
-      background: rgba(7,10,18,0.85);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(245, 240, 230, 0.92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line);
     }
-    .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 4rem; }
-    .brand { display: flex; align-items: center; gap: 0.6rem; font-weight: 900; font-size: 1.25rem; letter-spacing: -0.02em; }
-    .mark {
-      width: 2.25rem; height: 2.25rem; border-radius: 0.7rem;
-      background: linear-gradient(135deg, var(--blue), var(--violet));
-      display: grid; place-items: center; font-weight: 900; color: #fff; box-shadow: 0 8px 24px rgba(59,130,246,0.35);
+    .nav-inner {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      min-height: 4.5rem;
+      gap: 1rem;
     }
-    .brand span.accent { color: #60a5fa; }
-    .nav-links { display: none; gap: 1.75rem; }
-    .nav-links a { color: var(--muted); font-size: 0.875rem; font-weight: 500; }
-    .nav-links a:hover { color: var(--text); }
-    .nav-cta { display: none; gap: 0.75rem; align-items: center; }
+    .nav-links { display: flex; gap: 1.75rem; justify-content: center; }
+    .nav-links a { font-size: 0.98rem; font-weight: 500; color: #3c3833; }
+    .nav-links a:hover { color: var(--teal-dark); }
+    .nav-cta { justify-self: end; }
     .btn {
-      display: inline-flex; align-items: center; justify-content: center;
-      padding: 0.7rem 1.25rem; border-radius: 0.75rem; font-weight: 600; font-size: 0.875rem;
-      border: 1px solid transparent; transition: opacity .15s, background .15s, border-color .15s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 0.95rem;
+      line-height: 1;
+      padding: 0.85rem 1.25rem;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
     }
-    .btn:hover { opacity: 0.92; }
-    .btn-primary {
-      background: linear-gradient(90deg, #2563eb, #7c3aed);
-      color: #fff; box-shadow: 0 12px 32px rgba(37,99,235,0.35);
-    }
+    .btn-teal { background: var(--teal-dark); color: #fff; }
+    .btn-teal:hover { background: #115e59; }
     .btn-ghost {
-      background: rgba(255,255,255,0.06);
-      border-color: rgba(255,255,255,0.12);
-      color: var(--text);
+      background: var(--paper);
+      color: var(--charcoal);
+      border-color: rgba(26, 24, 22, 0.16);
     }
-    .btn-lg { padding: 1rem 1.75rem; font-size: 1.05rem; font-weight: 700; }
-    .hero {
-      position: relative; overflow: hidden;
-      padding: 5.5rem 0 4.5rem;
-      background: radial-gradient(ellipse 80% 60% at 20% 40%, rgba(59,130,246,0.22), transparent 55%),
-                  radial-gradient(ellipse 70% 50% at 85% 15%, rgba(139,92,246,0.2), transparent 50%),
-                  linear-gradient(160deg, #05080f 0%, #0a1630 45%, #12082a 100%);
+    .btn-ghost:hover { border-color: rgba(26, 24, 22, 0.32); }
+    .btn-light { background: #fff; color: var(--teal-dark); }
+    .btn-light:hover { background: var(--cream); }
+    .hero { position: relative; overflow: hidden; padding: 4.25rem 0 3.5rem; }
+    .hero-stone {
+      position: absolute;
+      inset: 0 0 0 40%;
+      background: url("stone.jpg") 70% center / cover no-repeat;
+      -webkit-mask-image: linear-gradient(90deg, transparent, #000 24%);
+      mask-image: linear-gradient(90deg, transparent, #000 24%);
+      pointer-events: none;
     }
-    .pill {
-      display: inline-flex; align-items: center; gap: 0.5rem;
-      padding: 0.45rem 1rem; border-radius: 999px;
-      background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.25);
-      color: #93c5fd; font-size: 0.85rem; font-weight: 500; margin-bottom: 1.5rem;
+    .hero-grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 2.5rem;
+      align-items: center;
     }
     .hero h1 {
-      font-size: clamp(2.15rem, 4.6vw, 3.75rem); font-weight: 900; letter-spacing: -0.03em;
-      line-height: 1.1; max-width: none; margin-bottom: 1.25rem;
+      font-family: var(--serif);
+      font-weight: 560;
+      font-size: clamp(2.65rem, 4.7vw, 4.35rem);
+      line-height: 1.06;
+      letter-spacing: -0.03em;
+      color: var(--charcoal);
+      margin-bottom: 1.1rem;
     }
-    .grad { background: linear-gradient(90deg, #60a5fa, #a78bfa); -webkit-background-clip: text; background-clip: text; color: transparent; }
-    .hero-lead { font-size: clamp(1.1rem, 2vw, 1.4rem); color: #cbd5e1; font-weight: 300; max-width: 40rem; margin-bottom: 0.75rem; }
-    .hero-sub { color: var(--muted); margin-bottom: 2rem; max-width: 42rem; }
-    .hero-sub strong { color: #fff; font-weight: 600; }
-    .hero-actions { display: flex; flex-wrap: wrap; gap: 0.85rem; margin-bottom: 2.5rem; }
-    .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; max-width: 36rem; }
-    .stat {
-      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
-      border-radius: 1rem; padding: 1rem 1.1rem;
+    .hero h1 em {
+      font-style: italic;
+      font-weight: 560;
+      color: var(--brass);
     }
-    .stat strong { display: block; color: #60a5fa; font-size: 1.35rem; font-weight: 900; }
-    .stat span { color: var(--muted); font-size: 0.75rem; }
-    section { padding: 4rem 0; }
-    .section-label {
-      display: inline-block; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
-      text-transform: uppercase; color: #93c5fd; background: rgba(59,130,246,0.12);
-      border: 1px solid rgba(59,130,246,0.2); padding: 0.35rem 0.75rem; border-radius: 999px; margin-bottom: 1rem;
+    .hero-lead {
+      font-size: 1.15rem;
+      color: var(--muted);
+      max-width: 34rem;
+      margin-bottom: 1.6rem;
     }
-    h2 { font-size: clamp(1.6rem, 3vw, 2.25rem); font-weight: 900; letter-spacing: -0.02em; margin-bottom: 0.75rem; }
-    .muted { color: var(--muted); }
-    .center { text-align: center; }
-    .center .muted { max-width: 40rem; margin: 0 auto 2rem; }
-    .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.35rem; }
+    .reassure { display: flex; flex-wrap: wrap; gap: 0.9rem 1.25rem; color: var(--stone); font-size: 0.92rem; }
+    .reassure span { display: inline-flex; align-items: center; gap: 0.4rem; }
+    .reassure svg { color: var(--teal); flex: none; }
+    .hero-visual { position: relative; min-height: 22rem; }
+    .app {
+      background: var(--paper);
+      border: 1px solid rgba(26, 24, 22, 0.06);
+      border-radius: 1.25rem;
+      box-shadow: 0 24px 60px rgba(26, 24, 22, 0.12);
+      display: grid;
+      grid-template-columns: 9.5rem 1fr;
+      min-height: 24rem;
+      margin-right: 5.5rem;
+      overflow: hidden;
+    }
+    .app-nav {
+      background: #f7f4ee;
+      border-right: 1px solid var(--line);
+      padding: 1rem 0.75rem;
+    }
+    .app-brand {
+      font-family: var(--serif);
+      font-weight: 640;
+      font-size: 0.95rem;
+      letter-spacing: -0.02em;
+      padding: 0.2rem 0.45rem 0.9rem;
+    }
+    .app-nav button, .app-nav a {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      text-align: left;
+      background: transparent;
+      border: 0;
+      border-radius: 0.65rem;
+      color: var(--muted);
+      font: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 0.45rem 0.5rem;
+      margin-bottom: 0.15rem;
+    }
+    .app-nav .is-on { background: #fff; color: var(--charcoal); box-shadow: 0 1px 2px rgba(26, 24, 22, 0.05); }
+    .app-nav svg { color: var(--teal); flex: none; }
+    .app-main { padding: 1.1rem 1.15rem 1.2rem; }
+    .app-kicker {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 0.35rem;
+    }
+    .app-main h2 { font-family: var(--sans); font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; }
     .chip {
-      display: inline-flex; align-items: center; gap: 0.4rem;
-      padding: 0.55rem 0.9rem; border-radius: 0.75rem;
-      background: var(--card); border: 1px solid var(--border); font-size: 0.85rem; font-weight: 600;
+      display: inline-flex;
+      margin-top: 0.55rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      background: var(--cream-deep);
+      border: 1px solid var(--line);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted);
     }
-    .when {
-      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
-      padding: 0.12rem 0.4rem; border-radius: 999px;
-      background: rgba(52,211,153,0.15); color: #6ee7b7;
+    .from-csv { margin: 0.9rem 0 0.75rem; font-size: 0.82rem; color: var(--stone); }
+    .from-csv strong { display: block; color: var(--charcoal); font-size: 0.92rem; }
+    .why-box {
+      background: #f6f3ec;
+      border-radius: 0.85rem;
+      padding: 0.8rem 0.85rem;
+      margin-bottom: 0.85rem;
     }
-    .when.next { background: rgba(59,130,246,0.18); color: #93c5fd; }
-    .when.later { background: rgba(255,255,255,0.06); color: #94a3b8; }
-    .grid-2 { display: grid; gap: 1.5rem; }
-    .grid-3 { display: grid; gap: 1.25rem; }
-    .card {
-      background: var(--card); border: 1px solid var(--border); border-radius: 1.1rem; padding: 1.4rem;
+    .why-box header { display: flex; justify-content: space-between; gap: 0.5rem; align-items: center; margin-bottom: 0.3rem; }
+    .why-box header span { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--stone); }
+    .badge {
+      background: rgba(13, 148, 136, 0.12);
+      color: var(--teal-dark);
+      border-radius: 999px;
+      padding: 0.15rem 0.45rem;
+      font-size: 0.68rem;
+      font-weight: 700;
     }
-    .card:hover { border-color: rgba(96,165,250,0.35); }
-    .pain { background: rgba(248,113,113,0.06); border-color: rgba(248,113,113,0.15); }
-    .win { background: rgba(59,130,246,0.08); border-color: rgba(59,130,246,0.2); }
-    .row { display: flex; gap: 0.7rem; align-items: flex-start; margin-top: 0.65rem; font-size: 0.9rem; color: #cbd5e1; }
-    .icon-box {
-      width: 2.75rem; height: 2.75rem; border-radius: 0.8rem; display: grid; place-items: center;
-      background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2));
-      font-size: 1.25rem; margin-bottom: 0.9rem;
+    .why-box p { font-size: 0.92rem; font-weight: 600; line-height: 1.35; }
+    .bars { display: grid; gap: 0.45rem; }
+    .bar-row { display: grid; grid-template-columns: 1fr auto; gap: 0.35rem 0.6rem; font-size: 0.78rem; color: var(--muted); }
+    .track { grid-column: 1 / -1; height: 0.35rem; border-radius: 999px; background: rgba(26, 24, 22, 0.08); overflow: hidden; }
+    .track i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--teal), #14b8a6); }
+    .brief-float {
+      position: absolute;
+      right: 0;
+      bottom: 1.25rem;
+      width: 13.5rem;
+      background: #fff;
+      border-radius: 1rem;
+      box-shadow: 0 18px 40px rgba(26, 24, 22, 0.16);
+      border: 1px solid rgba(26, 24, 22, 0.06);
+      padding: 0.95rem 1rem;
     }
-    .step-num { font-size: 3.5rem; font-weight: 900; color: rgba(59,130,246,0.25); line-height: 1; margin-bottom: 0.5rem; }
-    .cta-band {
-      background: radial-gradient(ellipse at 30% 50%, rgba(59,130,246,0.25), transparent 55%),
-                  radial-gradient(ellipse at 70% 30%, rgba(139,92,246,0.22), transparent 45%),
-                  #05080f;
-      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
-      padding: 5rem 0; text-align: center;
+    .brief-float h3 { font-size: 0.95rem; margin-bottom: 0.3rem; }
+    .brief-float p { font-size: 0.84rem; color: var(--muted); }
+    .brief-float .rule { margin-top: 0.75rem; padding-top: 0.7rem; border-top: 1px solid var(--line); }
+    .brief-float strong { display: block; font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--teal-dark); margin-bottom: 0.15rem; }
+    .trust { padding: 1.75rem 0 2.25rem; border-top: 1px solid var(--line); }
+    .trust p {
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--stone);
+      margin-bottom: 1rem;
     }
-    footer { padding: 3rem 0; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85rem; }
-    footer .brand { margin-bottom: 0.75rem; }
-    .foot-grid { display: grid; gap: 2rem; margin-bottom: 2rem; }
-    .foot-grid a { display: block; color: #64748b; margin-top: 0.45rem; }
-    .foot-grid a:hover { color: #cbd5e1; }
-    .foot-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.75rem; padding-top: 1.5rem; border-top: 1px solid var(--border); font-size: 0.75rem; color: #475569; }
-    @media (min-width: 768px) {
-      .nav-links, .nav-cta { display: flex; }
-      .stats { grid-template-columns: repeat(4, 1fr); max-width: 48rem; }
-      .grid-2 { grid-template-columns: 1fr 1fr; }
-      .grid-3 { grid-template-columns: repeat(3, 1fr); }
-      .foot-grid { grid-template-columns: 2fr 1fr 1fr; }
-      .hero h1 { max-width: 20em; }
+    .trust-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem 1.75rem; }
+    .trust-row span {
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: #8a8378;
+      font-size: 0.95rem;
+    }
+    section.block { padding: 4.25rem 0; }
+    .eyebrow {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 0.75rem;
+    }
+    .center { text-align: center; }
+    h2.serif {
+      font-family: var(--serif);
+      font-weight: 560;
+      font-size: clamp(1.85rem, 3vw, 2.6rem);
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+    }
+    .lede { color: var(--muted); max-width: 40rem; margin: 0.85rem auto 0; font-size: 1.05rem; }
+    .pillars { display: grid; gap: 1.75rem; margin-top: 2.5rem; }
+    .pillar { text-align: center; padding: 0 0.5rem; }
+    .icon-circle {
+      width: 3.25rem;
+      height: 3.25rem;
+      margin: 0 auto 0.9rem;
+      border-radius: 999px;
+      border: 1.5px solid rgba(26, 24, 22, 0.16);
+      display: grid;
+      place-items: center;
+      color: var(--charcoal);
+      background: rgba(255, 252, 248, 0.65);
+    }
+    .pillar h3 { font-size: 1.15rem; margin-bottom: 0.4rem; }
+    .pillar p { color: var(--muted); font-size: 0.98rem; }
+    .path-row { display: grid; gap: 1.25rem; margin-top: 2.5rem; }
+    .path-step { text-align: center; }
+    .path-step h3 { font-size: 1.05rem; margin: 0.75rem 0 0.35rem; }
+    .path-step p { color: var(--muted); font-size: 0.95rem; }
+    .arrow { display: none; color: #b7b0a4; align-self: center; }
+    .band-wrap { padding: 0 0 4.5rem; }
+    .band {
+      background: var(--indigo);
+      color: #f8f5ef;
+      border-radius: 1.35rem;
+      padding: 1.75rem 1.5rem 1.5rem;
+      box-shadow: 0 18px 40px rgba(30, 41, 59, 0.18);
+    }
+    .band :focus-visible { outline-color: #F5F0E6; }
+    .band-top { display: grid; gap: 1.25rem; align-items: center; }
+    .band h2 {
+      font-family: var(--serif);
+      font-weight: 560;
+      font-size: clamp(1.8rem, 3vw, 2.35rem);
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+    }
+    .band .promise { color: rgba(248, 245, 239, 0.82); margin-top: 0.55rem; max-width: 36rem; }
+    .flow { display: flex; flex-wrap: wrap; gap: 0.55rem 0.35rem; align-items: center; }
+    .flow-step strong { display: block; font-size: 0.92rem; }
+    .flow-step span { display: block; color: rgba(248, 245, 239, 0.72); font-size: 0.82rem; }
+    .flow-arrow { color: rgba(248, 245, 239, 0.45); padding: 0 0.25rem; }
+    .band form { margin-top: 1.35rem; padding-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.12); display: grid; gap: 0.75rem; }
+    .form-row { display: grid; gap: 0.75rem; }
+    .band label { display: grid; gap: 0.3rem; font-size: 0.82rem; font-weight: 600; color: rgba(248, 245, 239, 0.88); }
+    .hint { font-weight: 500; color: rgba(248, 245, 239, 0.62); }
+    .band input, .band textarea {
+      width: 100%;
+      font: inherit;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 0.8rem;
+      padding: 0.7rem 0.8rem;
+    }
+    .band textarea { min-height: 5.5rem; resize: vertical; }
+    .band input::placeholder, .band textarea::placeholder { color: rgba(248, 245, 239, 0.45); }
+    .band-actions { display: flex; flex-wrap: wrap; gap: 0.85rem 1.25rem; align-items: center; }
+    .direct { font-size: 0.92rem; color: rgba(248, 245, 239, 0.8); }
+    .direct a { color: #fff; text-decoration: underline; text-underline-offset: 0.15em; }
+    .privacy { font-size: 0.8rem; color: rgba(248, 245, 239, 0.62); }
+    .site-footer {
+      position: relative;
+      color: #f6f1e8;
+      background: #1a1816 url("stone.jpg") center / cover no-repeat;
+      padding: 4.5rem 0 2rem;
+    }
+    .site-footer::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(26, 24, 22, 0.55);
+    }
+    .footer-inner { position: relative; z-index: 1; display: grid; gap: 1.75rem; }
+    .site-footer .wordmark { color: #fff; }
+    .site-footer p { max-width: 22rem; color: rgba(246, 241, 232, 0.86); margin-top: 0.65rem; }
+    .foot-links { display: flex; flex-wrap: wrap; gap: 0.85rem 1.25rem; }
+    .foot-links a { color: rgba(246, 241, 232, 0.9); font-weight: 600; }
+    .foot-links a:hover { color: #fff; }
+    .foot-meta { color: rgba(246, 241, 232, 0.8); font-size: 0.92rem; }
+    .foot-meta span { display: block; }
+    @media (min-width: 800px) {
+      .hero-grid { grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr); gap: 2rem; }
+      .pillars { grid-template-columns: repeat(3, 1fr); }
+      .path-row { grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr; align-items: start; }
+      .arrow { display: grid; place-items: center; padding-top: 1.1rem; }
+      .band { padding: 2rem 2rem 1.6rem; }
+      .band-top { grid-template-columns: 1.05fr 1.2fr; }
+      .form-row { grid-template-columns: 1fr 1fr; }
+      .footer-inner { grid-template-columns: 1.4fr 1fr 1fr; align-items: start; }
+    }
+    @media (max-width: 799px) {
+      .nav-inner { grid-template-columns: 1fr auto; }
+      .nav-links { grid-column: 1 / -1; justify-content: flex-start; gap: 1.25rem; padding-bottom: 0.85rem; }
+      .app { margin-right: 0; grid-template-columns: 1fr; }
+      .app-nav { display: flex; gap: 0.25rem; overflow: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+      .app-brand { display: none; }
+      .app-nav a { width: auto; white-space: nowrap; }
+      .brief-float { position: static; width: auto; margin-top: 0.85rem; }
+      .hero-stone { inset: auto 0 0 0; height: 46%; -webkit-mask-image: linear-gradient(180deg, transparent, #000 30%); mask-image: linear-gradient(180deg, transparent, #000 30%); }
     }
   </style>
 </head>
 <body>
   <header class="nav">
     <div class="wrap nav-inner">
-      <a class="brand" href="#">
-        <div class="mark">V</div>
-        Vhona <span class="accent">AI</span>
-      </a>
-      <nav class="nav-links">
-        <a href="#today">Today</a>
-        <a href="#integrations">Data sources</a>
-        <a href="#features">Features</a>
-        <a href="#how-it-works">How it works</a>
+      <a class="wordmark" href="#top">Vhona AI</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="#product">Product</a>
+        <a href="#about">About</a>
       </nav>
       <div class="nav-cta">
-        <a class="btn btn-primary" href="#talk">Talk to us</a>
+        <a class="btn btn-teal" href="#contact">Talk to us</a>
       </div>
     </div>
   </header>
 
-  <section class="hero">
-    <div class="wrap">
-      <div class="pill">🇿🇦 Built for South African service businesses. POPIA minded.</div>
-      <h1>Turn your data into<br /><span class="grad">a trusted why, in seconds.</span></h1>
-      <p class="hero-lead">Vhona AI is business intelligence for South African service SMBs.</p>
-      <p class="hero-sub"><strong>Today:</strong> upload a CSV, map the columns, read health KPIs, ask why, and get a morning brief. Every figure is cited to your rows. When Vhona cannot cite them, it stops. <strong>Later:</strong> a SQL database, then Google Sheets and accounting apps. WhatsApp follows those connectors.</p>
-      <div class="hero-actions">
-        <a class="btn btn-primary btn-lg" href="#talk">Talk to us →</a>
-        <a class="btn btn-ghost btn-lg" href="#how-it-works">See how it works</a>
-      </div>
-      <div class="stats">
-        <div class="stat"><strong>CSV</strong><span>Upload and map, today</span></div>
-        <div class="stat"><strong>KPIs</strong><span>Revenue, expenses, profit</span></div>
-        <div class="stat"><strong>Cited</strong><span>Why answers name the rows</span></div>
-        <div class="stat"><strong>Stop</strong><span>No citation, no number</span></div>
-      </div>
-    </div>
-  </section>
-
-  <section id="integrations">
-    <div class="wrap center">
-      <span class="section-label">Data sources</span>
-      <h2>CSV today. SQL next. Live apps after that.</h2>
-      <p class="muted">Excel and CSV work in this release. A SQL database is the next source, alongside CSV. Google Sheets, Xero, QuickBooks, Shopify, and Wave are later live connectors. WhatsApp and Slack are later delivery channels.</p>
-      <div class="chips">
-        <div class="chip">🟢 Excel / CSV <span class="when">Today</span></div>
-        <div class="chip">🗄️ SQL database <span class="when next">Next source</span></div>
-        <div class="chip">🟢 Google Sheets <span class="when later">Later</span></div>
-        <div class="chip">🔵 Xero <span class="when later">Later</span></div>
-        <div class="chip">🟢 QuickBooks <span class="when later">Later</span></div>
-        <div class="chip">🟣 Shopify <span class="when later">Later</span></div>
-        <div class="chip">🔵 Wave <span class="when later">Later</span></div>
-        <div class="chip">💬 WhatsApp <span class="when later">Later</span></div>
-        <div class="chip">⚡ Slack <span class="when later">Later</span></div>
-      </div>
-    </div>
-  </section>
-
-  <section id="today" style="background:var(--bg2);border-block:1px solid var(--border);">
-    <div class="wrap">
-      <div class="center">
-        <span class="section-label">Now and next</span>
-        <h2>What works today, and what comes later</h2>
-        <p class="muted">The current release is one path: upload and map a CSV, then health KPIs, a receipted why, and a morning brief. Later items are named here in full.</p>
-      </div>
-      <div class="grid-2">
-        <div class="card win">
-          <h3>Works today</h3>
-          <div class="row"><span style="color:var(--green)">✓</span> Upload a CSV and map the columns</div>
-          <div class="row"><span style="color:var(--green)">✓</span> Health KPIs for this period against the last</div>
-          <div class="row"><span style="color:var(--green)">✓</span> Receipted why, cited to the exact rows</div>
-          <div class="row"><span style="color:var(--green)">✓</span> One morning brief on your next visit</div>
-          <div class="row"><span style="color:var(--green)">✓</span> Fail closed: cite the rows, or show nothing</div>
+  <main id="top">
+    <section class="hero">
+      <div class="hero-stone" aria-hidden="true"></div>
+      <div class="wrap hero-grid">
+        <div>
+          <h1>Turn your data into<br />a trusted <em>why</em>,<br />in seconds.</h1>
+          <p class="hero-lead">CSV receipted insights for South African service SMBs. Map the columns, read the health KPIs, and trust the why. If Vhona cannot cite the rows, it stops.</p>
+          <div class="hero-actions">
+            <a class="btn btn-teal" href="#contact">Talk to us <span aria-hidden="true">→</span></a>
+            <a class="btn btn-ghost" href="#product">
+              <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor"><path d="M6.2 4.2v7.6L12 8 6.2 4.2z"/></svg>
+              Watch demo
+            </a>
+          </div>
+          <div class="reassure">
+            <span>
+              <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6.2"/><path d="M5.2 8.2 7.1 10l3.8-4"/></svg>
+              Built for SA SMBs
+            </span>
+            <span>
+              <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6.2"/><path d="M5.2 8.2 7.1 10l3.8-4"/></svg>
+              Cited to your rows
+            </span>
+            <span>
+              <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6.2"/><path d="M5.2 8.2 7.1 10l3.8-4"/></svg>
+              POPIA minded
+            </span>
+          </div>
         </div>
-        <div class="card">
-          <h3>Comes later</h3>
-          <div class="row"><span style="color:#93c5fd">→</span> SQL database as a data source, next to CSV</div>
-          <div class="row"><span style="color:#93c5fd">→</span> Live connectors: Google Sheets, Xero, QuickBooks, Shopify, Wave</div>
-          <div class="row"><span style="color:#93c5fd">→</span> WhatsApp and Slack, after those connectors</div>
-          <div class="row"><span style="color:#93c5fd">→</span> Benchmarking against other South African SMBs</div>
+
+        <div class="hero-visual">
+          <article class="app" aria-label="Example of the Vhona path">
+            <div class="app-nav">
+              <div class="app-brand">Vhona AI</div>
+              <a class="is-on" href="#product"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7.2 8 3l5 4.2V13H3V7.2z"/></svg>Overview</a>
+              <a href="#product"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 3v7M5.5 6.5 8 3.8 10.5 6.5"/><path d="M3.5 13h9"/></svg>Uploads</a>
+              <a href="#product"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12V8M8 12V4M13 12V6"/></svg>KPIs</a>
+              <a href="#product"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 3.5h8v9l-4-2-4 2v-9z"/></svg>Why</a>
+              <a href="#product"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="5.2"/><path d="M8 5.2V8l2 1.4"/></svg>Brief</a>
+            </div>
+            <div class="app-main">
+              <p class="app-kicker">Example</p>
+              <h2>Health KPIs</h2>
+              <div class="chip">South African service SMB</div>
+              <p class="from-csv"><strong>From your CSV</strong>Columns mapped for this period</p>
+              <div class="why-box">
+                <header><span>Receipted why</span><span class="badge">Cited</span></header>
+                <p>Expenses moved on the supplier payments in this file.</p>
+              </div>
+              <div class="bars" aria-label="Example rows behind the change">
+                <div class="bar-row"><span>Supplier payments</span><span>3 rows</span><div class="track"><i style="width:72%"></i></div></div>
+                <div class="bar-row"><span>Bank charges</span><span>2 rows</span><div class="track"><i style="width:48%"></i></div></div>
+                <div class="bar-row"><span>Card fees</span><span>1 row</span><div class="track"><i style="width:28%"></i></div></div>
+              </div>
+            </div>
+          </article>
+          <aside class="brief-float">
+            <h3>Morning brief</h3>
+            <p>One verified snapshot on your next visit.</p>
+            <div class="rule">
+              <strong>Fail closed</strong>
+              <p>No citation, no figure.</p>
+            </div>
+          </aside>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section>
-    <div class="wrap grid-2">
+    <section class="trust" aria-label="Built for South African service SMBs">
+      <div class="wrap">
+        <p>Built for SA SMBs</p>
+        <div class="trust-row">
+          <span>CSV today</span>
+          <span>Health KPIs</span>
+          <span>Receipted why</span>
+          <span>Morning brief</span>
+          <span>Fail closed</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="about">
+      <div class="wrap">
+        <div class="center">
+          <p class="eyebrow">Validate. Enrich. Decide.</p>
+          <h2 class="serif">A CSV you can check, then a why you can trust.</h2>
+          <p class="lede">Vhona AI turns an export into health KPIs, a receipted why, and a morning brief, for the way South African service SMBs already keep their books.</p>
+        </div>
+        <div class="pillars">
+          <article class="pillar">
+            <div class="icon-circle" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><path d="M8.2 12.2 10.8 15l5-6"/></svg>
+            </div>
+            <h3>Validate</h3>
+            <p>Confirm the column map. If the rows cannot support a figure, Vhona stops.</p>
+          </article>
+          <article class="pillar">
+            <div class="icon-circle" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><ellipse cx="12" cy="7" rx="7" ry="3"/><path d="M5 7v5c0 1.7 3.1 3 7 3s7-1.3 7-3V7"/><path d="M5 12v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"/></svg>
+            </div>
+            <h3>Enrich</h3>
+            <p>This period against the last, with the transactions named in the why.</p>
+          </article>
+          <article class="pillar">
+            <div class="icon-circle" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3.5 14.2 9H20l-4.6 3.4L17.2 18 12 14.8 6.8 18l1.8-5.6L4 9h5.8L12 3.5z"/></svg>
+            </div>
+            <h3>Decide</h3>
+            <p>A morning brief you can check, so the next conversation starts from the rows.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="product" style="padding-top:0">
+      <div class="wrap">
+        <div class="center">
+          <p class="eyebrow">From CSV to clarity in 4 steps</p>
+          <h2 class="serif">Simple to start. Trusted in the rows.</h2>
+        </div>
+        <div class="path-row">
+          <article class="path-step">
+            <div class="icon-circle" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 16V6M8 9.5 12 5.5 16 9.5"/><path d="M5 19h14"/></svg>
+            </div>
+            <h3>Upload and map</h3>
+            <p>Bring the CSV you already export. Confirm the columns.</p>
+          </article>
+          <div class="arrow" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </div>
+          <article class="path-step">
+            <div class="icon-circle" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 19V10M12 19V5M19 19v-7"/></svg>
+            </div>
+            <h3>Health KPIs</h3>
+            <p>Revenue, expenses, and profit against the previous period.</p>
+          </article>
+          <div class="arrow" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </div>
+          <article class="path-step">
+            <div class="icon-circle" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M7 4.5h10v15l-5-2.6-5 2.6v-15z"/></svg>
+            </div>
+            <h3>Receipted why</h3>
+            <p>Ask why a number moved. The answer cites the rows, or it stops.</p>
+          </article>
+          <div class="arrow" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </div>
+          <article class="path-step">
+            <div class="icon-circle" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 1.6"/></svg>
+            </div>
+            <h3>Morning brief</h3>
+            <p>On the next visit, one verified snapshot. Or a clear stop.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="band-wrap" id="contact">
+      <div class="wrap">
+        <div class="band">
+          <div class="band-top">
+            <div>
+              <h2>Talk to us</h2>
+              <p class="promise">Request a conversation. Send a short note. We reply within one business day. If it looks like a fit, we arrange a focused conversation of 30 minutes to 1 hour, then a diagnostic of 3 to 6 weeks. The decision is yours.</p>
+            </div>
+            <div class="flow" aria-label="What happens next">
+              <div class="flow-step"><strong>Reply</strong><span>1 business day</span></div>
+              <span class="flow-arrow" aria-hidden="true">→</span>
+              <div class="flow-step"><strong>Conversation</strong><span>30–60 min</span></div>
+              <span class="flow-arrow" aria-hidden="true">→</span>
+              <div class="flow-step"><strong>Diagnostic</strong><span>3–6 weeks</span></div>
+              <span class="flow-arrow" aria-hidden="true">→</span>
+              <div class="flow-step"><strong>Decision</strong><span>Your choice</span></div>
+            </div>
+          </div>
+          <form id="conversation-form" action="mailto:tnyawasha@gmail.com?subject=Vhona%20AI%3A%20request%20a%20conversation" method="post" enctype="text/plain">
+            <div class="form-row">
+              <label>Name
+                <input name="name" type="text" autocomplete="name" required maxlength="120" />
+              </label>
+              <label>Email
+                <input name="email" type="email" autocomplete="email" required maxlength="200" />
+              </label>
+            </div>
+            <label>Company <span class="hint">(optional)</span>
+              <input name="company" type="text" autocomplete="organization" maxlength="160" />
+            </label>
+            <label>Short note
+              <textarea name="note" required maxlength="1000" placeholder="What you want to trust in the numbers."></textarea>
+            </label>
+            <div class="band-actions">
+              <button class="btn btn-light" type="submit">Request a conversation <span aria-hidden="true">→</span></button>
+              <p class="direct">Prefer to write directly? <a href="mailto:tnyawasha@gmail.com?subject=Vhona%20AI%3A%20request%20a%20conversation">tnyawasha@gmail.com</a></p>
+            </div>
+            <p class="privacy">This opens an email in your mail app. This page does not store what you type. Please do not send confidential client data until we agree a secure route.</p>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
       <div>
-        <span class="section-label" style="color:#fca5a5;background:rgba(248,113,113,0.12);border-color:rgba(248,113,113,0.25);">The old way</span>
-        <h2>A spreadsheet, and a story with no rows</h2>
-        <div class="card pain">
-          <div class="row"><span style="color:var(--red)">✗</span> Month-end lives in a file the bank export does not match</div>
-          <div class="row"><span style="color:var(--red)">✗</span> Profit moved, and nobody can point at the transactions</div>
-          <div class="row"><span style="color:var(--red)">✗</span> Dashboards that look finished and go stale</div>
-          <div class="row"><span style="color:var(--red)">✗</span> The answer arrives after the client conversation</div>
-        </div>
+        <div class="wordmark">Vhona AI</div>
+        <p>Business intelligence for South African service SMBs. Cited answers, or no answer.</p>
       </div>
-      <div>
-        <span class="section-label">The Vhona way</span>
-        <h2>One CSV path you can trust</h2>
-        <div class="card win">
-          <div class="row"><span style="color:var(--green)">✓</span> Upload the export you already have, and map it once</div>
-          <div class="row"><span style="color:var(--green)">✓</span> Health KPIs with a comparison to the previous period</div>
-          <div class="row"><span style="color:var(--green)">✓</span> Plain-language why, with a receipt of the rows</div>
-          <div class="row"><span style="color:var(--green)">✓</span> A morning brief when you come back, or a clear stop</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="features" style="background:var(--bg2);border-block:1px solid var(--border);">
-    <div class="wrap">
-      <div class="center">
-        <span class="section-label">The current release</span>
-        <h2>Upload, map, KPIs, why, brief</h2>
-        <p class="muted">Built for owners of South African service businesses. The heavy lifting is the citation, so a number you cannot check does not appear.</p>
-      </div>
-      <div class="grid-3">
-        <div class="card"><div class="icon-box">📄</div><h3 style="margin-bottom:0.4rem">CSV upload and map</h3><p class="muted" style="font-size:0.9rem">Bring an Excel or CSV export. Confirm the columns Vhona guessed, including a balance column when the file has one.</p></div>
-        <div class="card"><div class="icon-box">📈</div><h3 style="margin-bottom:0.4rem">Health KPIs</h3><p class="muted" style="font-size:0.9rem">Revenue, expenses, and profit for the latest period against the one before. Cash appears only when a usable balance is in the file.</p></div>
-        <div class="card"><div class="icon-box">🧾</div><h3 style="margin-bottom:0.4rem">Receipted why</h3><p class="muted" style="font-size:0.9rem">Ask why a number moved. The answer cites the transactions. Open the receipt and read those rows.</p></div>
-        <div class="card"><div class="icon-box">🌅</div><h3 style="margin-bottom:0.4rem">Morning brief</h3><p class="muted" style="font-size:0.9rem">On the next visit, one verified snapshot and one explanation. The same citation rule as why.</p></div>
-        <div class="card"><div class="icon-box">🛡️</div><h3 style="margin-bottom:0.4rem">Fail closed</h3><p class="muted" style="font-size:0.9rem">When the rows cannot support the answer, Vhona says "Can't verify that yet." The brief says "No verified brief today."</p></div>
-        <div class="card"><div class="icon-box">🔒</div><h3 style="margin-bottom:0.4rem">POPIA minded</h3><p class="muted" style="font-size:0.9rem">Built for South African businesses, with an audit-friendly trail from the question back to the rows.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <section id="how-it-works">
-    <div class="wrap">
-      <div class="center">
-        <span class="section-label" style="color:#c4b5fd;background:rgba(139,92,246,0.12);border-color:rgba(139,92,246,0.25);">The path</span>
-        <h2>From a CSV to a morning brief</h2>
-        <p class="muted">Upload and map, health KPIs, a receipted why, then a morning brief. SQL, Sheets, and WhatsApp wait for a later release.</p>
-      </div>
-      <div class="grid-3">
-        <div class="card"><div class="step-num">01</div><h3>Upload and map</h3><p class="muted" style="font-size:0.9rem;margin-top:0.5rem">Export a CSV from Excel or your books. Confirm the columns. That mapped file is the source that works today.</p></div>
-        <div class="card"><div class="step-num">02</div><h3>Read health KPIs</h3><p class="muted" style="font-size:0.9rem;margin-top:0.5rem">Revenue, expenses, and profit, compared with the previous period. Cash stays on the page only when the balance column has usable values.</p></div>
-        <div class="card"><div class="step-num">03</div><h3>Why, then the brief</h3><p class="muted" style="font-size:0.9rem;margin-top:0.5rem">Ask why a KPI moved and get a receipt of the rows. Come back for one morning brief. Missing rows end the answer.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="cta-band" id="talk">
-    <div class="wrap">
-      <h2>Talk to us</h2>
-      <p class="muted" style="margin:1rem auto 1.75rem;max-width:36rem">Vhona AI is for South African service SMBs. We will show you the current path: upload and map a CSV, health KPIs, a receipted why, and a morning brief.</p>
-      <a class="btn btn-primary btn-lg" href="mailto:tnyawasha@gmail.com?subject=Talk%20to%20us%20about%20Vhona%20AI">Talk to us →</a>
-    </div>
-  </section>
-
-  <footer>
-    <div class="wrap">
-      <div class="foot-grid">
-        <div>
-          <div class="brand"><div class="mark">V</div>Vhona <span class="accent">AI</span></div>
-          <p>Business intelligence for South African service SMBs. CSV today. Cited answers, or no answer.</p>
-          <p style="margin-top:0.75rem;color:#475569;font-size:0.75rem">🇿🇦 Built in South Africa</p>
-        </div>
-        <div>
-          <strong style="color:#cbd5e1">Product</strong>
-          <a href="#today">Today and later</a>
-          <a href="#integrations">Data sources</a>
-          <a href="#features">Features</a>
-        </div>
-        <div>
-          <strong style="color:#cbd5e1">Contact</strong>
-          <a href="mailto:tnyawasha@gmail.com">Email</a>
-          <a href="#talk">Talk to us</a>
-        </div>
-      </div>
-      <div class="foot-bottom">
+      <nav class="foot-links" aria-label="Footer">
+        <a href="#product">Product</a>
+        <a href="#about">About</a>
+        <a href="#contact">Talk to us</a>
+      </nav>
+      <div class="foot-meta">
+        <span>Built with purpose in South Africa.</span>
         <span>© 2026 Vhona AI. All rights reserved.</span>
-        <span>For SA service businesses that want the rows behind the number.</span>
       </div>
     </div>
   </footer>
+
+  <script>
+    (function () {
+      var form = document.getElementById("conversation-form");
+      if (!form) return;
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        var data = new FormData(form);
+        var name = String(data.get("name") || "").trim();
+        var email = String(data.get("email") || "").trim();
+        var company = String(data.get("company") || "").trim();
+        var note = String(data.get("note") || "").trim();
+        var lines = ["Name: " + name, "Email: " + email];
+        if (company) lines.push("Company: " + company);
+        lines.push("", note);
+        window.location.href = "mailto:tnyawasha@gmail.com?subject=" +
+          encodeURIComponent("Vhona AI: request a conversation") +
+          "&body=" + encodeURIComponent(lines.join("\n"));
+      });
+    })();
+  </script>
 </body>
 </html>

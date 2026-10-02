@@ -387,4 +387,4 @@ For Benaiah: Cloudflare Pages project **crux-ai** can keep answering at [https:/
 
 ## License / product
 
-Product name: **Vhona** (branded **Vhona AI**).
+Product name: **Vhona AI**.
