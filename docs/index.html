@@ -25,7 +25,13 @@
       --sans: "Source Sans 3", "Segoe UI", sans-serif;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; scroll-padding-top: 5.5rem; }
+    @media (max-width: 799px) {
+      html { scroll-padding-top: 11rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
     body {
       font-family: var(--sans);
       background: var(--cream);
@@ -61,10 +67,36 @@
       min-height: 4.5rem;
       gap: 1rem;
     }
-    .nav-links { display: flex; gap: 1.75rem; justify-content: center; }
-    .nav-links a { font-size: 0.98rem; font-weight: 500; color: #3c3833; }
-    .nav-links a:hover { color: var(--teal-dark); }
+    .nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.15rem 1.15rem;
+      justify-content: center;
+      align-items: center;
+    }
+    .nav-links a {
+      position: relative;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #3c3833;
+      padding: 0.4rem 0.15rem;
+      border-radius: 0.35rem;
+      transition: color 0.15s ease, background 0.15s ease;
+    }
+    .nav-links a:hover { color: var(--teal-dark); background: rgba(13, 148, 136, 0.08); }
+    .nav-links a.is-active { color: var(--teal-dark); }
+    .nav-links a.is-active::after {
+      content: "";
+      position: absolute;
+      left: 0.15rem;
+      right: 0.15rem;
+      bottom: 0.15rem;
+      height: 2px;
+      border-radius: 999px;
+      background: var(--brass);
+    }
     .nav-cta { justify-self: end; }
+    .nav-cta .btn.is-active { background: var(--teal-dark); box-shadow: inset 0 -2px 0 var(--brass); }
     .btn {
       display: inline-flex;
       align-items: center;
@@ -393,7 +425,7 @@
     }
     @media (max-width: 799px) {
       .nav-inner { grid-template-columns: 1fr auto; }
-      .nav-links { grid-column: 1 / -1; justify-content: flex-start; gap: 1.25rem; padding-bottom: 0.85rem; }
+      .nav-links { grid-column: 1 / -1; justify-content: flex-start; gap: 0.15rem 0.85rem; padding-bottom: 0.7rem; }
       .app { margin-right: 0; grid-template-columns: 1fr; }
       .app-nav { display: flex; gap: 0.25rem; overflow: auto; border-right: 0; border-bottom: 1px solid var(--line); }
       .app-brand { display: none; }
@@ -408,11 +440,13 @@
     <div class="wrap nav-inner">
       <a class="wordmark" href="#top"><img src="vhona-wordmark.png" alt="Vhona AI" /></a>
       <nav class="nav-links" aria-label="Primary">
-        <a href="#product">Product</a>
-        <a href="#about">About</a>
+        <a href="#product" data-nav>Product</a>
+        <a href="#how-it-works" data-nav>How it works</a>
+        <a href="#connectors" data-nav>Connectors</a>
+        <a href="#about" data-nav>Trust</a>
       </nav>
       <div class="nav-cta">
-        <a class="btn btn-teal" href="#contact">Talk to us</a>
+        <a class="btn btn-teal" href="#contact" data-nav>Talk to us</a>
       </div>
     </div>
   </header>
@@ -485,8 +519,8 @@
       </div>
     </section>
 
-    <section class="block product" id="product">
-      <div class="connectors" aria-label="Connectors and delivery channels">
+    <section class="block product">
+      <div class="connectors" id="connectors" aria-label="Connectors and delivery channels">
         <div class="wrap">
           <ul class="connector-strip">
             <li>Slack</li>
@@ -504,12 +538,12 @@
           <p class="connector-note">Connectors and delivery channels rolling out — <a href="#contact">Talk to us</a> for your stack.</p>
         </div>
       </div>
-      <div class="wrap">
+      <div class="wrap" id="product">
         <div class="center">
           <p class="eyebrow">Connect → Trusted why → Deliver</p>
           <h2 class="serif">Insights you can take into the Monday room.</h2>
         </div>
-        <div class="path-row">
+        <div class="path-row" id="how-it-works">
           <article class="path-step">
             <div class="icon-circle" aria-hidden="true">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 12h6"/><path d="M8 8.5H5.8a3.2 3.2 0 0 0 0 6.4H8"/><path d="M16 8.5h2.2a3.2 3.2 0 0 1 0 6.4H16"/></svg>
@@ -626,7 +660,9 @@
       </div>
       <nav class="foot-links" aria-label="Footer">
         <a href="#product">Product</a>
-        <a href="#about">About</a>
+        <a href="#how-it-works">How it works</a>
+        <a href="#connectors">Connectors</a>
+        <a href="#about">Trust</a>
         <a href="#contact">Talk to us</a>
       </nav>
       <div class="foot-meta">
@@ -656,6 +692,56 @@
           encodeURIComponent("Vhona AI: request a conversation") +
           "&body=" + encodeURIComponent(lines.join("\n"));
       });
+    })();
+    (function () {
+      var links = Array.prototype.slice.call(document.querySelectorAll("[data-nav]"));
+      if (!links.length) return;
+      var seen = {};
+      var sections = [];
+      links.forEach(function (link) {
+        var id = (link.getAttribute("href") || "").replace("#", "");
+        var section = id && document.getElementById(id);
+        if (!section || seen[id]) return;
+        seen[id] = true;
+        sections.push(section);
+      });
+      sections.sort(function (a, b) {
+        return a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+      });
+      function setActive(id) {
+        links.forEach(function (link) {
+          var on = (link.getAttribute("href") || "") === "#" + id;
+          link.classList.toggle("is-active", on);
+          if (on) link.setAttribute("aria-current", "true");
+          else link.removeAttribute("aria-current");
+        });
+      }
+      function currentId() {
+        var nav = document.querySelector(".nav");
+        var line = (nav ? nav.getBoundingClientRect().height : 72) + 36;
+        var id = "";
+        sections.forEach(function (section) {
+          if (section.getBoundingClientRect().top <= line) id = section.id;
+        });
+        var doc = document.documentElement;
+        if (window.innerHeight + window.scrollY >= doc.scrollHeight - 2) {
+          id = sections.length ? sections[sections.length - 1].id : id;
+        }
+        return id;
+      }
+      var frame = 0;
+      function onScroll() {
+        if (frame) return;
+        frame = window.requestAnimationFrame(function () {
+          frame = 0;
+          setActive(currentId());
+        });
+      }
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll);
+      window.addEventListener("hashchange", onScroll);
+      window.addEventListener("load", onScroll);
+      onScroll();
     })();
   </script>
 </body>
