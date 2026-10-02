@@ -37,12 +37,14 @@
     :focus-visible { outline: 2px solid var(--teal-dark); outline-offset: 3px; }
     .wrap { max-width: 72rem; margin: 0 auto; padding: 0 1.25rem; }
     .wordmark {
-      font-family: var(--serif);
-      font-weight: 640;
-      font-size: 1.55rem;
-      letter-spacing: -0.03em;
-      color: var(--charcoal);
-      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      line-height: 0;
+    }
+    .wordmark img {
+      display: block;
+      height: 32px;
+      width: auto;
     }
     .nav {
       position: sticky;
@@ -146,11 +148,13 @@
       padding: 1rem 0.75rem;
     }
     .app-brand {
-      font-family: var(--serif);
-      font-weight: 640;
-      font-size: 0.95rem;
-      letter-spacing: -0.02em;
-      padding: 0.2rem 0.45rem 0.9rem;
+      padding: 0.15rem 0.15rem 0.85rem;
+    }
+    .app-brand img {
+      display: block;
+      height: 20px;
+      width: auto;
+      max-width: 100%;
     }
     .app-nav button, .app-nav a {
       width: 100%;
@@ -364,7 +368,12 @@
       background: rgba(28, 25, 23, 0.36);
     }
     .footer-inner { position: relative; z-index: 1; display: grid; gap: 1.75rem; }
-    .site-footer .wordmark { color: #fff; }
+    .site-footer .wordmark {
+      background: var(--cream);
+      border-radius: 0.45rem;
+      padding: 0.4rem 0.6rem;
+    }
+    .site-footer .wordmark img { height: 30px; }
     .site-footer p { max-width: 22rem; color: rgba(246, 241, 232, 0.86); margin-top: 0.65rem; }
     .foot-links { display: flex; flex-wrap: wrap; gap: 0.85rem 1.25rem; }
     .foot-links a { color: rgba(246, 241, 232, 0.9); font-weight: 600; }
@@ -397,7 +406,7 @@
 <body>
   <header class="nav">
     <div class="wrap nav-inner">
-      <a class="wordmark" href="#top">Vhona AI</a>
+      <a class="wordmark" href="#top"><img src="vhona-wordmark.png" alt="Vhona AI" /></a>
       <nav class="nav-links" aria-label="Primary">
         <a href="#product">Product</a>
         <a href="#about">About</a>
@@ -441,7 +450,7 @@
         <div class="hero-visual">
           <article class="app" aria-label="Example of the Vhona path">
             <div class="app-nav">
-              <div class="app-brand">Vhona AI</div>
+              <div class="app-brand"><img src="vhona-wordmark.png" alt="Vhona AI" /></div>
               <a class="is-on" href="#product"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7.2 8 3l5 4.2V13H3V7.2z"/></svg>Overview</a>
               <a href="#product"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6.2 6.2H4.6a2.2 2.2 0 0 0 0 4.4h1.6M9.8 6.2h1.6a2.2 2.2 0 0 1 0 4.4H9.8M6.6 8.4h2.8"/></svg>Connect</a>
               <a href="#product"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12V8M8 12V4M13 12V6"/></svg>KPIs</a>
@@ -600,7 +609,7 @@
             </label>
             <div class="band-actions">
               <button class="btn btn-light" type="submit">Request a conversation <span aria-hidden="true">→</span></button>
-              <p class="direct">Prefer to write directly? <a href="mailto:tnyawasha@gmail.com?subject=Vhona%20AI%3A%20request%20a%20conversation">tnyawasha@gmail.com</a></p>
+              <p class="direct">Prefer to write directly? <a href="mailto:tnyawasha@gmail.com?subject=Vhona%20AI%3A%20request%20a%20conversation">tnyawasha@gmail.com</a> · <a href="tel:+27615067323">061 506 7323</a></p>
             </div>
             <p class="privacy">This opens an email in your mail app. This page does not store what you type. Please do not send confidential client data until we agree a secure route.</p>
           </form>
@@ -612,7 +621,7 @@
   <footer class="site-footer">
     <div class="wrap footer-inner">
       <div>
-        <div class="wordmark">Vhona AI</div>
+        <div class="wordmark"><img src="vhona-wordmark.png" alt="Vhona AI" /></div>
         <p>Business intelligence for South African service SMBs. Cited answers, or no answer.</p>
       </div>
       <nav class="foot-links" aria-label="Footer">
@@ -621,6 +630,8 @@
         <a href="#contact">Talk to us</a>
       </nav>
       <div class="foot-meta">
+        <span><a href="mailto:tnyawasha@gmail.com">tnyawasha@gmail.com</a></span>
+        <span><a href="tel:+27615067323">061 506 7323</a></span>
         <span>Built with purpose in South Africa.</span>
         <span>© 2026 Vhona AI. All rights reserved.</span>
       </div>
