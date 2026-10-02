@@ -1,6 +1,6 @@
 # Vhona AI marketing site
 
-Static landing page (`index.html`) and `stone.jpg`, the fitted-granite background. No build step.
+Static landing page (`index.html`) with Great Zimbabwe dry-stone photographs: `hero-dry-stone.jpg` (hero, right-weighted, faded into the cream canvas) and `footer-dry-stone.jpg` (full-width opaque footer). No build step. No mosaic artwork.
 
 Enable Pages → **Deploy from a branch** → branch `main` → folder `/docs`.
 

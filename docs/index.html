@@ -10,17 +10,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,560;0,9..144,640;1,9..144,560&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --cream: #F5F0E6;
-      --cream-deep: #F3EEE4;
-      --paper: #FFFcf8;
+      --cream: #F5F0E8;
+      --cream-deep: #EDE6DA;
+      --paper: #FFFFFF;
       --teal: #0D9488;
       --teal-dark: #0F766E;
       --brass: #B8956A;
       --indigo: #1E293B;
-      --charcoal: #1A1816;
-      --muted: #5C574F;
-      --stone: #6B6560;
-      --line: rgba(26, 24, 22, 0.1);
+      --charcoal: #1C1917;
+      --muted: #57534E;
+      --stone: #57534E;
+      --line: rgba(28, 25, 23, 0.1);
       --serif: "Fraunces", Georgia, "Times New Roman", serif;
       --sans: "Source Sans 3", "Segoe UI", sans-serif;
     }
@@ -48,7 +48,7 @@
       position: sticky;
       top: 0;
       z-index: 40;
-      background: rgba(245, 240, 230, 0.92);
+      background: rgba(245, 240, 232, 0.92);
       backdrop-filter: blur(14px);
       border-bottom: 1px solid var(--line);
     }
@@ -78,23 +78,23 @@
       cursor: pointer;
       transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
     }
-    .btn-teal { background: var(--teal-dark); color: #fff; }
-    .btn-teal:hover { background: #115e59; }
+    .btn-teal { background: var(--teal); color: #fff; }
+    .btn-teal:hover { background: var(--teal-dark); }
     .btn-ghost {
       background: var(--paper);
       color: var(--charcoal);
-      border-color: rgba(26, 24, 22, 0.16);
+      border-color: rgba(28, 25, 23, 0.16);
     }
-    .btn-ghost:hover { border-color: rgba(26, 24, 22, 0.32); }
+    .btn-ghost:hover { border-color: rgba(28, 25, 23, 0.32); }
     .btn-light { background: #fff; color: var(--teal-dark); }
     .btn-light:hover { background: var(--cream); }
     .hero { position: relative; overflow: hidden; padding: 4.25rem 0 3.5rem; }
     .hero-stone {
       position: absolute;
-      inset: 0 0 0 40%;
-      background: url("stone.jpg") 70% center / cover no-repeat;
-      -webkit-mask-image: linear-gradient(90deg, transparent, #000 24%);
-      mask-image: linear-gradient(90deg, transparent, #000 24%);
+      inset: 0;
+      background: url("hero-dry-stone.jpg") right center / cover no-repeat;
+      -webkit-mask-image: linear-gradient(90deg, transparent 0%, transparent 12%, #000 48%);
+      mask-image: linear-gradient(90deg, transparent 0%, transparent 12%, #000 48%);
       pointer-events: none;
     }
     .hero-grid {
@@ -131,9 +131,9 @@
     .hero-visual { position: relative; min-height: 22rem; }
     .app {
       background: var(--paper);
-      border: 1px solid rgba(26, 24, 22, 0.06);
+      border: 1px solid rgba(28, 25, 23, 0.06);
       border-radius: 1.25rem;
-      box-shadow: 0 24px 60px rgba(26, 24, 22, 0.12);
+      box-shadow: 0 24px 60px rgba(28, 25, 23, 0.12);
       display: grid;
       grid-template-columns: 9.5rem 1fr;
       min-height: 24rem;
@@ -168,7 +168,7 @@
       padding: 0.45rem 0.5rem;
       margin-bottom: 0.15rem;
     }
-    .app-nav .is-on { background: #fff; color: var(--charcoal); box-shadow: 0 1px 2px rgba(26, 24, 22, 0.05); }
+    .app-nav .is-on { background: #fff; color: var(--charcoal); box-shadow: 0 1px 2px rgba(28, 25, 23, 0.05); }
     .app-nav svg { color: var(--teal); flex: none; }
     .app-main { padding: 1.1rem 1.15rem 1.2rem; }
     .app-kicker {
@@ -212,8 +212,8 @@
     .why-box p { font-size: 0.92rem; font-weight: 600; line-height: 1.35; }
     .bars { display: grid; gap: 0.45rem; }
     .bar-row { display: grid; grid-template-columns: 1fr auto; gap: 0.35rem 0.6rem; font-size: 0.78rem; color: var(--muted); }
-    .track { grid-column: 1 / -1; height: 0.35rem; border-radius: 999px; background: rgba(26, 24, 22, 0.08); overflow: hidden; }
-    .track i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--teal), #14b8a6); }
+    .track { grid-column: 1 / -1; height: 0.35rem; border-radius: 999px; background: rgba(28, 25, 23, 0.08); overflow: hidden; }
+    .track i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--teal-dark), var(--teal)); }
     .brief-float {
       position: absolute;
       right: 0;
@@ -221,8 +221,8 @@
       width: 13.5rem;
       background: #fff;
       border-radius: 1rem;
-      box-shadow: 0 18px 40px rgba(26, 24, 22, 0.16);
-      border: 1px solid rgba(26, 24, 22, 0.06);
+      box-shadow: 0 18px 40px rgba(28, 25, 23, 0.16);
+      border: 1px solid rgba(28, 25, 23, 0.06);
       padding: 0.95rem 1rem;
     }
     .brief-float h3 { font-size: 0.95rem; margin-bottom: 0.3rem; }
@@ -271,7 +271,7 @@
       height: 3.25rem;
       margin: 0 auto 0.9rem;
       border-radius: 999px;
-      border: 1.5px solid rgba(26, 24, 22, 0.16);
+      border: 1.5px solid rgba(28, 25, 23, 0.16);
       display: grid;
       place-items: center;
       color: var(--charcoal);
@@ -292,7 +292,7 @@
       padding: 1.75rem 1.5rem 1.5rem;
       box-shadow: 0 18px 40px rgba(30, 41, 59, 0.18);
     }
-    .band :focus-visible { outline-color: #F5F0E6; }
+    .band :focus-visible { outline-color: #F5F0E8; }
     .band-top { display: grid; gap: 1.25rem; align-items: center; }
     .band h2 {
       font-family: var(--serif);
@@ -327,15 +327,15 @@
     .privacy { font-size: 0.8rem; color: rgba(248, 245, 239, 0.62); }
     .site-footer {
       position: relative;
-      color: #f6f1e8;
-      background: #1a1816 url("stone.jpg") center / cover no-repeat;
+      color: #FFFFFF;
+      background: #1C1917 url("footer-dry-stone.jpg") center / cover no-repeat;
       padding: 4.5rem 0 2rem;
     }
     .site-footer::before {
       content: "";
       position: absolute;
       inset: 0;
-      background: rgba(26, 24, 22, 0.55);
+      background: rgba(28, 25, 23, 0.36);
     }
     .footer-inner { position: relative; z-index: 1; display: grid; gap: 1.75rem; }
     .site-footer .wordmark { color: #fff; }
@@ -343,8 +343,9 @@
     .foot-links { display: flex; flex-wrap: wrap; gap: 0.85rem 1.25rem; }
     .foot-links a { color: rgba(246, 241, 232, 0.9); font-weight: 600; }
     .foot-links a:hover { color: #fff; }
-    .foot-meta { color: rgba(246, 241, 232, 0.8); font-size: 0.92rem; }
+    .foot-meta { color: rgba(255, 255, 255, 0.82); font-size: 0.92rem; }
     .foot-meta span { display: block; }
+    .foot-meta a { color: #FFFFFF; text-decoration: underline; text-underline-offset: 0.15em; }
     @media (min-width: 800px) {
       .hero-grid { grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr); gap: 2rem; }
       .pillars { grid-template-columns: repeat(3, 1fr); }
@@ -363,7 +364,7 @@
       .app-brand { display: none; }
       .app-nav a { width: auto; white-space: nowrap; }
       .brief-float { position: static; width: auto; margin-top: 0.85rem; }
-      .hero-stone { inset: auto 0 0 0; height: 46%; -webkit-mask-image: linear-gradient(180deg, transparent, #000 30%); mask-image: linear-gradient(180deg, transparent, #000 30%); }
+      .hero-stone { inset: auto 0 0 0; height: 46%; background-position: center 42%; -webkit-mask-image: linear-gradient(180deg, transparent, #000 36%); mask-image: linear-gradient(180deg, transparent, #000 36%); }
     }
   </style>
 </head>
