@@ -19,4 +19,5 @@ TestResults/
 *.received.*
 secrets.json
 appsettings.*.local.json
+infra/*.local.json
 .DS_Store

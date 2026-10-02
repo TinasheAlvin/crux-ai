@@ -232,6 +232,7 @@ else
     {
         var candidates = new[]
         {
+            Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "testdata", fileName)),
             Path.GetFullPath(Path.Combine(HostEnvironment.ContentRootPath, "testdata", fileName)),
             Path.GetFullPath(Path.Combine(HostEnvironment.ContentRootPath, "..", "..", "testdata", fileName)),
             Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "testdata", fileName))

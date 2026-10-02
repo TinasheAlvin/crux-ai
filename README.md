@@ -16,12 +16,18 @@ Nango connectors, WhatsApp, email, and multi-story digests remain **out of scope
 - Local filesystem CSV storage
 - Cookie **demo auth** that bootstraps an Organisation + owner membership
 
-Placeholders (not wired as the trust boundary):
+Local demo defaults (no Azure account required):
 
-- Microsoft Entra External ID (`Auth:EntraExternalId` in config, TODOs in `src/CruxAI.Web/Program.cs`)
-- Azure SQL (`ConnectionStrings:AzureSql`, set `Database:Provider` to `AzureSql`)
-- Azure Blob (`Storage:AzureBlob`, set `Storage:Provider` to `AzureBlob`)
-- Azure OpenAI (`AzureOpenAI:*` — if Endpoint / DeploymentName / ApiKey are set, it may classify *which KPI* a free-text question is about. It never authors amounts. Without keys, the deterministic verifier runs alone.)
+- Cookie **demo auth** (`Auth:Provider` = `Demo`)
+- **SQLite** (`Database:Provider` = `Sqlite`)
+- Local filesystem CSV storage (`Storage:Provider` = `Local`)
+
+Hosted demo, when those settings are switched (see [Host on Azure](#host-on-azure)):
+
+- Microsoft Entra External ID (`Auth:Provider` = `EntraExternalId`)
+- Azure SQL (`Database:Provider` = `AzureSql`) — transactions, KPI inputs, why citations, morning brief rows
+- Azure Blob (`Storage:Provider` = `AzureBlob`) — the CSV bytes
+- Azure OpenAI stays optional (`AzureOpenAI:*` — if Endpoint / DeploymentName / ApiKey are set, it may classify *which KPI* a free-text question is about. It never authors amounts. Without keys, the deterministic verifier runs alone.)
 
 ## Solution layout
 
@@ -147,28 +153,38 @@ The file lives under gitignored `App_Data/`. Delete it between partner sessions 
 
 Committed files contain **placeholders only**. Do not put real connection strings, client secrets, or account keys in git.
 
-| Setting | Local demo | Later |
+| Setting | Local demo | Hosted demo |
 | --- | --- | --- |
 | `Database:Provider` | `Sqlite` | `AzureSql` |
 | `ConnectionStrings:Sqlite` | `Data Source=App_Data/cruxai.db` | unused |
-| `ConnectionStrings:AzureSql` | empty | user-secrets |
+| `ConnectionStrings:AzureSql` | empty | App Service setting or Key Vault reference |
 | `Storage:Provider` | `Local` | `AzureBlob` |
 | `Storage:LocalRoot` | `App_Data/uploads` | unused |
-| `Storage:AzureBlob:*` | empty placeholders | user-secrets |
-| `Auth:Provider` | `Demo` | Entra External ID |
-| `DemoAuth:*` | Harbour Street Studio owner | unused once Entra is live |
-| `AzureOpenAI:Endpoint` | placeholder / empty | user-secrets |
-| `AzureOpenAI:DeploymentName` | placeholder / empty | user-secrets |
-| `AzureOpenAI:ApiKey` | empty | user-secrets |
-| `Analytics:Sink` | `File` (JSONL) | `Memory` or `Sqlite` |
-| `Analytics:FilePath` | `App_Data/partner-events.jsonl` | unused if Sink is Memory |
-| `Analytics:SqlitePath` | `App_Data/partner-events.db` | used when Sink is Sqlite |
+| `Storage:AzureBlob:ConnectionString` | empty | App Service setting or Key Vault reference |
+| `Storage:AzureBlob:ContainerName` | `csv-uploads` | `csv-uploads` |
+| `Storage:DataProtection:ContainerName` | `crux-keys` | `crux-keys` (auth keys, only when storage is Azure Blob) |
+| `Auth:Provider` | `Demo` | `EntraExternalId` for the timed path. `Demo` still works on the host if Entra is not filled in. |
+| `Auth:DefaultOrganizationName` | falls back to `DemoAuth:OrganizationName` | `Harbour Street Studio` |
+| `Auth:EntraExternalId:*` | placeholders | App Service settings. `ClientSecret` is a secret. |
+| `DemoAuth:*` | Harbour Street Studio owner | unused once Entra is the provider |
+| `AzureOpenAI:Endpoint` | placeholder / empty | user-secrets or App Service setting |
+| `AzureOpenAI:DeploymentName` | placeholder / empty | user-secrets or App Service setting |
+| `AzureOpenAI:ApiKey` | empty | user-secrets or App Service setting |
+| `Analytics:Sink` | `File` (JSONL) | `File` |
+| `Analytics:FilePath` | `App_Data/partner-events.jsonl` | `/home/crux/partner-events.jsonl` on App Service |
+| `Analytics:SqlitePath` | `App_Data/partner-events.db` | unused on the host |
+| `APPLICATIONINSIGHTS_CONNECTION_STRING` | unset | set only when App Insights is enabled |
 
 Copy `src/CruxAI.Web/appsettings.Example.json` for a full list of keys, then store real values in user secrets:
 
 ```bash
 dotnet user-secrets set "ConnectionStrings:AzureSql" "Server=tcp:..." --project src/CruxAI.Web
 dotnet user-secrets set "Storage:AzureBlob:ConnectionString" "DefaultEndpointsProtocol=https;..." --project src/CruxAI.Web
+dotnet user-secrets set "Database:Provider" "AzureSql" --project src/CruxAI.Web
+dotnet user-secrets set "Storage:Provider" "AzureBlob" --project src/CruxAI.Web
+dotnet user-secrets set "Auth:Provider" "EntraExternalId" --project src/CruxAI.Web
+dotnet user-secrets set "Auth:EntraExternalId:Instance" "https://YOUR_TENANT.ciamlogin.com/" --project src/CruxAI.Web
+dotnet user-secrets set "Auth:EntraExternalId:Domain" "YOUR_TENANT.onmicrosoft.com" --project src/CruxAI.Web
 dotnet user-secrets set "Auth:EntraExternalId:TenantId" "..." --project src/CruxAI.Web
 dotnet user-secrets set "Auth:EntraExternalId:ClientId" "..." --project src/CruxAI.Web
 dotnet user-secrets set "Auth:EntraExternalId:ClientSecret" "..." --project src/CruxAI.Web
@@ -181,14 +197,157 @@ The Web project already has a `UserSecretsId`. User secrets live on the develope
 
 HTTPS is available via `--launch-profile https` once the ASP.NET Core developer certificate is trusted.
 
-## Auth placeholder
+## Host on Azure
 
-Demo login is intentional so the CSV + KPI + why + morning brief flow can be exercised without an Entra tenant. Replacing it:
+The hosted demo is the same spine on a public HTTPS URL. App Service Linux (.NET 8, zip deploy) is the host: Blazor Interactive Server needs WebSockets and sticky sessions (ARR affinity), and that does not need a container registry. Azure SQL Basic holds transactions, citations, and briefs. A StorageV2 account (Standard LRS) holds the CSV container `csv-uploads` and the data-protection container `crux-keys`. The database stays on the Basic tier (not serverless) so the first request is not waiting for a paused database.
 
-1. Add `Microsoft.Identity.Web`.
-2. Fill `Auth:EntraExternalId` via user-secrets.
-3. Follow the commented block in `src/CruxAI.Web/Program.cs`.
-4. Map the Entra `oid` onto `AppUser.ExternalId` and keep using `Membership` for org access.
+Region default is **South Africa North**. The plan default is **B1** (smallest Linux size with Always On). A staging slot raises the plan to **S1**, because slots are a Standard feature. Key Vault and Application Insights are off unless you opt in.
+
+`infra/main.parameters.json` does not contain passwords. Pass `sqlAdminPassword` on the command line. The password needs Azure SQL complexity (12+ characters, upper, lower, digit, symbol) and must not contain `;`.
+
+```bash
+az group create --name crux-ai-demo --location southafricanorth
+az deployment group create \
+  --resource-group crux-ai-demo \
+  --template-file infra/main.bicep \
+  --parameters infra/main.parameters.json \
+  --parameters sqlAdminPassword='REPLACE_WITH_A_STRONG_PASSWORD'
+```
+
+The deployment outputs `webAppName` and `healthUrl`. Copy `webAppName` into the GitHub secret `AZURE_WEBAPP_NAME`.
+
+Flip providers without editing the template by changing App Service settings (these are what the Bicep template sets for a hosted site):
+
+| App setting | Hosted value |
+| --- | --- |
+| `Database__Provider` | `AzureSql` |
+| `ConnectionStrings__AzureSql` | SQL connection string, or a Key Vault reference |
+| `Storage__Provider` | `AzureBlob` |
+| `Storage__AzureBlob__ConnectionString` | storage connection string, or a Key Vault reference |
+| `Storage__AzureBlob__ContainerName` | `csv-uploads` |
+| `Auth__Provider` | `EntraExternalId` or `Demo` |
+| `Auth__EntraExternalId__Instance` | `https://<tenant>.ciamlogin.com/` |
+| `Auth__EntraExternalId__TenantId` | directory (tenant) id |
+| `Auth__EntraExternalId__ClientId` | app registration client id |
+| `Auth__EntraExternalId__ClientSecret` | client secret |
+| `Auth__DefaultOrganizationName` | `Harbour Street Studio` |
+
+Empty, `YOUR_*`, and `<TODO-...>` values are rejected at startup when that provider is selected. A literal `@Microsoft.KeyVault(...)` value means the reference was not resolved: grant the app identity secret **get**, then restart.
+
+To exercise Azure SQL and Blob before the Entra tenant exists, deploy with `authProvider=Demo` (the committed parameters file does this). `GET /healthz` then reports `database: AzureSql`, `storage: AzureBlob`, `auth: Demo`, `sampleCsv: true`. The five-minute bar includes Entra sign-in, so switch `authProvider` once the app registration exists:
+
+```bash
+az deployment group create \
+  --resource-group crux-ai-demo \
+  --template-file infra/main.bicep \
+  --parameters infra/main.parameters.json \
+  --parameters sqlAdminPassword='REPLACE_WITH_A_STRONG_PASSWORD' \
+  --parameters authProvider=EntraExternalId \
+  --parameters entraInstance='https://YOUR_TENANT.ciamlogin.com/' \
+  --parameters entraDomain='YOUR_TENANT.onmicrosoft.com' \
+  --parameters entraTenantId='YOUR_TENANT_ID' \
+  --parameters entraClientId='YOUR_CLIENT_ID' \
+  --parameters entraClientSecret='YOUR_CLIENT_SECRET'
+```
+
+Redirect URIs on that app registration:
+
+- `https://<webAppName>.azurewebsites.net/signin-oidc`
+- `https://<webAppName>.azurewebsites.net/signout-callback-oidc`
+
+Issue ID tokens. Add optional claims **email** and **name**. The sign-in link is a full page navigation (`/auth/signin`) so the Blazor circuit is created after the cookie exists.
+
+### Key Vault (optional)
+
+`--parameters enableKeyVault=true keyVaultAdminObjectId=$(az ad signed-in-user show --query id -o tsv)`
+
+The template writes `sql-connection`, `blob-connection`, and (when set) `entra-client-secret`, then points the app settings at unversioned secret URIs. The web app's system identity gets secret get/list. Without Key Vault, the same values live only in App Service settings.
+
+### Application Insights (optional)
+
+`--parameters enableAppInsights=true` adds a 30-day Log Analytics workspace and sets `APPLICATIONINSIGHTS_CONNECTION_STRING`. Leave it off for the lean demo. Telemetry is not registered when the connection string is empty.
+
+### Staging slot (optional)
+
+`--parameters enableStagingSlot=true` creates a `staging` slot and, on a Basic plan, moves the SKU to S1. Deploy by setting the GitHub secret `AZURE_WEBAPP_SLOT` to `staging`, or run the workflow manually with input `slot=staging`. The slot shares the demo database and storage account. Swap in the portal when you want staging to become production. B1 has no slots.
+
+### GitHub Actions
+
+Workflow: `.github/workflows/azure-demo.yml`.
+
+On every pull request and on `main`: restore, `dotnet test`, publish `src/CruxAI.Web`, check the sample CSVs are in the publish folder, and compile `infra/main.bicep`.
+
+Deploy runs only when the repository variable `AZURE_DEPLOY_ENABLED` is `true`, and only on a push to `main` or a manual run. Until that variable is set, a missing Azure subscription does not fail the build.
+
+GitHub secrets:
+
+| Secret | Purpose |
+| --- | --- |
+| `AZURE_CREDENTIALS` | JSON from the deploy service principal (`az ad sp create-for-rbac --sdk-auth`) |
+| `AZURE_WEBAPP_NAME` | `webAppName` output from the Bicep deployment |
+| `AZURE_WEBAPP_SLOT` | Optional. `staging` to deploy the slot. Empty deploys production. |
+
+Repository variable:
+
+| Variable | Purpose |
+| --- | --- |
+| `AZURE_DEPLOY_ENABLED` | Set to `true` after the resource group and secrets exist |
+
+Connection strings are not GitHub secrets. Bicep writes them to App Service (or Key Vault). Do not echo them into the workflow.
+
+```bash
+az ad sp create-for-rbac \
+  --name crux-ai-deploy \
+  --role contributor \
+  --scopes /subscriptions/<subscription-id>/resourceGroups/crux-ai-demo \
+  --sdk-auth
+```
+
+Put the JSON document in `AZURE_CREDENTIALS`. Scope it to the demo resource group.
+
+Publish path used by the workflow and by a manual zip deploy:
+
+```bash
+dotnet publish src/CruxAI.Web/CruxAI.Web.csproj -c Release -o ./publish
+```
+
+`publish/CruxAI.Web.dll` is the App Service entry point (`DOTNETCORE|8.0`). `WEBSITE_RUN_FROM_PACKAGE=1`. Sample CSVs are published under `testdata/` so **Use sample CSV** works on the host.
+
+### Entra and the five-minute path
+
+Cold sample CSV → first trusted receipted why is meant to stay within five minutes, sign-in included. These are the delays that blow that budget:
+
+1. **Email verification / sign-up.** Create the demo user in the External ID tenant first and sign in with the password. A user flow that waits on a mailbox will not finish in five minutes.
+2. **Wrong authority.** External ID uses `https://<tenant>.ciamlogin.com/`. `https://login.microsoftonline.com/` is a workforce tenant and will not complete this sign-in.
+3. **Redirect URI mismatch.** The reply URL must be `https://<app>.azurewebsites.net/signin-oidc` on the same host the browser is using. A missing URI sends the user back to `/login` with an error.
+4. **Missing email claim.** Startup and sign-in both fail closed without an email. Add the optional email claim and the `email` scope. The login page shows the error instead of opening a half-signed-in session.
+5. **Placeholder client secret.** `Auth:Provider=EntraExternalId` with an empty or `<TODO-...>` secret refuses to boot. `/healthz` will not come up until the secret is real.
+6. **Client secret expiry.** A later demo fails at the IdP with a login error, not inside the CSV flow.
+7. **Extra profile attributes** on the user flow. Each extra screen is time. Keep the flow to existing-user sign-in.
+8. **In-circuit navigation to sign-in.** The Sign in control opts out of Blazor enhanced navigation. Replacing it with `NavigateTo` without a full page load leaves the circuit anonymous.
+9. **Cold start.** The first boot runs EF `EnsureCreated` against Azure SQL Basic. Basic does not pause. A serverless database can spend the whole five minutes waking up. B1 Always On keeps the process up after that first boot.
+10. **Auth cookie lost on restart.** Data-protection keys are stored in the `crux-keys` blob when storage is Azure Blob, so a restart does not drop the session in the middle of map → why.
+11. **ARR affinity off.** Blazor Server drops the circuit if the next request lands on another instance. The template turns client affinity and WebSockets on, and the plan is one worker.
+12. **`/healthz` still says `auth: Demo`.** Blob and SQL are live, but the timed path has not started. Set `Auth__Provider` to `EntraExternalId` and fill the Entra settings.
+
+`/healthz` does not touch the database. It reports the active providers and whether the clean sample CSV was published. The product Health page stays at `/health`. Partner events are unchanged: `finishes_upload`, `asks_why_session_one`, `rates_explanation_trustworthy`, `returns_for_brief_within_7_days`, `pay_or_waitlist_signal`, plus `map_abandon`, `receipt_open`, and `receipt_distrust`. On the host they append to `/home/crux/partner-events.jsonl` (Kudu SSH). While signed in, `GET /internal/partner-events` returns the same JSON as locally.
+
+### Manual smoke on the hosted URL
+
+`dotnet test src/CruxAI.sln` is the automated check. This is the manual check after deploy. Use the clean sample. Time it from the sign-in click.
+
+1. `curl https://<webAppName>.azurewebsites.net/healthz` returns `status: ok`, `database: AzureSql`, `storage: AzureBlob`, `sampleCsv: true`, and `auth` equal to the provider you deployed.
+2. Sign in. Entra: one existing user, full-page Sign in, land on Home signed in as Harbour Street Studio. Demo: **Continue as demo owner**.
+3. **Clean sample** (or **Use sample CSV**). Confirm the guessed columns in one tap and persist. Fix any broken cells in place if you used the default sample. Do not restart.
+4. Health shows revenue, expenses, and profit for the latest month versus the previous month. Cash is hidden on the clean sample. It appears only for **Sample with cash**, and it is never a fake zero.
+5. Tap a KPI. The answer includes a receipt of exact RowIds. Open the receipt and see those rows.
+6. Refresh Why. The same receipt is still there (it was read from Azure SQL, not from the browser).
+7. In storage, the container `csv-uploads` has a blob under `{org}/{import}/`. That is the file the import reopens.
+8. Ask something the verifier cannot cite. The page says **Can't verify that yet.** There is no answer body and no streamed draft.
+9. After the cited why, choose **Send me the morning brief**. Sign out and sign in again (next visit). Home shows yesterday's snapshot plus one receipted explanation, or **No verified brief today** with a path back to **Ask why**.
+10. While signed in, `GET /internal/partner-events` includes the signals from the session (`finishes_upload`, and `receipt_open` if you opened the receipt).
+
+Local `dotnet run --project src/CruxAI.Web --launch-profile http` is unchanged: Demo, SQLite, and `App_Data/uploads`. User-secrets override those defaults on that machine only. Set the three providers back to `Demo`, `Sqlite`, and `Local` to return to the local path.
 
 ## Marketing site
 

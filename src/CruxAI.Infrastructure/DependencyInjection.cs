@@ -1,5 +1,4 @@
 using CruxAI.Core.Csv;
-using CruxAI.Core.Entities;
 using CruxAI.Core.Storage;
 using CruxAI.Core.Time;
 using CruxAI.Core.Why;
@@ -7,6 +6,7 @@ using CruxAI.Infrastructure.Brief;
 using CruxAI.Infrastructure.Csv;
 using CruxAI.Infrastructure.Data;
 using CruxAI.Infrastructure.Health;
+using CruxAI.Infrastructure.Hosting;
 using CruxAI.Infrastructure.Imports;
 using CruxAI.Infrastructure.Storage;
 using CruxAI.Infrastructure.Why;
@@ -23,35 +23,43 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var databaseProvider = configuration["Database:Provider"] ?? "Sqlite";
-        services.AddDbContext<CruxDbContext>(options =>
+        if (HostingConfiguration.IsAzureSql(configuration))
         {
-            if (string.Equals(databaseProvider, "AzureSql", StringComparison.OrdinalIgnoreCase))
+            var azureSql = HostingConfiguration.RequireAzureSqlConnectionString(configuration);
+            services.AddDbContext<CruxDbContext>(options =>
             {
-                var azureSql = configuration.GetConnectionString("AzureSql")
-                    ?? throw new InvalidOperationException(
-                        "Database:Provider is AzureSql but ConnectionStrings:AzureSql is empty. Store it in user-secrets.");
-                options.UseSqlServer(azureSql);
-            }
-            else
+                options.UseSqlServer(azureSql, sql =>
+                {
+                    sql.EnableRetryOnFailure(3, TimeSpan.FromSeconds(5), null);
+                    sql.CommandTimeout(60);
+                });
+            });
+        }
+        else
+        {
+            var sqlite = configuration.GetConnectionString("Sqlite")
+                ?? "Data Source=App_Data/cruxai.db";
+            services.AddDbContext<CruxDbContext>(options =>
             {
-                var sqlite = configuration.GetConnectionString("Sqlite")
-                    ?? "Data Source=App_Data/cruxai.db";
                 var dataSource = sqlite.Replace("Data Source=", "", StringComparison.OrdinalIgnoreCase).Trim();
                 if (!Path.IsPathRooted(dataSource) && !dataSource.Contains(':'))
                 {
                     var full = Path.GetFullPath(dataSource);
-                    Directory.CreateDirectory(Path.GetDirectoryName(full)!);
+                    var directory = Path.GetDirectoryName(full);
+                    if (!string.IsNullOrWhiteSpace(directory))
+                    {
+                        Directory.CreateDirectory(directory);
+                    }
                 }
 
                 options.UseSqlite(sqlite);
-            }
-        });
+            });
+        }
 
-        var storageProvider = configuration["Storage:Provider"] ?? "Local";
-        if (string.Equals(storageProvider, "AzureBlob", StringComparison.OrdinalIgnoreCase))
+        if (HostingConfiguration.IsAzureBlob(configuration))
         {
-            services.AddSingleton<IFileStorage, AzureBlobFileStorage>();
+            HostingConfiguration.RequireAzureBlobConnectionString(configuration);
+            services.AddSingleton<IFileStorage>(_ => AzureBlobFileStorage.FromConfiguration(configuration));
         }
         else
         {
@@ -78,73 +86,5 @@ public static class DependencyInjection
         services.AddScoped<OrgBootstrapper>();
 
         return services;
-    }
-}
-
-public sealed class OrgBootstrapper
-{
-    private readonly CruxDbContext _db;
-
-    public OrgBootstrapper(CruxDbContext db)
-    {
-        _db = db;
-    }
-
-    public async Task<(AppUser User, Organization Organization, Membership Membership)> EnsureDemoTenantAsync(
-        string email,
-        string displayName,
-        string organizationName,
-        CancellationToken cancellationToken = default)
-    {
-        var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
-        if (user is null)
-        {
-            user = new AppUser
-            {
-                Id = Guid.NewGuid(),
-                ExternalId = $"demo:{email}",
-                Email = email,
-                DisplayName = displayName,
-                CreatedAt = DateTime.UtcNow
-            };
-            _db.Users.Add(user);
-        }
-        else
-        {
-            user.DisplayName = displayName;
-        }
-
-        var membership = await _db.Memberships
-            .Include(m => m.Organization)
-            .FirstOrDefaultAsync(m => m.UserId == user.Id, cancellationToken);
-
-        Organization organization;
-        if (membership is null)
-        {
-            organization = new Organization
-            {
-                Id = Guid.NewGuid(),
-                Name = organizationName,
-                CreatedAt = DateTime.UtcNow
-            };
-            membership = new Membership
-            {
-                Id = Guid.NewGuid(),
-                OrganizationId = organization.Id,
-                UserId = user.Id,
-                Role = MembershipRole.Owner,
-                CreatedAt = DateTime.UtcNow
-            };
-            _db.Organizations.Add(organization);
-            _db.Memberships.Add(membership);
-        }
-        else
-        {
-            organization = membership.Organization;
-            organization.Name = organizationName;
-        }
-
-        await _db.SaveChangesAsync(cancellationToken);
-        return (user, organization, membership);
     }
 }
