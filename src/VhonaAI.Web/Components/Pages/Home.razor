@@ -1,0 +1,243 @@
+﻿@page "/"
+@attribute [Authorize]
+@inject ImportService Imports
+@inject HealthKpiService HealthKpis
+@inject MorningBriefService Briefs
+@inject NavigationManager Navigation
+@inject ICurrentUser CurrentUser
+@inject IWebHostEnvironment HostEnvironment
+
+<PageTitle>Home · Vhona AI</PageTitle>
+
+@if (briefLanding is { OptedIn: true })
+{
+    <p class="eyebrow">@CurrentUser.OrganizationName</p>
+    <MorningBriefView Landing="briefLanding" />
+
+    <section class="panel">
+        <header class="panel-header">
+            <h2>Import another CSV</h2>
+            <p>Mapping can be remapped at any time without losing persisted RowIds on previous imports.</p>
+        </header>
+        <label class="upload-button @(busy ? "is-disabled" : null)">
+            <InputFile OnChange="OnFileSelected" accept=".csv,text/csv" disabled="@busy" />
+            @(busy ? "Uploading…" : "Upload CSV")
+        </label>
+        <button type="button" class="btn btn-outline sample-btn" @onclick="() => UseSampleAsync(false)" disabled="@busy">
+            Use sample CSV
+        </button>
+        <button type="button" class="btn btn-outline sample-btn" @onclick="() => UseSampleAsync(true)" disabled="@busy">
+            Sample with cash
+        </button>
+        <button type="button" class="btn btn-outline sample-btn" @onclick='() => UseSampleFileAsync("sample-transactions-clean.csv")' disabled="@busy">
+            Clean sample
+        </button>
+        @if (!string.IsNullOrWhiteSpace(error))
+        {
+            <p class="banner banner-error" role="alert">@error</p>
+        }
+    </section>
+}
+else if (snapshot?.HasData == true)
+{
+    <p class="eyebrow">@CurrentUser.OrganizationName</p>
+    <HealthKpiCards Snapshot="snapshot" />
+
+    <section class="panel">
+        <header class="panel-header">
+            <h2>Import another CSV</h2>
+            <p>Mapping can be remapped at any time without losing persisted RowIds on previous imports.</p>
+        </header>
+        <label class="upload-button @(busy ? "is-disabled" : null)">
+            <InputFile OnChange="OnFileSelected" accept=".csv,text/csv" disabled="@busy" />
+            @(busy ? "Uploading…" : "Upload CSV")
+        </label>
+        <button type="button" class="btn btn-outline sample-btn" @onclick="() => UseSampleAsync(false)" disabled="@busy">
+            Use sample CSV
+        </button>
+        <button type="button" class="btn btn-outline sample-btn" @onclick="() => UseSampleAsync(true)" disabled="@busy">
+            Sample with cash
+        </button>
+        <button type="button" class="btn btn-outline sample-btn" @onclick='() => UseSampleFileAsync("sample-transactions-clean.csv")' disabled="@busy">
+            Clean sample
+        </button>
+        @if (!string.IsNullOrWhiteSpace(error))
+        {
+            <p class="banner banner-error" role="alert">@error</p>
+        }
+    </section>
+}
+else
+{
+    <section class="hero-card">
+        <p class="eyebrow">@CurrentUser.OrganizationName</p>
+        <h1>Start with a CSV — then ask why with a receipt</h1>
+        <p class="lede">
+            Upload a bank or bookkeeping export. Map columns, persist RowIds, see health KPIs,
+            then tap a card to get a cited why. After a trusted why, opt in for a morning brief.
+        </p>
+
+        <label class="upload-button @(busy ? "is-disabled" : null)">
+            <InputFile OnChange="OnFileSelected" accept=".csv,text/csv" disabled="@busy" />
+            @(busy ? "Uploading…" : "Upload CSV")
+        </label>
+        <button type="button" class="btn btn-outline sample-btn" @onclick="() => UseSampleAsync(false)" disabled="@busy">
+            Use sample CSV
+        </button>
+        <button type="button" class="btn btn-outline sample-btn" @onclick="() => UseSampleAsync(true)" disabled="@busy">
+            Sample with cash
+        </button>
+        <button type="button" class="btn btn-outline sample-btn" @onclick='() => UseSampleFileAsync("sample-transactions-clean.csv")' disabled="@busy">
+            Clean sample
+        </button>
+
+        @if (!string.IsNullOrWhiteSpace(error))
+        {
+            <p class="banner banner-error" role="alert">@error</p>
+        }
+
+        <p class="hint">
+            <code>testdata/sample-transactions-clean.csv</code> is the fastest path to a cited why.
+            The default sample includes a few broken March rows to exercise validation.
+            Cash stays hidden unless a balance column is mapped — try
+            <code>testdata/sample-transactions-with-cash.csv</code>.
+        </p>
+    </section>
+}
+
+@if (recent.Count > 0)
+{
+    <section class="panel">
+        <header class="panel-header">
+            <h2>Recent imports</h2>
+            <p>@transactionCount transaction@(transactionCount == 1 ? "" : "s") persisted for this organisation.</p>
+        </header>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th>Status</th>
+                    <th>Rows</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var job in recent)
+                {
+                    <tr>
+                        <td>@job.OriginalFileName</td>
+                        <td><span class="status-pill">@job.Status</span></td>
+                        <td>@(job.ImportedRowCount?.ToString() ?? "—")</td>
+                        <td>
+                            @if (job.Status == ImportStatus.Imported)
+                            {
+                                <a href="/health">Health KPIs</a>
+                                <span> · </span>
+                                <a href="@($"/imports/{job.Id}")">RowIds</a>
+                                <span> · </span>
+                                <a href="@($"/imports/{job.Id}/map")">Remap</a>
+                            }
+                            else if (job.Status == ImportStatus.Mapped || job.Status == ImportStatus.Validated)
+                            {
+                                <a href="@($"/imports/{job.Id}/validate")">Continue validation</a>
+                            }
+                            else
+                            {
+                                <a href="@($"/imports/{job.Id}/map")">Continue mapping</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </section>
+}
+
+<PartnerWaitlistStrip Surface="home" />
+
+@code {
+    private bool busy;
+    private string? error;
+    private IReadOnlyList<ImportJob> recent = [];
+    private int transactionCount;
+    private HealthSnapshot? snapshot;
+    private MorningBriefLanding? briefLanding;
+
+    protected override async Task OnInitializedAsync()
+    {
+        recent = await Imports.ListRecentAsync();
+        transactionCount = await Imports.CountTransactionsAsync();
+        snapshot = await HealthKpis.GetSnapshotAsync();
+        var preference = await Briefs.GetPreferenceAsync();
+        if (preference.OptedIn)
+        {
+            briefLanding = await Briefs.GetLandingAsync();
+        }
+    }
+
+    private async Task OnFileSelected(InputFileChangeEventArgs args)
+    {
+        busy = true;
+        error = null;
+        try
+        {
+            await using var upload = args.File.OpenReadStream(ImportService.MaxUploadBytes);
+            await using var buffer = new MemoryStream();
+            await upload.CopyToAsync(buffer);
+            buffer.Position = 0;
+            var job = await Imports.CreateFromUploadAsync(buffer, args.File.Name, buffer.Length);
+            Navigation.NavigateTo($"/imports/{job.Id}/map");
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task UseSampleAsync(bool withCash) =>
+        await UseSampleFileAsync(withCash ? "sample-transactions-with-cash.csv" : "sample-transactions.csv");
+
+    private async Task UseSampleFileAsync(string fileName)
+    {
+        busy = true;
+        error = null;
+        try
+        {
+            var path = FindSampleCsv(fileName);
+            if (path is null)
+            {
+                error = $"Could not find testdata/{fileName}. Upload the file from the repo instead.";
+                return;
+            }
+
+            await using var upload = File.OpenRead(path);
+            var job = await Imports.CreateFromUploadAsync(upload, Path.GetFileName(path), new FileInfo(path).Length);
+            Navigation.NavigateTo($"/imports/{job.Id}/map");
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private string? FindSampleCsv(string fileName)
+    {
+        var candidates = new[]
+        {
+            Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "testdata", fileName)),
+            Path.GetFullPath(Path.Combine(HostEnvironment.ContentRootPath, "testdata", fileName)),
+            Path.GetFullPath(Path.Combine(HostEnvironment.ContentRootPath, "..", "..", "testdata", fileName)),
+            Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "testdata", fileName))
+        };
+
+        return candidates.FirstOrDefault(File.Exists);
+    }
+}

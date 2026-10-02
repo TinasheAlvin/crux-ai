@@ -1,0 +1,51 @@
+@page "/login"
+@layout EmptyLayout
+@attribute [AllowAnonymous]
+@inject IConfiguration Configuration
+
+<PageTitle>Sign in · Vhona AI</PageTitle>
+
+<section class="auth-card">
+    <h1>See the rows behind the numbers</h1>
+    @if (UseEntra)
+    {
+        <p class="lede">
+            Sign in with Microsoft Entra External ID. The first successful sign-in creates an organisation
+            and owner membership, then opens the CSV path.
+        </p>
+        <a class="btn btn-primary btn-lg" href="/auth/signin" data-enhance-nav="false">Sign in</a>
+        <p class="hint">
+            Use a user that already exists in the tenant. A sign-up flow that waits on email verification
+            will not fit the five-minute demo.
+        </p>
+    }
+    else
+    {
+        <p class="lede">
+            Local demo sign-in bootstraps an organisation and owner membership.
+            Set <code>Auth:Provider</code> to <code>EntraExternalId</code> when the host should use Microsoft Entra External ID.
+        </p>
+
+        <form method="post" action="/auth/demo-login">
+            <AntiforgeryToken />
+            <button type="submit" class="btn btn-primary btn-lg">Continue as demo owner</button>
+        </form>
+
+        <p class="hint">
+            Demo tenant: Harbour Street Studio · owner@harbourstreet.local
+        </p>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Error))
+    {
+        <p class="banner banner-error" role="alert">@Error</p>
+    }
+</section>
+
+@code {
+    private bool UseEntra =>
+        string.Equals(Configuration["Auth:Provider"], "EntraExternalId", StringComparison.OrdinalIgnoreCase);
+
+    [SupplyParameterFromQuery(Name = "error")]
+    public string? Error { get; set; }
+}

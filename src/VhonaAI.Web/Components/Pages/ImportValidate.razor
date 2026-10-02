@@ -1,0 +1,205 @@
+@page "/imports/{ImportJobId:guid}/validate"
+@attribute [Authorize]
+@inject ImportService Imports
+@inject NavigationManager Navigation
+
+<PageTitle>Validate · Vhona AI</PageTitle>
+
+<ImportStepper Current="3" />
+
+@if (job is null)
+{
+    <p>Loading…</p>
+}
+else
+{
+    <section class="panel">
+        <header class="panel-header">
+            <p class="eyebrow">@job.OriginalFileName</p>
+            <h1>Fix errors without starting over</h1>
+            <p class="lede">
+                @validCount of @rows.Count row(s) are valid.
+                Edit the highlighted cells, re-validate, then persist. Mapping stays on this import.
+            </p>
+        </header>
+
+        @if (!string.IsNullOrWhiteSpace(banner))
+        {
+            <p class="banner banner-error" role="alert">@banner</p>
+        }
+
+        <div class="actions actions-inline">
+            <a class="btn btn-link" href="@($"/imports/{ImportJobId}/map")">Back to mapping</a>
+            <button class="btn btn-outline" type="button" @onclick="RevalidateAsync" disabled="@busy">Re-validate</button>
+            <button class="btn btn-primary" type="button" @onclick="() => PersistAsync(false)" disabled="@busy">
+                Persist @validCount valid row@(validCount == 1 ? "" : "s")
+            </button>
+            @if (invalidCount > 0)
+            {
+                <button class="btn btn-outline" type="button" @onclick="() => PersistAsync(true)" disabled="@busy">
+                    Import valid rows only (@invalidCount skipped)
+                </button>
+            }
+        </div>
+
+        <div class="table-scroll">
+            <table class="data-table validate-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                        <th>Category</th>
+                        <th>Reference</th>
+                        <th>Counterparty</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in edits)
+                    {
+                        <tr class="@(row.HasErrors ? "is-invalid-row" : null)">
+                            <td>@row.SourceRowNumber</td>
+                            <td>
+                                <input class="form-control @(row.Error("Date") is null ? null : "is-invalid")" @bind="row.Date" />
+                                <div class="field-error">@row.Error("Date")</div>
+                            </td>
+                            <td>
+                                <input class="form-control @(row.Error("Description") is null ? null : "is-invalid")" @bind="row.Description" />
+                                <div class="field-error">@row.Error("Description")</div>
+                            </td>
+                            <td>
+                                <input class="form-control @(row.Error("Amount") is null ? null : "is-invalid")" @bind="row.Amount" />
+                                <div class="field-error">@row.Error("Amount")</div>
+                            </td>
+                            <td><input class="form-control" @bind="row.Category" /></td>
+                            <td><input class="form-control" @bind="row.Reference" /></td>
+                            <td><input class="form-control" @bind="row.Counterparty" /></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+}
+
+@code {
+    [Parameter] public Guid ImportJobId { get; set; }
+
+    private ImportJob? job;
+    private List<RowEdit> edits = [];
+    private IReadOnlyList<ValidatedImportRow> rows = [];
+    private string? banner;
+    private bool busy;
+    private int validCount => edits.Count(row => !row.HasErrors);
+    private int invalidCount => edits.Count(row => row.HasErrors);
+
+    protected override async Task OnInitializedAsync()
+    {
+        job = await Imports.GetJobAsync(ImportJobId);
+        await LoadValidationAsync();
+    }
+
+    private async Task LoadValidationAsync()
+    {
+        if (job is null)
+        {
+            return;
+        }
+
+        rows = await Imports.ValidateAsync(job);
+        edits = rows.Select(RowEdit.From).ToList();
+    }
+
+    private async Task RevalidateAsync()
+    {
+        if (job is null)
+        {
+            return;
+        }
+
+        busy = true;
+        banner = null;
+        try
+        {
+            await Imports.SaveCorrectionsAsync(job, BuildCorrections());
+            await LoadValidationAsync();
+        }
+        catch (Exception ex)
+        {
+            banner = ex.Message;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task PersistAsync(bool includeOnlyValid)
+    {
+        if (job is null)
+        {
+            return;
+        }
+
+        busy = true;
+        banner = null;
+        try
+        {
+            await Imports.SaveCorrectionsAsync(job, BuildCorrections());
+            await LoadValidationAsync();
+            await Imports.PersistAsync(job, includeOnlyValid);
+            Navigation.NavigateTo("/health");
+        }
+        catch (Exception ex)
+        {
+            banner = ex.Message;
+            await LoadValidationAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private Dictionary<int, IReadOnlyDictionary<string, string>> BuildCorrections() =>
+        edits.ToDictionary(
+            row => row.SourceRowNumber,
+            row => (IReadOnlyDictionary<string, string>)new Dictionary<string, string>
+            {
+                [TransactionFields.Date] = row.Date,
+                [TransactionFields.Description] = row.Description,
+                [TransactionFields.Amount] = row.Amount,
+                [TransactionFields.Category] = row.Category,
+                [TransactionFields.Reference] = row.Reference,
+                [TransactionFields.Counterparty] = row.Counterparty
+            });
+
+    private sealed class RowEdit
+    {
+        public int SourceRowNumber { get; init; }
+        public string Date { get; set; } = "";
+        public string Description { get; set; } = "";
+        public string Amount { get; set; } = "";
+        public string Category { get; set; } = "";
+        public string Reference { get; set; } = "";
+        public string Counterparty { get; set; } = "";
+        public Dictionary<string, string> Errors { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+        public bool HasErrors => Errors.Count > 0;
+        public string? Error(string field) => Errors.TryGetValue(field, out var value) ? value : null;
+
+        public static RowEdit From(ValidatedImportRow row) => new()
+        {
+            SourceRowNumber = row.SourceRowNumber,
+            Date = row.Fields.GetValueOrDefault(TransactionFields.Date) ?? "",
+            Description = row.Fields.GetValueOrDefault(TransactionFields.Description) ?? "",
+            Amount = string.IsNullOrWhiteSpace(row.DisplayAmount)
+                ? row.Fields.GetValueOrDefault(TransactionFields.Amount) ?? ""
+                : row.DisplayAmount,
+            Category = row.Fields.GetValueOrDefault(TransactionFields.Category) ?? "",
+            Reference = row.Fields.GetValueOrDefault(TransactionFields.Reference) ?? "",
+            Counterparty = row.Fields.GetValueOrDefault(TransactionFields.Counterparty) ?? "",
+            Errors = row.Errors.ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.OrdinalIgnoreCase)
+        };
+    }
+}

@@ -6,13 +6,13 @@
       "value": "southafricanorth"
     },
     "namePrefix": {
-      "value": "cruxai"
+      "value": "vhonaai"
     },
     "sqlAdminLogin": {
-      "value": "cruxadmin"
+      "value": "vhonaadmin"
     },
     "sqlDatabaseName": {
-      "value": "cruxai"
+      "value": "vhonaai"
     },
     "appServiceSku": {
       "value": "B1"
