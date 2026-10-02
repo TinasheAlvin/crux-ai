@@ -17,7 +17,7 @@ public sealed class ClaimsCurrentUser : ICurrentUser
 
     public bool IsAuthenticated => User.Identity?.IsAuthenticated == true;
 
-    public Guid UserId => Guid.Parse(Require(ClaimTypes.NameIdentifier));
+    public Guid UserId => Guid.Parse(RequireFirst("crux_user_id", ClaimTypes.NameIdentifier));
 
     public Guid OrganizationId => Guid.Parse(Require("org_id"));
 
@@ -29,4 +29,18 @@ public sealed class ClaimsCurrentUser : ICurrentUser
 
     private string Require(string type) =>
         User.FindFirstValue(type) ?? string.Empty;
+
+    private string RequireFirst(params string[] types)
+    {
+        foreach (var type in types)
+        {
+            var value = User.FindFirstValue(type);
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                return value;
+            }
+        }
+
+        return string.Empty;
+    }
 }

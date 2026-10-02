@@ -25,6 +25,7 @@ public static class DemoAuthEndpoints
             var claims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new("crux_user_id", user.Id.ToString()),
                 new(ClaimTypes.Email, user.Email),
                 new(ClaimTypes.Name, user.DisplayName),
                 new("org_id", organization.Id.ToString()),
@@ -44,12 +45,6 @@ public static class DemoAuthEndpoints
 
             return Results.Redirect("/");
         }).AllowAnonymous();
-
-        endpoints.MapPost("/auth/logout", async (HttpContext http) =>
-        {
-            await http.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return Results.Redirect("/login");
-        });
 
         return endpoints;
     }

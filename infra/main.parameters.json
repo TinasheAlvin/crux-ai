@@ -1,0 +1,36 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "southafricanorth"
+    },
+    "namePrefix": {
+      "value": "cruxai"
+    },
+    "sqlAdminLogin": {
+      "value": "cruxadmin"
+    },
+    "sqlDatabaseName": {
+      "value": "cruxai"
+    },
+    "appServiceSku": {
+      "value": "B1"
+    },
+    "enableStagingSlot": {
+      "value": false
+    },
+    "enableKeyVault": {
+      "value": false
+    },
+    "enableAppInsights": {
+      "value": false
+    },
+    "authProvider": {
+      "value": "Demo"
+    },
+    "defaultOrganizationName": {
+      "value": "Harbour Street Studio"
+    }
+  }
+}
