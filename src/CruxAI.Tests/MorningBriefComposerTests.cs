@@ -41,6 +41,14 @@ public class MorningBriefComposerTests
     }
 
     [Fact]
+    public void Empty_hint_names_vhona_and_does_not_invent_a_digest()
+    {
+        Assert.Equal(
+            "Ask why for a cited answer. Vhona never fills a brief with a guessed digest.",
+            MorningBriefMessages.EmptyHint);
+    }
+
+    [Fact]
     public void Capture_freezes_visible_kpi_snapshot_metrics()
     {
         var transactions = new List<Transaction>

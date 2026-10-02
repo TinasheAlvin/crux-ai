@@ -1,4 +1,4 @@
-// Crux AI hosted demo. South Africa North, lean SKUs.
+// Vhona AI hosted demo. South Africa North, lean SKUs.
 // App Service Linux (.NET 8) + Azure SQL Basic + Blob. Optional Key Vault and App Insights.
 // Blazor Interactive Server needs WebSockets and ARR affinity, which App Service provides
 // without a container registry.

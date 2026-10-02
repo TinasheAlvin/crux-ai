@@ -8,7 +8,7 @@ public static class MorningBriefMessages
     public const string Cta = "Send me the morning brief";
     public const string Dismiss = "Not now";
     public const string Empty = "No verified brief today";
-    public const string EmptyHint = "Ask why for a cited answer. Crux never fills a brief with a guessed digest.";
+    public const string EmptyHint = "Ask why for a cited answer. Vhona never fills a brief with a guessed digest.";
     public const string AskWhy = "Ask why";
     public const string SheetTitle = "Get a morning brief";
     public const string SheetLede = "Yesterday’s snapshot plus one cited explanation. Never a multi-story digest.";

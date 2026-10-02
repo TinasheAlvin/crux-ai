@@ -1,4 +1,4 @@
-# Crux AI
+# Vhona AI
 
 CSV-first BI for South African service-business owners.
 
@@ -68,8 +68,8 @@ If you already ran an earlier slice, delete `src/CruxAI.Web/App_Data/cruxai.db` 
 2. Click **Use sample CSV** (or upload `testdata/sample-transactions.csv`). For a faster happy path with no broken cells, use `testdata/sample-transactions-clean.csv`.
 3. Confirm auto-guessed columns, then persist. The default sample has Feb + Mar 2026 rows and a few broken March cells — fix those in place, then persist.
 4. You land on **health KPIs**: revenue, expenses, and profit for the latest month in the file vs the previous month.
-5. **Cash is hidden** on this sample — there is no balance column, so Crux never shows a fake R0 cash card.
-6. Tap a KPI card. Crux seeds “Why did this change?” and answers from the Transaction store. The answer includes a **receipt** of the exact persisted RowIds (and columns such as Date, Description, Amount).
+5. **Cash is hidden** on this sample — there is no balance column, so Vhona never shows a fake R0 cash card.
+6. Tap a KPI card. Vhona seeds “Why did this change?” and answers from the Transaction store. The answer includes a **receipt** of the exact persisted RowIds (and columns such as Date, Description, Amount).
 7. Open the receipt to see those rows. Type a different question in the chat box (on Health or Why). If the question cannot be cited to RowIds, you get **Can't verify that yet.** and **Try another question** — never an uncited number or draft answer.
 8. After a **cited** why, an opt-in sheet appears with one primary CTA: **Send me the morning brief**. Dismiss it once with **Not now** and it will not come back (it is not buried in settings).
 9. Open **Home** or **Brief** (next visit). You get **yesterday’s snapshot KPIs** plus **one** receipted explanation and a receipt strip. If nothing can be cited: **No verified brief today** and a path back to **Ask why** — never a fake or multi-story digest.
@@ -355,4 +355,4 @@ Public landing page for **Vhona AI**: [https://tinashealvin.github.io/crux-ai/](
 
 ## License / product
 
-Product name: **Vhona** (branded **Vhona AI**).
+Product name: **Vhona AI**.
