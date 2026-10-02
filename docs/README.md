@@ -1,6 +1,6 @@
 # Vhona AI marketing site
 
-Static single-file landing page. GitHub Pages hosts it with no build step.
+Static landing page (`index.html`) and `stone.jpg`, the fitted-granite background. No build step.
 
 Enable Pages → **Deploy from a branch** → branch `main` → folder `/docs`.
 
