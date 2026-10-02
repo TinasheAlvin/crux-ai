@@ -351,8 +351,8 @@ Local `dotnet run --project src/CruxAI.Web --launch-profile http` is unchanged: 
 
 ## Marketing site
 
-Public landing page: [https://tinashealvin.github.io/crux-ai/](https://tinashealvin.github.io/crux-ai/) — source in [`docs/`](docs/).
+Public landing page for **Vhona AI**: [https://tinashealvin.github.io/crux-ai/](https://tinashealvin.github.io/crux-ai/). Source in [`docs/`](docs/).
 
 ## License / product
 
-Product name: **Crux AI**.
+Product name: **Vhona** (branded **Vhona AI**).
