@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script>document.documentElement.classList.add("js");</script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PulseChat by Vhona AI: WhatsApp bot cost per enquiry</title>
@@ -159,97 +160,377 @@
     .reassure { display: flex; flex-wrap: wrap; gap: 0.9rem 1.25rem; color: var(--stone); font-size: 0.92rem; }
     .reassure span { display: inline-flex; align-items: center; gap: 0.4rem; }
     .reassure svg { color: var(--teal); flex: none; }
-    .panel {
-      background: var(--paper);
-      border: 1px solid rgba(28, 25, 23, 0.06);
-      border-radius: 1.25rem;
-      box-shadow: 0 24px 60px rgba(28, 25, 23, 0.12);
-      padding: 1.15rem 1.15rem 1rem;
+    .pc-card {
+      margin: 0;
+      background: linear-gradient(180deg, #fbf8f2 0%, var(--cream) 100%);
+      border: 1px solid rgba(184, 149, 106, 0.55);
+      border-radius: 1.15rem;
+      box-shadow: 0 16px 36px rgba(28, 25, 23, 0.08);
+      color: var(--indigo);
+      overflow: hidden;
     }
-    .panel-top {
+    .pc-wide { max-width: 56rem; margin: 2rem auto 0; }
+    .pc-body { padding: 1.05rem 1.1rem 0.2rem; }
+    .pc-head {
       display: flex;
       justify-content: space-between;
       gap: 0.75rem;
       align-items: flex-start;
       margin-bottom: 0.85rem;
     }
-    .panel-kicker {
-      font-size: 0.68rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--teal);
-      margin-bottom: 0.25rem;
-    }
-    .panel h2 {
-      font-family: var(--sans);
-      font-size: 1.2rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-    .panel-sub { color: var(--muted); font-size: 0.92rem; margin-top: 0.15rem; }
-    .mock-pill {
-      flex: none;
-      background: var(--cream-deep);
-      border: 1px solid var(--line);
-      color: var(--stone);
-      border-radius: 999px;
-      padding: 0.28rem 0.6rem;
+    .pc-kicker {
       font-size: 0.72rem;
       font-weight: 700;
-      letter-spacing: 0.01em;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--brass);
+      margin-bottom: 0.28rem;
+    }
+    .pc-card h2,
+    .pc-card h3 {
+      font-family: var(--sans);
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--indigo);
+    }
+    .pc-badge {
+      flex: none;
+      align-self: flex-start;
+      max-width: 12rem;
+      background: var(--cream-deep);
+      border: 1px solid rgba(184, 149, 106, 0.55);
+      color: var(--indigo);
+      border-radius: 999px;
+      padding: 0.28rem 0.65rem;
+      font-size: 0.72rem;
+      font-weight: 700;
       line-height: 1.3;
       text-align: center;
-      max-width: 11rem;
     }
-    .chart {
-      background: #f6f3ec;
-      border-radius: 0.9rem;
-      padding: 0.85rem 0.85rem 0.7rem;
-    }
-    .chart svg { display: block; width: 100%; height: auto; }
-    .chart-axis {
-      display: flex;
-      justify-content: space-between;
-      color: var(--stone);
-      font-size: 0.75rem;
-      font-weight: 600;
-      margin-top: 0.25rem;
-    }
-    .stat-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.7rem;
-      margin-top: 0.85rem;
-    }
-    .stat {
-      border: 1px solid var(--line);
-      border-radius: 0.85rem;
-      padding: 0.75rem 0.8rem;
-    }
-    .stat-label { font-size: 0.82rem; font-weight: 700; line-height: 1.3; }
-    .stat-value { margin-top: 0.3rem; color: var(--muted); font-size: 0.88rem; }
-    .mock-caption {
-      margin-top: 0.8rem;
+    .pc-card figcaption,
+    .pc-note {
+      padding: 0.75rem 1.1rem 1rem;
       color: var(--stone);
       font-size: 0.82rem;
     }
-    .shot { margin: 0; }
-    .shot img {
+    .path-strip .pc-head { justify-content: flex-end; }
+    .pc-primary {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 0.15rem;
+    }
+    .pc-spend {
+      font-family: var(--serif);
+      font-weight: 560;
+      font-size: clamp(1.85rem, 3vw, 2.35rem);
+      letter-spacing: -0.03em;
+      color: var(--indigo);
+      line-height: 1.1;
+    }
+    .pc-spend span {
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0;
+    }
+    .pc-trend {
+      margin-top: 0.35rem;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+    .pc-trend i {
+      color: var(--brass);
+      font-style: normal;
+      font-weight: 700;
+      margin-right: 0.2rem;
+    }
+    .pc-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.7rem;
+      margin-top: 0.95rem;
+    }
+    .pc-stat {
+      background: var(--cream-deep);
+      border: 1px solid rgba(184, 149, 106, 0.35);
+      border-radius: 0.85rem;
+      padding: 0.75rem 0.8rem;
+    }
+    .pc-stat p { font-size: 0.82rem; font-weight: 700; line-height: 1.3; color: var(--indigo); }
+    .pc-stat strong {
       display: block;
+      margin-top: 0.35rem;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--teal-dark);
+    }
+    .pc-stat span { font-weight: 600; color: var(--muted); font-size: 0.82rem; }
+    .mix-well {
+      background: var(--cream-deep);
+      border-radius: 0.9rem;
+      padding: 0.85rem 0.75rem 0.7rem;
+      border-top: 1px solid rgba(184, 149, 106, 0.35);
+    }
+    .mix-bars {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      align-items: end;
+      height: 9.5rem;
+    }
+    .mix-col {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 0.35rem;
+      height: 100%;
+      min-width: 0;
+    }
+    .mix-plot {
+      flex: 1 1 auto;
       width: 100%;
-      height: auto;
-      border-radius: 1rem;
-      border: 1px solid rgba(28, 25, 23, 0.08);
-      box-shadow: 0 18px 48px rgba(28, 25, 23, 0.12);
-      background: #fff;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      min-height: 0;
     }
-    .shot figcaption {
-      margin-top: 0.7rem;
+    .mix-col i {
+      display: block;
+      width: min(100%, 4.25rem);
+      height: var(--h);
+      border-radius: 0.5rem 0.5rem 0.15rem 0.15rem;
+      transform-origin: left bottom;
+      transform: scaleY(1);
+    }
+    .mix-col:nth-child(1) i { background: linear-gradient(180deg, var(--teal), var(--teal-dark)); }
+    .mix-col:nth-child(2) i { background: var(--brass); }
+    .mix-col:nth-child(3) i { background: rgba(87, 83, 78, 0.55); }
+    .mix-col span { font-size: 0.88rem; font-weight: 700; color: var(--indigo); }
+    .mix-col em {
+      font-style: normal;
+      font-size: 0.75rem;
+      font-weight: 600;
       color: var(--stone);
-      font-size: 0.86rem;
     }
-    .shot-wide { max-width: 56rem; margin: 2rem auto 0; }
+    .journey-wrap { overflow-x: auto; margin-top: 0.95rem; }
+    .journey-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+      min-width: 32rem;
+    }
+    .journey-table th {
+      text-align: left;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--teal-dark);
+      font-weight: 700;
+      padding: 0.45rem 0.55rem;
+      border-bottom: 1px solid rgba(184, 149, 106, 0.45);
+    }
+    .journey-table tbody th {
+      font-size: 0.92rem;
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--charcoal);
+      font-weight: 700;
+      padding: 0.7rem 0.55rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .journey-table td {
+      padding: 0.7rem 0.55rem;
+      border-bottom: 1px solid var(--line);
+      color: var(--charcoal);
+      background: transparent;
+    }
+    .journey-table .flag {
+      color: var(--brass);
+      font-weight: 700;
+    }
+    .path-strip { margin-top: 2rem; }
+    .path-steps {
+      list-style: none;
+      display: grid;
+      gap: 0.65rem;
+    }
+    .path-step {
+      border-radius: 1.05rem;
+      padding: 0.85rem 0.9rem 0.95rem;
+      background: transparent;
+    }
+    .path-step .path-num {
+      width: 2.1rem;
+      height: 2.1rem;
+      margin-bottom: 0.55rem;
+      border-radius: 999px;
+      border: 1.5px solid rgba(28, 25, 23, 0.16);
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      color: var(--charcoal);
+      background: rgba(255, 252, 248, 0.65);
+      transition: border-color 0.45s ease, color 0.45s ease, box-shadow 0.45s ease, background-color 0.45s ease;
+    }
+    .path-step strong { display: block; color: var(--indigo); margin-bottom: 0.2rem; }
+    .path-step p { color: var(--muted); font-size: 0.95rem; }
+    .path-step.is-on {
+      background: rgba(255, 252, 248, 0.92);
+      box-shadow:
+        0 0 0 1px rgba(13, 148, 136, 0.72),
+        0 0 0 4px rgba(184, 149, 106, 0.34),
+        0 12px 28px rgba(13, 148, 136, 0.15);
+    }
+    .path-step.is-on .path-num {
+      border-color: var(--teal);
+      color: var(--teal-dark);
+      background: #fff;
+      box-shadow: 0 8px 18px rgba(13, 148, 136, 0.16);
+    }
+    .memo-chrome {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 0.45rem 1rem;
+      align-items: center;
+      background: var(--teal-dark);
+      color: #fff;
+      padding: 0.7rem 1.1rem;
+      border-radius: 1.15rem 1.15rem 0 0;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+    .memo-chrome .pc-badge {
+      background: var(--cream);
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .memo-org {
+      font-family: var(--serif);
+      font-weight: 560;
+      font-size: 1.35rem;
+      letter-spacing: -0.03em;
+      color: var(--indigo);
+      margin-bottom: 0.85rem;
+    }
+    .memo-block { margin-top: 1rem; }
+    .memo-block h3 {
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--teal-dark);
+      margin-bottom: 0.45rem;
+    }
+    .memo-block ul,
+    .memo-block ol {
+      display: grid;
+      gap: 0.45rem;
+      padding-left: 1.15rem;
+      color: var(--charcoal);
+      font-size: 0.98rem;
+    }
+    .memo-block li { line-height: 1.4; }
+    .flip {
+      display: none;
+      position: relative;
+      min-height: 1.45em;
+    }
+    .flip-face {
+      grid-area: 1 / 1;
+      opacity: 0;
+      transition: opacity 0.7s ease;
+    }
+    .flip-face.is-then { opacity: 1; }
+    .flip.is-now .flip-face.is-then { opacity: 0; }
+    .flip.is-now .flip-face.is-now { opacity: 1; }
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    .js .settle {
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.55s ease, transform 0.55s ease;
+    }
+    .js .settle.is-in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .js .mix-col i {
+      transform: scaleY(0);
+      transition: transform 0.7s ease-out;
+    }
+    .js .pc-b.is-in .mix-col i { transform: scaleY(1); }
+    .js .journey-row {
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.55s ease, transform 0.55s ease, background-color 0.15s ease;
+      transition-delay: calc(var(--i, 0) * 70ms);
+    }
+    .js .pc-b.is-in .journey-row {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .js .pc-b.is-in .journey-row:hover { transform: translateY(-2px); }
+    .js .path-step.is-on { transform: translateY(-4px); }
+    .js .flip { display: grid; }
+    .js .pc-d .flip-read {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .js .settle,
+      .js .settle.is-in,
+      .js .mix-col i,
+      .js .pc-b.is-in .mix-col i,
+      .js .journey-row,
+      .js .pc-b.is-in .journey-row,
+      .js .pc-b.is-in .journey-row:hover,
+      .js .path-step.is-on {
+        opacity: 1;
+        transform: none;
+        transition: none;
+        animation: none;
+      }
+      .path-step.is-on {
+        background: transparent;
+        box-shadow: none;
+      }
+      .path-step.is-on .path-num {
+        border-color: rgba(28, 25, 23, 0.16);
+        color: var(--charcoal);
+        background: rgba(255, 252, 248, 0.65);
+        box-shadow: none;
+      }
+      .js .flip { display: none; }
+      .js .pc-d .flip-read {
+        position: static;
+        width: auto;
+        height: auto;
+        margin: 0;
+        overflow: visible;
+        clip: auto;
+        white-space: normal;
+      }
+    }
     section.block { padding: 4.25rem 0; }
     .eyebrow {
       font-size: 0.75rem;
@@ -288,39 +569,6 @@
     }
     .card h3 { font-size: 1.15rem; margin-bottom: 0.4rem; }
     .card p { color: var(--muted); font-size: 0.98rem; }
-    .mix {
-      margin-top: 1.25rem;
-      background: var(--paper);
-      border: 1px solid var(--line);
-      border-radius: 1.15rem;
-      padding: 1.15rem 1.2rem 1rem;
-    }
-    .mix-head {
-      display: flex;
-      justify-content: space-between;
-      gap: 0.75rem;
-      align-items: flex-start;
-      margin-bottom: 1rem;
-    }
-    .mix h3 { font-size: 1.05rem; }
-    .mix-note { color: var(--muted); font-size: 0.92rem; margin-top: 0.2rem; }
-    .mix-bars {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0.85rem;
-      align-items: end;
-      min-height: 9.5rem;
-      padding: 0.5rem 0.25rem 0;
-      border-top: 1px solid var(--line);
-    }
-    .mix-bars div { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 0.55rem; height: 9.5rem; }
-    .mix-bars i {
-      display: block;
-      width: min(100%, 4.5rem);
-      border-radius: 0.55rem 0.55rem 0.2rem 0.2rem;
-      background: linear-gradient(180deg, var(--teal), var(--teal-dark));
-    }
-    .mix-bars span { font-size: 0.88rem; font-weight: 700; color: #3c3833; }
     .steps { display: grid; gap: 1.25rem; margin-top: 2.5rem; }
     .step { text-align: center; }
     .step-num {
@@ -337,72 +585,6 @@
     .step h3 { font-size: 1.05rem; margin-bottom: 0.35rem; }
     .step p { color: var(--muted); font-size: 0.98rem; }
     .arrow { display: none; color: #b7b0a4; align-self: center; }
-    .memo {
-      max-width: 44rem;
-      margin: 2.25rem auto 0;
-      background: var(--paper);
-      border: 1px solid rgba(28, 25, 23, 0.08);
-      border-radius: 1rem;
-      box-shadow: 0 18px 40px rgba(28, 25, 23, 0.08);
-      overflow: hidden;
-    }
-    .memo-bar {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      gap: 0.4rem 1rem;
-      background: var(--teal-dark);
-      color: #f8f5ef;
-      padding: 0.7rem 1.15rem;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-    .memo-body { padding: 1.35rem 1.25rem 0.4rem; }
-    .memo-kicker {
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--teal);
-      margin-bottom: 0.4rem;
-    }
-    .memo h3 {
-      font-family: var(--serif);
-      font-weight: 560;
-      font-size: 1.65rem;
-      letter-spacing: -0.03em;
-      margin-bottom: 0.45rem;
-    }
-    .memo-lead { color: var(--muted); margin-bottom: 1.1rem; }
-    .memo ol { list-style: none; display: grid; gap: 0.85rem; }
-    .memo li {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 0.75rem;
-      align-items: start;
-      padding-top: 0.85rem;
-      border-top: 1px solid var(--line);
-    }
-    .memo li b {
-      width: 1.6rem;
-      height: 1.6rem;
-      border-radius: 999px;
-      display: grid;
-      place-items: center;
-      background: var(--cream-deep);
-      color: var(--teal-dark);
-      font-size: 0.82rem;
-    }
-    .memo li strong { display: block; margin-bottom: 0.15rem; }
-    .memo li span { color: var(--muted); font-size: 0.95rem; }
-    .memo figcaption, .mix figcaption {
-      padding: 0.9rem 1.2rem 1rem;
-      color: var(--stone);
-      font-size: 0.86rem;
-    }
-    .mix figcaption { padding: 0.85rem 0 0; }
     .band-wrap { padding: 0 0 4.5rem; }
     .band {
       background: var(--indigo);
@@ -491,7 +673,8 @@
       .band-top { grid-template-columns: 1.05fr 1.2fr; }
       .form-row { grid-template-columns: 1fr 1fr; }
       .footer-inner { grid-template-columns: 1.4fr 1fr 1fr; align-items: start; }
-      .memo-body { padding: 1.5rem 1.5rem 0.35rem; }
+      .path-steps { grid-template-columns: repeat(3, 1fr); }
+      .pc-body { padding: 1.15rem 1.25rem 0.35rem; }
     }
     @media (max-width: 799px) {
       .nav-inner { grid-template-columns: 1fr auto; }
@@ -503,8 +686,8 @@
         -webkit-mask-image: linear-gradient(180deg, transparent, #000 40%);
         mask-image: linear-gradient(180deg, transparent, #000 40%);
       }
-      .stat-row { grid-template-columns: 1fr; }
-      .panel-top, .mix-head { flex-direction: column; }
+      .pc-stats { grid-template-columns: 1fr; }
+      .pc-head, .memo-chrome { flex-direction: column; align-items: flex-start; }
     }
   </style>
 </head>
@@ -549,9 +732,30 @@
           </div>
         </div>
 
-        <figure class="shot">
-          <img src="../pulsechat-mocks/01-home.jpg" alt="Illustrative PulseChat home layout by Vhona AI. Not live billing data." />
-          <figcaption>Illustrative mock — not live billing data. Mock UI — not a live product. PulseChat by Vhona AI. Buttons and figures inside the picture are sample chrome, not actions on this page.</figcaption>
+        <figure class="pc-card pc-a settle" data-settle>
+          <div class="pc-body">
+            <div class="pc-head">
+              <div>
+                <p class="pc-kicker">Example month</p>
+                <h2>Conversation cost overview</h2>
+              </div>
+              <p class="pc-badge">Sample · not live billing</p>
+            </div>
+            <p class="pc-primary">Est. spend after free allowance</p>
+            <p class="pc-spend">R4.2k <span>(sample)</span></p>
+            <p class="pc-trend"><i aria-hidden="true">▲</i>vs prior month · sample trend up</p>
+            <div class="pc-stats">
+              <div class="pc-stat">
+                <p>Messages per resolved enquiry</p>
+                <strong>~1.8 <span>(sample)</span></strong>
+              </div>
+              <div class="pc-stat">
+                <p>Journeys flagged wastey</p>
+                <strong>3 <span>(sample)</span></strong>
+              </div>
+            </div>
+          </div>
+          <figcaption>Illustrative layout. Not a customer bill. PulseChat by Vhona AI.</figcaption>
         </figure>
       </div>
     </section>
@@ -586,9 +790,67 @@
             <p>See which journeys people finish, where they stall, and who the conversations are for.</p>
           </article>
         </div>
-        <figure class="shot shot-wide">
-          <img src="../pulsechat-mocks/02-product.jpg" alt="Illustrative PulseChat view of message mix and journeys. Not live billing data." />
-          <figcaption>Illustrative mock — not live billing data. Mock UI — not a live product. PulseChat by Vhona AI. Buttons and figures inside the picture are sample chrome, not actions on this page.</figcaption>
+        <figure class="pc-card pc-b pc-wide settle" data-settle>
+          <div class="pc-body">
+            <div class="pc-head">
+              <h2>Message mix &amp; journey cost</h2>
+              <p class="pc-badge">Sample · not live billing</p>
+            </div>
+            <div class="mix-well">
+              <div class="mix-bars" aria-hidden="true">
+                <div class="mix-col">
+                  <div class="mix-plot"><i style="--h: 92%"></i></div>
+                  <span>Service</span>
+                  <em>highest</em>
+                </div>
+                <div class="mix-col">
+                  <div class="mix-plot"><i style="--h: 58%"></i></div>
+                  <span>Utility</span>
+                  <em>mid</em>
+                </div>
+                <div class="mix-col">
+                  <div class="mix-plot"><i style="--h: 32%"></i></div>
+                  <span>Marketing</span>
+                  <em>lowest</em>
+                </div>
+              </div>
+            </div>
+            <p class="visually-hidden">Sample message mix, labels only. Service is highest, Utility is mid, Marketing is lowest. Bar heights are illustrative.</p>
+            <div class="journey-wrap">
+              <table class="journey-table">
+                <caption class="visually-hidden">Sample journeys. Figures are example shapes, not Meta rates or a real account.</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Journey</th>
+                    <th scope="col">Msgs / ticket</th>
+                    <th scope="col">Est. relative cost</th>
+                    <th scope="col">Flag</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="journey-row" style="--i: 0">
+                    <th scope="row">Order status</th>
+                    <td>Low</td>
+                    <td>Low</td>
+                    <td>—</td>
+                  </tr>
+                  <tr class="journey-row" style="--i: 1">
+                    <th scope="row">Password reset</th>
+                    <td>Mid</td>
+                    <td>Mid</td>
+                    <td>—</td>
+                  </tr>
+                  <tr class="journey-row" style="--i: 2">
+                    <th scope="row">Returns &amp; refund</th>
+                    <td>High</td>
+                    <td>High</td>
+                    <td class="flag">Wastey multi-bubble</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <figcaption>Illustrative. Figures are example shapes, not Meta rates or a real account.</figcaption>
         </figure>
       </div>
     </section>
@@ -623,10 +885,32 @@
             <p>Cut the waste and ask better questions. Leave with a note finance can use.</p>
           </article>
         </div>
-        <figure class="shot shot-wide">
-          <img src="../pulsechat-mocks/03-how-it-works.jpg" alt="Illustrative three-step PulseChat path: connect, measure, act. Not live billing data." />
-          <figcaption>Illustrative mock — not live billing data. Mock UI — not a live product. PulseChat by Vhona AI. Buttons and figures inside the picture are sample chrome, not actions on this page.</figcaption>
-        </figure>
+        <div class="pc-card path-strip pc-wide" id="sample-path">
+          <div class="pc-body">
+            <div class="pc-head">
+              <h2 class="visually-hidden">Sample path</h2>
+              <p class="pc-badge">Sample path</p>
+            </div>
+            <ol class="path-steps">
+              <li class="path-step">
+                <div class="path-num">1</div>
+                <strong>Connect</strong>
+                <p>BSP export or CSV</p>
+              </li>
+              <li class="path-step">
+                <div class="path-num">2</div>
+                <strong>See cost &amp; waste</strong>
+                <p>map messages → journeys</p>
+              </li>
+              <li class="path-step">
+                <div class="path-num">3</div>
+                <strong>Act</strong>
+                <p>note finance can use</p>
+              </li>
+            </ol>
+          </div>
+          <p class="pc-note">Illustrative path. Not a live account.</p>
+        </div>
       </div>
     </section>
 
@@ -635,11 +919,47 @@
         <div class="center">
           <p class="eyebrow">Mock proof</p>
           <h2 class="serif">The note finance actually reads.</h2>
-          <p class="lede">A sample exposure memo. The picture is a layout study for PulseChat by Vhona AI, not a customer file and not a bill.</p>
+          <p class="lede">A sample exposure memo. This layout is a study for PulseChat by Vhona AI, not a customer file and not a bill.</p>
         </div>
-        <figure class="shot shot-wide">
-          <img src="../pulsechat-mocks/04-sample-memo.jpg" alt="Illustrative WhatsApp exposure memo for PulseChat by Vhona AI. Not live billing data." />
-          <figcaption>Illustrative mock — not live billing data. Mock UI — not a live product. PulseChat by Vhona AI. Buttons and figures inside the picture are sample chrome, not actions on this page.</figcaption>
+        <figure class="pc-card pc-d pc-wide settle" data-settle>
+          <div class="memo-chrome">
+            <p>PulseChat · Sample exposure memo · October</p>
+            <p class="pc-badge">Sample · not a customer file</p>
+          </div>
+          <div class="pc-body">
+            <p class="memo-org">Sample Logistics SA (fictional)</p>
+            <div class="memo-block">
+              <h3>Executive summary</h3>
+              <ul>
+                <li>Lump bill view answers “what did we pay?”</li>
+                <li>This note answers “cost per resolved enquiry” and which journeys burn messages.</li>
+                <li>Example shape: high share of spend in a few repetitive journeys (not a quote).</li>
+              </ul>
+            </div>
+            <div class="memo-block">
+              <h3>Top waste journeys</h3>
+              <ol>
+                <li>Proof-of-delivery / “where is my order?” loops</li>
+                <li>Rate &amp; quote back-and-forth</li>
+                <li>Delivery ETA / delay updates</li>
+              </ol>
+            </div>
+            <div class="memo-block">
+              <h3>Recommended redesigns</h3>
+              <ul>
+                <li>
+                  <span class="flip" data-flip aria-hidden="true">
+                    <span class="flip-face is-then">Then · five bubbles for status</span>
+                    <span class="flip-face is-now">Now · one message + buttons</span>
+                  </span>
+                  <span class="flip-read">One message + buttons instead of five bubbles for status</span>
+                </li>
+                <li>Proactive ETA template where allowed</li>
+                <li>Self-serve quote path for repeat questions</li>
+              </ul>
+            </div>
+          </div>
+          <figcaption>Sample memo layout for sales conversations. Not a real customer file. Not a Meta invoice.</figcaption>
         </figure>
       </div>
     </section>
@@ -725,6 +1045,204 @@
           encodeURIComponent("Vhona AI: PulseChat request a conversation") +
           "&body=" + encodeURIComponent(lines.join("\n"));
       });
+    })();
+    (function () {
+      var reduceQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+      var STEP_MS = 2200;
+      function reduced() { return reduceQuery.matches; }
+
+      var settles = Array.prototype.slice.call(document.querySelectorAll("[data-settle]"));
+      var revealIo = null;
+      function revealAll() {
+        settles.forEach(function (node) { node.classList.add("is-in"); });
+      }
+      function armReveal() {
+        if (!settles.length || reduced() || !("IntersectionObserver" in window)) {
+          revealAll();
+          return;
+        }
+        if (revealIo) return;
+        revealIo = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.intersectionRatio < 0.25) return;
+            entry.target.classList.add("is-in");
+            revealIo.unobserve(entry.target);
+          });
+        }, { threshold: 0.25 });
+        settles.forEach(function (node) {
+          if (!node.classList.contains("is-in")) revealIo.observe(node);
+        });
+      }
+
+      var strip = document.getElementById("sample-path");
+      var steps = strip ? Array.prototype.slice.call(strip.querySelectorAll(".path-step")) : [];
+      var spineIndex = 0;
+      var spineTimer = 0;
+      var spineStarted = 0;
+      var spineRemaining = STEP_MS;
+      var spineInView = false;
+      var spineHover = false;
+      var spineFocus = false;
+
+      function paintSpine() {
+        steps.forEach(function (step, index) {
+          step.classList.toggle("is-on", !reduced() && spineInView && index === spineIndex);
+        });
+      }
+      function spineRunning() {
+        return steps.length && !reduced() && spineInView && document.visibilityState !== "hidden" && !spineHover && !spineFocus;
+      }
+      function clearSpineTimer() {
+        if (!spineTimer) return;
+        spineRemaining -= performance.now() - spineStarted;
+        if (spineRemaining < 32) spineRemaining = 32;
+        window.clearTimeout(spineTimer);
+        spineTimer = 0;
+      }
+      function armSpine() {
+        if (spineTimer || !spineRunning()) return;
+        spineStarted = performance.now();
+        spineTimer = window.setTimeout(function () {
+          spineTimer = 0;
+          spineIndex = (spineIndex + 1) % steps.length;
+          spineRemaining = STEP_MS;
+          paintSpine();
+          armSpine();
+        }, spineRemaining);
+      }
+      function syncSpine() {
+        if (!steps.length) return;
+        if (spineRunning()) armSpine();
+        else clearSpineTimer();
+        paintSpine();
+      }
+      function bindSpine() {
+        if (!strip || !steps.length) return;
+        if (!reduced()) {
+          steps.forEach(function (step) { step.setAttribute("tabindex", "0"); });
+        }
+        strip.addEventListener("pointerenter", function () {
+          spineHover = true;
+          syncSpine();
+        });
+        strip.addEventListener("pointerleave", function () {
+          spineHover = false;
+          syncSpine();
+        });
+        strip.addEventListener("focusin", function () {
+          spineFocus = true;
+          syncSpine();
+        });
+        strip.addEventListener("focusout", function (event) {
+          if (strip.contains(event.relatedTarget)) return;
+          spineFocus = false;
+          syncSpine();
+        });
+        if ("IntersectionObserver" in window) {
+          var spineIo = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) { spineInView = entry.intersectionRatio >= 0.25; });
+            syncSpine();
+          }, { threshold: [0, 0.25] });
+          spineIo.observe(strip);
+        }
+      }
+
+      var memo = document.querySelector(".pc-d");
+      var flip = document.querySelector("[data-flip]");
+      var flipTimer = 0;
+      var flipStarted = 0;
+      var flipRemaining = STEP_MS;
+      var flipInView = false;
+      var flipHover = false;
+      var flipFocus = false;
+
+      function flipRunning() {
+        return !!(flip && !reduced() && flipInView && document.visibilityState !== "hidden" && !flipHover && !flipFocus);
+      }
+      function clearFlipTimer() {
+        if (!flipTimer) return;
+        flipRemaining -= performance.now() - flipStarted;
+        if (flipRemaining < 32) flipRemaining = 32;
+        window.clearTimeout(flipTimer);
+        flipTimer = 0;
+      }
+      function armFlip() {
+        if (flipTimer || !flipRunning()) return;
+        flipStarted = performance.now();
+        flipTimer = window.setTimeout(function () {
+          flipTimer = 0;
+          flip.classList.toggle("is-now");
+          flipRemaining = STEP_MS;
+          armFlip();
+        }, flipRemaining);
+      }
+      function syncFlip() {
+        if (!flip) return;
+        if (flipRunning()) armFlip();
+        else clearFlipTimer();
+        if (reduced()) flip.classList.remove("is-now");
+      }
+      function bindFlip() {
+        if (!memo || !flip) return;
+        if (!reduced()) memo.setAttribute("tabindex", "0");
+        memo.addEventListener("pointerenter", function () {
+          flipHover = true;
+          syncFlip();
+        });
+        memo.addEventListener("pointerleave", function () {
+          flipHover = false;
+          syncFlip();
+        });
+        memo.addEventListener("focusin", function () {
+          flipFocus = true;
+          syncFlip();
+        });
+        memo.addEventListener("focusout", function (event) {
+          if (memo.contains(event.relatedTarget)) return;
+          flipFocus = false;
+          syncFlip();
+        });
+        if ("IntersectionObserver" in window) {
+          var flipIo = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) { flipInView = entry.intersectionRatio >= 0.25; });
+            syncFlip();
+          }, { threshold: [0, 0.25] });
+          flipIo.observe(memo);
+        }
+      }
+
+      function onReduceChange() {
+        if (reduced()) {
+          clearSpineTimer();
+          clearFlipTimer();
+          steps.forEach(function (step) {
+            step.classList.remove("is-on");
+            step.removeAttribute("tabindex");
+          });
+          if (memo) memo.removeAttribute("tabindex");
+          if (flip) flip.classList.remove("is-now");
+          spineHover = false;
+          spineFocus = false;
+          flipHover = false;
+          flipFocus = false;
+          revealAll();
+          return;
+        }
+        steps.forEach(function (step) { step.setAttribute("tabindex", "0"); });
+        if (memo) memo.setAttribute("tabindex", "0");
+        syncSpine();
+        syncFlip();
+      }
+
+      armReveal();
+      bindSpine();
+      bindFlip();
+      document.addEventListener("visibilitychange", function () {
+        syncSpine();
+        syncFlip();
+      });
+      if (reduceQuery.addEventListener) reduceQuery.addEventListener("change", onReduceChange);
+      else if (reduceQuery.addListener) reduceQuery.addListener(onReduceChange);
     })();
   </script>
 </body>
