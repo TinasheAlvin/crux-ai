@@ -1,6 +1,8 @@
 # Vhona AI marketing site
 
-Static landing page (`index.html`) and `stone.jpg`, the fitted-granite background. No build step.
+Static landing page (`index.html`) with Great Zimbabwe dry-stone photographs: `hero-dry-stone.jpg` (hero, right-weighted, faded into the cream canvas) and `footer-dry-stone.jpg` (full-width opaque footer). No build step. No mosaic artwork.
+
+The photographs are the Great Enclosure wall at Great Zimbabwe, by Jens Klinzing, [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) ([source](https://commons.wikimedia.org/wiki/File:Wall_of_the_great_enclosure,_Great_Zimbabwe.JPG)).
 
 Enable Pages → **Deploy from a branch** → branch `main` → folder `/docs`.
 
