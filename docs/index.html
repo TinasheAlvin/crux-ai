@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script>document.documentElement.classList.add("js");</script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Vhona AI: business intelligence for South African service SMBs</title>
@@ -417,6 +418,167 @@
       .form-row { grid-template-columns: 1fr 1fr; }
       .footer-inner { grid-template-columns: 1.4fr 1fr 1fr; align-items: start; }
     }
+    .path-step {
+      border-radius: 1.05rem;
+      padding: 0.7rem 0 0.85rem;
+    }
+    .path-step .icon-circle {
+      transition: border-color 0.45s ease, color 0.45s ease, box-shadow 0.45s ease, background-color 0.45s ease;
+    }
+    .path-step.is-on {
+      background: rgba(255, 252, 248, 0.92);
+      box-shadow:
+        0 0 0 1px rgba(13, 148, 136, 0.72),
+        0 0 0 4px rgba(184, 149, 106, 0.34),
+        0 12px 28px rgba(13, 148, 136, 0.15);
+    }
+    .path-step.is-on .icon-circle {
+      border-color: var(--teal);
+      color: var(--teal-dark);
+      background: #fff;
+      box-shadow: 0 8px 18px rgba(13, 148, 136, 0.16);
+    }
+    .product-demo {
+      max-width: 34rem;
+      margin: 2.75rem auto 0;
+    }
+    .product-demo-card {
+      background: linear-gradient(180deg, #fbf8f2 0%, var(--cream) 100%);
+      border: 1px solid rgba(184, 149, 106, 0.55);
+      border-radius: 1.15rem;
+      box-shadow: 0 16px 36px rgba(28, 25, 23, 0.08);
+      padding: 1rem 1.1rem 1.15rem;
+    }
+    .product-demo-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.85rem;
+    }
+    .product-demo-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--brass);
+    }
+    .product-demo-pill {
+      flex: 0 0 5.25rem;
+      height: 0.4rem;
+      border-radius: 999px;
+      background: rgba(28, 25, 23, 0.08);
+      border: 1px solid rgba(184, 149, 106, 0.35);
+      overflow: hidden;
+    }
+    .product-demo-pill i {
+      display: block;
+      height: 100%;
+      width: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--teal-dark), var(--teal) 58%, var(--brass));
+      transform: scaleX(0);
+      transform-origin: left center;
+    }
+    .product-demo-stage { display: grid; }
+    .demo-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .demo-copy { color: var(--muted); font-size: 0.92rem; }
+    .product-demo-face .rule {
+      margin-top: 0.75rem;
+      padding-top: 0.7rem;
+      border-top: 1px solid var(--line);
+    }
+    .product-demo-face .rule strong {
+      display: block;
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--teal-dark);
+      margin-bottom: 0.15rem;
+    }
+    .product-demo-face .rule p { font-size: 0.84rem; color: var(--muted); }
+    .js .lift {
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.55s ease, transform 0.55s ease;
+      transition-delay: calc(var(--i, 0) * 70ms);
+    }
+    .js .lift.is-in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .js .path-step.lift {
+      transition: opacity 0.55s ease, transform 0.55s ease, box-shadow 0.45s ease, background-color 0.45s ease;
+    }
+    .js .path-step.lift.is-in.is-on { transform: translateY(-4px); }
+    .hero-grid > .lift:nth-child(1) { --i: 0; }
+    .hero-grid > .lift:nth-child(2) { --i: 1; }
+    .connectors .wrap > .lift:nth-child(1) { --i: 0; }
+    .connectors .wrap > .lift:nth-child(2) { --i: 1; }
+    #product > .center.lift { --i: 0; }
+    .path-row > .lift:nth-child(1) { --i: 0; }
+    .path-row > .lift:nth-child(2) { --i: 1; }
+    .path-row > .lift:nth-child(3) { --i: 2; }
+    .path-row > .lift:nth-child(4) { --i: 3; }
+    .path-row > .lift:nth-child(5) { --i: 4; }
+    #product > .product-demo.lift { --i: 2; }
+    #about .pillars > .lift:nth-child(1) { --i: 0; }
+    #about .pillars > .lift:nth-child(2) { --i: 1; }
+    #about .pillars > .lift:nth-child(3) { --i: 2; }
+    .footer-inner > .lift:nth-child(1) { --i: 0; }
+    .footer-inner > .lift:nth-child(2) { --i: 1; }
+    .footer-inner > .lift:nth-child(3) { --i: 2; }
+    .js .product-demo-face {
+      grid-area: 1 / 1;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 350ms ease, transform 350ms ease;
+      pointer-events: none;
+    }
+    .js .product-demo-face.is-on {
+      opacity: 1;
+      transform: translateY(0);
+      z-index: 1;
+      pointer-events: auto;
+    }
+    .js .product-demo.is-arming .product-demo-pill i {
+      animation: demo-arm 2.2s linear forwards;
+    }
+    .js .product-demo.is-arming.is-paused .product-demo-pill i {
+      animation-play-state: paused;
+    }
+    @keyframes demo-arm {
+      from { transform: scaleX(0); }
+      to { transform: scaleX(1); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .js .lift,
+      .js .lift.is-in,
+      .js .path-step.lift.is-in.is-on,
+      .path-step.is-on,
+      .js .product-demo-face,
+      .js .product-demo-face.is-on {
+        opacity: 1;
+        transform: none;
+        transition: none;
+        animation: none;
+      }
+      .js .product-demo-face {
+        grid-area: auto;
+        pointer-events: auto;
+      }
+      .product-demo-stage { gap: 0.9rem; }
+      .product-demo-face + .product-demo-face {
+        border-top: 1px solid var(--line);
+        padding-top: 0.9rem;
+      }
+      .product-demo-pill { display: none; }
+      .js .product-demo.is-arming .product-demo-pill i { animation: none; }
+    }
     @media (max-width: 799px) {
       .nav-inner { grid-template-columns: 1fr auto; }
       .nav-links { grid-column: 1 / -1; justify-content: flex-start; gap: 0.15rem 0.85rem; padding-bottom: 0.7rem; }
@@ -449,7 +611,7 @@
     <section class="hero">
       <div class="hero-stone" aria-hidden="true"></div>
       <div class="wrap hero-grid">
-        <div>
+        <div class="lift">
           <h1>Turn your data into<br />a trusted <em>why</em>,<br />in seconds.</h1>
           <p class="hero-lead">Trusted receipted why for South African service businesses. Connect your books and tools. Get the insight where your team already works.</p>
           <div class="hero-actions">
@@ -475,7 +637,7 @@
           </div>
         </div>
 
-        <div class="hero-visual">
+        <div class="hero-visual lift">
           <article class="app" aria-label="Example of the Vhona path">
             <div class="app-nav">
               <div class="app-brand"><img src="vhona-wordmark.png" alt="Vhona AI" /></div>
@@ -516,7 +678,7 @@
     <section class="block product">
       <div class="connectors" id="connectors" aria-label="Connectors and delivery channels">
         <div class="wrap">
-          <ul class="connector-strip">
+          <ul class="connector-strip lift">
             <li>Slack</li>
             <li>WhatsApp</li>
             <li>Sage</li>
@@ -528,36 +690,36 @@
             <li>Excel</li>
             <li>CSV</li>
           </ul>
-          <p class="connector-note">Connectors and delivery channels rolling out. <a href="#contact">Talk to us</a> for your stack.</p>
+          <p class="connector-note lift">Connectors and delivery channels rolling out. <a href="#contact">Talk to us</a> for your stack.</p>
         </div>
       </div>
       <div class="wrap" id="product">
-        <div class="center">
+        <div class="center lift">
           <p class="eyebrow">Connect → Trusted why → Deliver</p>
           <h2 class="serif">Insights you can take into the Monday room.</h2>
         </div>
         <div class="path-row" id="how-it-works">
-          <article class="path-step">
+          <article class="path-step lift">
             <div class="icon-circle" aria-hidden="true">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 12h6"/><path d="M8 8.5H5.8a3.2 3.2 0 0 0 0 6.4H8"/><path d="M16 8.5h2.2a3.2 3.2 0 0 1 0 6.4H16"/></svg>
             </div>
             <h3>Connect</h3>
             <p>Bring numbers from the tools you already use: Xero, Sage, SQL Server. CSV when that is what you have today.</p>
           </article>
-          <div class="arrow" aria-hidden="true">
+          <div class="arrow lift" aria-hidden="true">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
           </div>
-          <article class="path-step">
+          <article class="path-step lift">
             <div class="icon-circle" aria-hidden="true">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M7 4.5h10v15l-5-2.6-5 2.6v-15z"/></svg>
             </div>
             <h3>Trusted why</h3>
             <p>Health KPIs and a receipted why. If Vhona cannot cite the rows, it stops.</p>
           </article>
-          <div class="arrow" aria-hidden="true">
+          <div class="arrow lift" aria-hidden="true">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
           </div>
-          <article class="path-step">
+          <article class="path-step lift">
             <div class="icon-circle" aria-hidden="true">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 6.5h14v9H8.2L5 18.8V6.5z"/></svg>
             </div>
@@ -565,32 +727,68 @@
             <p>Morning brief in product, and insights where the team already works: Slack and WhatsApp.</p>
           </article>
         </div>
+        <div class="product-demo lift" data-demo>
+          <div class="product-demo-card" role="group" aria-label="Illustrative">
+            <div class="product-demo-head">
+              <p class="product-demo-label" aria-hidden="true">Illustrative</p>
+              <div class="product-demo-pill" aria-hidden="true"><i></i></div>
+            </div>
+            <div class="product-demo-stage" aria-hidden="true">
+              <article class="product-demo-face is-on">
+                <p class="app-kicker">Overview</p>
+                <p class="demo-title">Health KPIs</p>
+                <div class="chip">South African service SMB</div>
+                <p class="from-books"><strong>From your books</strong>Connected numbers for this period</p>
+                <div class="bars">
+                  <div class="bar-row"><span>Supplier payments</span><span>3 rows</span><div class="track"><i style="width:72%"></i></div></div>
+                  <div class="bar-row"><span>Bank charges</span><span>2 rows</span><div class="track"><i style="width:48%"></i></div></div>
+                  <div class="bar-row"><span>Card fees</span><span>1 row</span><div class="track"><i style="width:28%"></i></div></div>
+                </div>
+              </article>
+              <article class="product-demo-face">
+                <div class="why-box">
+                  <header><span>Receipted why</span><span class="badge">Cited</span></header>
+                  <p>Expenses moved on the supplier payments in this period.</p>
+                </div>
+                <p class="demo-copy">Health KPIs and a receipted why. If Vhona cannot cite the rows, it stops.</p>
+              </article>
+              <article class="product-demo-face">
+                <p class="demo-title">Morning brief</p>
+                <p class="demo-copy">One verified snapshot on your next visit.</p>
+                <div class="rule">
+                  <strong>Fail closed</strong>
+                  <p>No citation, no figure.</p>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
     <section class="block" id="about">
       <div class="wrap">
-        <div class="center">
+        <div class="center lift">
           <p class="eyebrow">Trust the insight. See the proof.</p>
           <h2 class="serif">From numbers to a trusted why. Every why comes with a receipt.</h2>
           <p class="lede">Vhona AI gives South African service businesses health KPIs and a receipted why from the books and tools they already use. If it cannot cite the rows, it stops.</p>
         </div>
         <div class="pillars">
-          <article class="pillar">
+          <article class="pillar lift">
             <div class="icon-circle" aria-hidden="true">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><path d="M8.2 12.2 10.8 15l5-6"/></svg>
             </div>
             <h3>Cite the rows</h3>
             <p>If the rows cannot support a figure, Vhona stops.</p>
           </article>
-          <article class="pillar">
+          <article class="pillar lift">
             <div class="icon-circle" aria-hidden="true">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><ellipse cx="12" cy="7" rx="7" ry="3"/><path d="M5 7v5c0 1.7 3.1 3 7 3s7-1.3 7-3V7"/><path d="M5 12v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"/></svg>
             </div>
             <h3>Name the change</h3>
             <p>This period against the last, with the transactions named in the why.</p>
           </article>
-          <article class="pillar">
+          <article class="pillar lift">
             <div class="icon-circle" aria-hidden="true">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3.5 14.2 9H20l-4.6 3.4L17.2 18 12 14.8 6.8 18l1.8-5.6L4 9h5.8L12 3.5z"/></svg>
             </div>
@@ -603,7 +801,7 @@
 
     <section class="band-wrap" id="contact">
       <div class="wrap">
-        <div class="band">
+        <div class="band lift">
           <div class="band-top">
             <div>
               <h2>Talk to us</h2>
@@ -647,18 +845,18 @@
 
   <footer class="site-footer">
     <div class="wrap footer-inner">
-      <div>
+      <div class="lift">
         <div class="wordmark"><img src="vhona-wordmark.png" alt="Vhona AI" /></div>
         <p>Business intelligence for South African service SMBs. Cited answers, or no answer.</p>
       </div>
-      <nav class="foot-links" aria-label="Footer">
+      <nav class="foot-links lift" aria-label="Footer">
         <a href="#product">Product</a>
         <a href="#how-it-works">How it works</a>
         <a href="#connectors">Connectors</a>
         <a href="#about">Trust</a>
         <a href="#contact">Talk to us</a>
       </nav>
-      <div class="foot-meta">
+      <div class="foot-meta lift">
         <span><a href="mailto:tnyawasha@gmail.com">tnyawasha@gmail.com</a></span>
         <span><a href="tel:+27615067323">061 506 7323</a></span>
         <span>Built with purpose in South Africa.</span>
@@ -735,6 +933,216 @@
       window.addEventListener("hashchange", onScroll);
       window.addEventListener("load", onScroll);
       onScroll();
+    })();
+    (function () {
+      var reduceQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+      var STEP_MS = 2200;
+      function reduced() { return reduceQuery.matches; }
+
+      var lifts = Array.prototype.slice.call(document.querySelectorAll(".lift"));
+      var revealIo = null;
+      function revealAll() {
+        lifts.forEach(function (node) { node.classList.add("is-in"); });
+      }
+      function armReveal() {
+        if (!lifts.length || reduced() || !("IntersectionObserver" in window)) {
+          revealAll();
+          return;
+        }
+        if (revealIo) return;
+        revealIo = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.intersectionRatio < 0.25) return;
+            entry.target.classList.add("is-in");
+            revealIo.unobserve(entry.target);
+          });
+        }, { threshold: 0.25 });
+        lifts.forEach(function (node) {
+          if (!node.classList.contains("is-in")) revealIo.observe(node);
+        });
+      }
+
+      var row = document.getElementById("how-it-works");
+      var steps = row ? Array.prototype.slice.call(row.querySelectorAll(".path-step")) : [];
+      var spineIndex = 0;
+      var spineTimer = 0;
+      var spineStarted = 0;
+      var spineRemaining = STEP_MS;
+      var spineInView = false;
+      var spineHover = false;
+      var spineFocus = false;
+      var spineIo = null;
+
+      function paintSpine() {
+        steps.forEach(function (step, index) {
+          step.classList.toggle("is-on", !reduced() && spineInView && index === spineIndex);
+        });
+      }
+      function spineRunning() {
+        return steps.length && !reduced() && spineInView && document.visibilityState !== "hidden" && !spineHover && !spineFocus;
+      }
+      function clearSpineTimer() {
+        if (!spineTimer) return;
+        spineRemaining -= performance.now() - spineStarted;
+        if (spineRemaining < 32) spineRemaining = 32;
+        window.clearTimeout(spineTimer);
+        spineTimer = 0;
+      }
+      function armSpine() {
+        if (spineTimer || !spineRunning()) return;
+        spineStarted = performance.now();
+        spineTimer = window.setTimeout(function () {
+          spineTimer = 0;
+          spineIndex = (spineIndex + 1) % steps.length;
+          spineRemaining = STEP_MS;
+          paintSpine();
+          armSpine();
+        }, spineRemaining);
+      }
+      function syncSpine() {
+        if (!steps.length) return;
+        if (spineRunning()) armSpine();
+        else clearSpineTimer();
+        paintSpine();
+      }
+      function bindSpine() {
+        if (!steps.length) return;
+        steps.forEach(function (step) {
+          if (!reduced()) step.setAttribute("tabindex", "0");
+        });
+        row.addEventListener("pointerover", function (event) {
+          var step = event.target.closest ? event.target.closest(".path-step") : null;
+          var next = !!step;
+          if (next === spineHover) return;
+          spineHover = next;
+          syncSpine();
+        });
+        row.addEventListener("pointerout", function (event) {
+          var next = event.relatedTarget;
+          var still = !!(next && next.closest && row.contains(next) && next.closest(".path-step"));
+          if (still === spineHover) return;
+          spineHover = still;
+          syncSpine();
+        });
+        row.addEventListener("focusin", function (event) {
+          var step = event.target.closest ? event.target.closest(".path-step") : null;
+          if (!step || !step.matches(":focus-visible")) return;
+          spineFocus = true;
+          syncSpine();
+        });
+        row.addEventListener("focusout", function (event) {
+          if (row.contains(event.relatedTarget)) return;
+          spineFocus = false;
+          syncSpine();
+        });
+        if ("IntersectionObserver" in window) {
+          spineIo = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) { spineInView = entry.intersectionRatio >= 0.25; });
+            syncSpine();
+          }, { threshold: [0, 0.25] });
+          spineIo.observe(row);
+        }
+      }
+
+      var demo = document.querySelector("[data-demo]");
+      var faces = demo ? Array.prototype.slice.call(demo.querySelectorAll(".product-demo-face")) : [];
+      var pill = demo ? demo.querySelector(".product-demo-pill i") : null;
+      var card = demo ? demo.querySelector(".product-demo-card") : null;
+      var faceIndex = 0;
+      var demoInView = false;
+      var demoHeld = false;
+
+      function paintFaces() {
+        faces.forEach(function (face, index) {
+          face.classList.toggle("is-on", reduced() || index === faceIndex);
+        });
+      }
+      function demoShouldPlay() {
+        return !!(demo && faces.length > 1 && pill && !reduced() && demoInView && !demoHeld && document.visibilityState !== "hidden");
+      }
+      function restartArm() {
+        if (!demo || !pill) return;
+        demo.classList.remove("is-arming");
+        void pill.offsetWidth;
+        if (demoShouldPlay()) demo.classList.add("is-arming");
+      }
+      function syncDemo() {
+        if (!demo) return;
+        var play = demoShouldPlay();
+        demo.classList.toggle("is-paused", !!demo.classList.contains("is-arming") && !play);
+        if (play && !demo.classList.contains("is-arming")) restartArm();
+        paintFaces();
+      }
+      function bindDemo() {
+        if (!demo || !pill || !card) return;
+        pill.addEventListener("animationend", function (event) {
+          if (event.animationName !== "demo-arm") return;
+          if (!demoShouldPlay()) return;
+          faceIndex = (faceIndex + 1) % faces.length;
+          paintFaces();
+          restartArm();
+        });
+        card.addEventListener("pointerenter", function () {
+          demoHeld = true;
+          syncDemo();
+        });
+        card.addEventListener("pointerleave", function () {
+          demoHeld = false;
+          syncDemo();
+        });
+        card.addEventListener("focusin", function () {
+          if (!card.matches(":focus-visible")) return;
+          demoHeld = true;
+          syncDemo();
+        });
+        card.addEventListener("focusout", function (event) {
+          if (demo.contains(event.relatedTarget)) return;
+          demoHeld = false;
+          syncDemo();
+        });
+        if (!reduced()) card.setAttribute("tabindex", "0");
+        if ("IntersectionObserver" in window) {
+          var demoIo = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) { demoInView = entry.intersectionRatio >= 0.25; });
+            syncDemo();
+          }, { threshold: [0, 0.25] });
+          demoIo.observe(demo);
+        }
+        paintFaces();
+      }
+
+      function onReduceChange() {
+        if (reduced()) {
+          clearSpineTimer();
+          steps.forEach(function (step) {
+            step.classList.remove("is-on");
+            step.removeAttribute("tabindex");
+          });
+          if (card) card.removeAttribute("tabindex");
+          demoHeld = false;
+          if (demo) {
+            demo.classList.remove("is-arming");
+            demo.classList.remove("is-paused");
+          }
+          revealAll();
+          paintFaces();
+          return;
+        }
+        steps.forEach(function (step) { step.setAttribute("tabindex", "0"); });
+        if (card) card.setAttribute("tabindex", "0");
+        syncSpine();
+        syncDemo();
+      }
+
+      armReveal();
+      bindSpine();
+      bindDemo();
+      document.addEventListener("visibilitychange", function () {
+        syncSpine();
+        syncDemo();
+      });
+      if (reduceQuery.addEventListener) reduceQuery.addEventListener("change", onReduceChange);
+      else if (reduceQuery.addListener) reduceQuery.addListener(onReduceChange);
     })();
   </script>
 </body>
