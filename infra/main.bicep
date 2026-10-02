@@ -2,6 +2,12 @@
 // App Service Linux (.NET 8) + Azure SQL Basic + Blob. Optional Key Vault and App Insights.
 // Blazor Interactive Server needs WebSockets and ARR affinity, which App Service provides
 // without a container registry.
+//
+// These defaults are for a new resource group. Azure does not rename resources in place.
+// A demo already deployed with namePrefix cruxai, SQL login cruxadmin, database cruxai,
+// data-protection container crux-keys, analytics file /home/crux/partner-events.jsonl,
+// and resource group crux-ai-demo keeps those names. Do not apply this file to that
+// group: incremental mode would add a second set of resources beside the live ones.
 
 @description('Azure region. South Africa North is the default.')
 param location string = 'southafricanorth'
@@ -9,10 +15,10 @@ param location string = 'southafricanorth'
 @description('Short name prefix. Lowercase letters and digits. Used in globally unique resource names.')
 @minLength(3)
 @maxLength(12)
-param namePrefix string = 'cruxai'
+param namePrefix string = 'vhonaai'
 
 @description('Azure SQL admin login. SQL authentication is used for the app connection.')
-param sqlAdminLogin string = 'cruxadmin'
+param sqlAdminLogin string = 'vhonaadmin'
 
 @description('Azure SQL admin password. At least 12 characters with upper, lower, digit, and symbol. Do not use a semicolon; it breaks the connection string. Do not commit this value.')
 @secure()
@@ -20,7 +26,7 @@ param sqlAdminLogin string = 'cruxadmin'
 param sqlAdminPassword string
 
 @description('Azure SQL database name. Must be empty on first boot; the app creates tables with EF EnsureCreated.')
-param sqlDatabaseName string = 'cruxai'
+param sqlDatabaseName string = 'vhonaai'
 
 @description('App Service plan SKU. B1 is the lean Linux size with Always On. Staging slots force at least S1.')
 @allowed([
@@ -83,7 +89,7 @@ var requestedTier = startsWith(appServiceSku, 'S') ? 'Standard' : 'Basic'
 var effectiveSku = enableStagingSlot && requestedTier == 'Basic' ? 'S1' : appServiceSku
 var effectiveTier = enableStagingSlot && requestedTier == 'Basic' ? 'Standard' : requestedTier
 var tags = {
-  project: 'crux-ai'
+  project: 'vhona-ai'
   environment: 'demo'
 }
 var tenantId = subscription().tenantId
@@ -104,11 +110,11 @@ var baseSettings = {
   Storage__Provider: 'AzureBlob'
   Storage__AzureBlob__ConnectionString: blobAppSetting
   Storage__AzureBlob__ContainerName: 'csv-uploads'
-  Storage__DataProtection__ContainerName: 'crux-keys'
+  Storage__DataProtection__ContainerName: 'vhona-keys'
   Auth__Provider: authProvider
   Auth__DefaultOrganizationName: defaultOrganizationName
   Analytics__Sink: 'File'
-  Analytics__FilePath: '/home/crux/partner-events.jsonl'
+  Analytics__FilePath: '/home/vhona/partner-events.jsonl'
 }
 var entraSettings = authProvider == 'EntraExternalId' ? {
   Auth__EntraExternalId__Instance: entraInstance
@@ -264,7 +270,7 @@ resource csvContainer 'Microsoft.Storage/storageAccounts/blobServices/containers
 
 resource keysContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-05-01' = {
   parent: blobService
-  name: 'crux-keys'
+  name: 'vhona-keys'
   properties: {
     publicAccess: 'None'
   }

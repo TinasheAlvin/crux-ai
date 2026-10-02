@@ -32,11 +32,11 @@ Hosted demo, when those settings are switched (see [Host on Azure](#host-on-azur
 ## Solution layout
 
 ```
-src/CruxAI.sln
-src/CruxAI.Core/              Domain, mapping, validation, health KPI calculator, why verifier, brief composer, analytics contracts
-src/CruxAI.Infrastructure/    EF Core, CSV reader, file storage, import + health + why + morning brief + event log
-src/CruxAI.Web/               Blazor UI + demo auth + partner dump endpoint
-src/CruxAI.Tests/
+src/VhonaAI.sln
+src/VhonaAI.Core/              Domain, mapping, validation, health KPI calculator, why verifier, brief composer, analytics contracts
+src/VhonaAI.Infrastructure/    EF Core, CSV reader, file storage, import + health + why + morning brief + event log
+src/VhonaAI.Web/               Blazor UI + demo auth + partner dump endpoint
+src/VhonaAI.Tests/
 testdata/sample-transactions.csv
 testdata/sample-transactions-with-cash.csv
 testdata/sample-transactions-clean.csv
@@ -47,17 +47,17 @@ testdata/sample-transactions-clean.csv
 Requires the [.NET 8 SDK](https://dotnet.microsoft.com/download).
 
 ```bash
-dotnet restore src/CruxAI.sln
-dotnet build src/CruxAI.sln
-dotnet test src/CruxAI.sln
-dotnet run --project src/CruxAI.Web --launch-profile http
+dotnet restore src/VhonaAI.sln
+dotnet build src/VhonaAI.sln
+dotnet test src/VhonaAI.sln
+dotnet run --project src/VhonaAI.Web --launch-profile http
 ```
 
 Open http://localhost:5028
 
-The first run creates `src/CruxAI.Web/App_Data/cruxai.db` and `src/CruxAI.Web/App_Data/uploads/` (gitignored).
+The first run creates `src/VhonaAI.Web/App_Data/vhonaai.db` and `src/VhonaAI.Web/App_Data/uploads/` (gitignored).
 
-If you already ran an earlier slice, delete `src/CruxAI.Web/App_Data/cruxai.db` so SQLite picks up Why / morning-brief tables (or let the startup patch create those tables).
+If you already ran an earlier slice, delete `src/VhonaAI.Web/App_Data/vhonaai.db` so SQLite picks up Why / morning-brief tables (or let the startup patch create those tables).
 
 ### Demo path (CSV map → health KPIs → receipted why → morning brief)
 
@@ -120,14 +120,14 @@ Lightweight scoreboard events for design-partner sessions. **No new product feat
 Default sink (from the Web project directory):
 
 ```bash
-cat src/CruxAI.Web/App_Data/partner-events.jsonl
+cat src/VhonaAI.Web/App_Data/partner-events.jsonl
 ```
 
 Count by name:
 
 ```bash
 python3 -c "import json,collections,pathlib
-p=pathlib.Path('src/CruxAI.Web/App_Data/partner-events.jsonl')
+p=pathlib.Path('src/VhonaAI.Web/App_Data/partner-events.jsonl')
 c=collections.Counter(json.loads(l)['name'] for l in p.read_text().splitlines() if l.strip())
 print('\n'.join(f'{n:4} {k}' for k,n in c.most_common()))"
 ```
@@ -137,7 +137,7 @@ While signed in, `GET http://localhost:5028/internal/partner-events` returns the
 If you set `Analytics:Sink` to `Sqlite`:
 
 ```bash
-sqlite3 src/CruxAI.Web/App_Data/partner-events.db \
+sqlite3 src/VhonaAI.Web/App_Data/partner-events.db \
   "SELECT name, org_id, user_id, timestamp, properties_json FROM partner_events ORDER BY id;"
 ```
 
@@ -156,13 +156,13 @@ Committed files contain **placeholders only**. Do not put real connection string
 | Setting | Local demo | Hosted demo |
 | --- | --- | --- |
 | `Database:Provider` | `Sqlite` | `AzureSql` |
-| `ConnectionStrings:Sqlite` | `Data Source=App_Data/cruxai.db` | unused |
+| `ConnectionStrings:Sqlite` | `Data Source=App_Data/vhonaai.db` | unused |
 | `ConnectionStrings:AzureSql` | empty | App Service setting or Key Vault reference |
 | `Storage:Provider` | `Local` | `AzureBlob` |
 | `Storage:LocalRoot` | `App_Data/uploads` | unused |
 | `Storage:AzureBlob:ConnectionString` | empty | App Service setting or Key Vault reference |
 | `Storage:AzureBlob:ContainerName` | `csv-uploads` | `csv-uploads` |
-| `Storage:DataProtection:ContainerName` | `crux-keys` | `crux-keys` (auth keys, only when storage is Azure Blob) |
+| `Storage:DataProtection:ContainerName` | `vhona-keys` | `vhona-keys` (auth keys, only when storage is Azure Blob) |
 | `Auth:Provider` | `Demo` | `EntraExternalId` for the timed path. `Demo` still works on the host if Entra is not filled in. |
 | `Auth:DefaultOrganizationName` | falls back to `DemoAuth:OrganizationName` | `Harbour Street Studio` |
 | `Auth:EntraExternalId:*` | placeholders | App Service settings. `ClientSecret` is a secret. |
@@ -171,26 +171,26 @@ Committed files contain **placeholders only**. Do not put real connection string
 | `AzureOpenAI:DeploymentName` | placeholder / empty | user-secrets or App Service setting |
 | `AzureOpenAI:ApiKey` | empty | user-secrets or App Service setting |
 | `Analytics:Sink` | `File` (JSONL) | `File` |
-| `Analytics:FilePath` | `App_Data/partner-events.jsonl` | `/home/crux/partner-events.jsonl` on App Service |
+| `Analytics:FilePath` | `App_Data/partner-events.jsonl` | `/home/vhona/partner-events.jsonl` on App Service |
 | `Analytics:SqlitePath` | `App_Data/partner-events.db` | unused on the host |
 | `APPLICATIONINSIGHTS_CONNECTION_STRING` | unset | set only when App Insights is enabled |
 
-Copy `src/CruxAI.Web/appsettings.Example.json` for a full list of keys, then store real values in user secrets:
+Copy `src/VhonaAI.Web/appsettings.Example.json` for a full list of keys, then store real values in user secrets:
 
 ```bash
-dotnet user-secrets set "ConnectionStrings:AzureSql" "Server=tcp:..." --project src/CruxAI.Web
-dotnet user-secrets set "Storage:AzureBlob:ConnectionString" "DefaultEndpointsProtocol=https;..." --project src/CruxAI.Web
-dotnet user-secrets set "Database:Provider" "AzureSql" --project src/CruxAI.Web
-dotnet user-secrets set "Storage:Provider" "AzureBlob" --project src/CruxAI.Web
-dotnet user-secrets set "Auth:Provider" "EntraExternalId" --project src/CruxAI.Web
-dotnet user-secrets set "Auth:EntraExternalId:Instance" "https://YOUR_TENANT.ciamlogin.com/" --project src/CruxAI.Web
-dotnet user-secrets set "Auth:EntraExternalId:Domain" "YOUR_TENANT.onmicrosoft.com" --project src/CruxAI.Web
-dotnet user-secrets set "Auth:EntraExternalId:TenantId" "..." --project src/CruxAI.Web
-dotnet user-secrets set "Auth:EntraExternalId:ClientId" "..." --project src/CruxAI.Web
-dotnet user-secrets set "Auth:EntraExternalId:ClientSecret" "..." --project src/CruxAI.Web
-dotnet user-secrets set "AzureOpenAI:Endpoint" "https://YOUR_RESOURCE.openai.azure.com/" --project src/CruxAI.Web
-dotnet user-secrets set "AzureOpenAI:DeploymentName" "your-deployment" --project src/CruxAI.Web
-dotnet user-secrets set "AzureOpenAI:ApiKey" "..." --project src/CruxAI.Web
+dotnet user-secrets set "ConnectionStrings:AzureSql" "Server=tcp:..." --project src/VhonaAI.Web
+dotnet user-secrets set "Storage:AzureBlob:ConnectionString" "DefaultEndpointsProtocol=https;..." --project src/VhonaAI.Web
+dotnet user-secrets set "Database:Provider" "AzureSql" --project src/VhonaAI.Web
+dotnet user-secrets set "Storage:Provider" "AzureBlob" --project src/VhonaAI.Web
+dotnet user-secrets set "Auth:Provider" "EntraExternalId" --project src/VhonaAI.Web
+dotnet user-secrets set "Auth:EntraExternalId:Instance" "https://YOUR_TENANT.ciamlogin.com/" --project src/VhonaAI.Web
+dotnet user-secrets set "Auth:EntraExternalId:Domain" "YOUR_TENANT.onmicrosoft.com" --project src/VhonaAI.Web
+dotnet user-secrets set "Auth:EntraExternalId:TenantId" "..." --project src/VhonaAI.Web
+dotnet user-secrets set "Auth:EntraExternalId:ClientId" "..." --project src/VhonaAI.Web
+dotnet user-secrets set "Auth:EntraExternalId:ClientSecret" "..." --project src/VhonaAI.Web
+dotnet user-secrets set "AzureOpenAI:Endpoint" "https://YOUR_RESOURCE.openai.azure.com/" --project src/VhonaAI.Web
+dotnet user-secrets set "AzureOpenAI:DeploymentName" "your-deployment" --project src/VhonaAI.Web
+dotnet user-secrets set "AzureOpenAI:ApiKey" "..." --project src/VhonaAI.Web
 ```
 
 The Web project already has a `UserSecretsId`. User secrets live on the developer machine, not in the repo.
@@ -199,16 +199,16 @@ HTTPS is available via `--launch-profile https` once the ASP.NET Core developer 
 
 ## Host on Azure
 
-The hosted demo is the same spine on a public HTTPS URL. App Service Linux (.NET 8, zip deploy) is the host: Blazor Interactive Server needs WebSockets and sticky sessions (ARR affinity), and that does not need a container registry. Azure SQL Basic holds transactions, citations, and briefs. A StorageV2 account (Standard LRS) holds the CSV container `csv-uploads` and the data-protection container `crux-keys`. The database stays on the Basic tier (not serverless) so the first request is not waiting for a paused database.
+The hosted demo is the same spine on a public HTTPS URL. App Service Linux (.NET 8, zip deploy) is the host: Blazor Interactive Server needs WebSockets and sticky sessions (ARR affinity), and that does not need a container registry. Azure SQL Basic holds transactions, citations, and briefs. A StorageV2 account (Standard LRS) holds the CSV container `csv-uploads` and the data-protection container `vhona-keys`. The database stays on the Basic tier (not serverless) so the first request is not waiting for a paused database.
 
 Region default is **South Africa North**. The plan default is **B1** (smallest Linux size with Always On). A staging slot raises the plan to **S1**, because slots are a Standard feature. Key Vault and Application Insights are off unless you opt in.
 
 `infra/main.parameters.json` does not contain passwords. Pass `sqlAdminPassword` on the command line. The password needs Azure SQL complexity (12+ characters, upper, lower, digit, symbol) and must not contain `;`.
 
 ```bash
-az group create --name crux-ai-demo --location southafricanorth
+az group create --name vhona-ai-demo --location southafricanorth
 az deployment group create \
-  --resource-group crux-ai-demo \
+  --resource-group vhona-ai-demo \
   --template-file infra/main.bicep \
   --parameters infra/main.parameters.json \
   --parameters sqlAdminPassword='REPLACE_WITH_A_STRONG_PASSWORD'
@@ -238,7 +238,7 @@ To exercise Azure SQL and Blob before the Entra tenant exists, deploy with `auth
 
 ```bash
 az deployment group create \
-  --resource-group crux-ai-demo \
+  --resource-group vhona-ai-demo \
   --template-file infra/main.bicep \
   --parameters infra/main.parameters.json \
   --parameters sqlAdminPassword='REPLACE_WITH_A_STRONG_PASSWORD' \
@@ -275,7 +275,7 @@ The template writes `sql-connection`, `blob-connection`, and (when set) `entra-c
 
 Workflow: `.github/workflows/azure-demo.yml`.
 
-On every pull request and on `main`: restore, `dotnet test`, publish `src/CruxAI.Web`, check the sample CSVs are in the publish folder, and compile `infra/main.bicep`.
+On every pull request and on `main`: restore, `dotnet test`, publish `src/VhonaAI.Web`, check the sample CSVs are in the publish folder, and compile `infra/main.bicep`.
 
 Deploy runs only when the repository variable `AZURE_DEPLOY_ENABLED` is `true`, and only on a push to `main` or a manual run. Until that variable is set, a missing Azure subscription does not fail the build.
 
@@ -297,9 +297,9 @@ Connection strings are not GitHub secrets. Bicep writes them to App Service (or 
 
 ```bash
 az ad sp create-for-rbac \
-  --name crux-ai-deploy \
+  --name vhona-ai-deploy \
   --role contributor \
-  --scopes /subscriptions/<subscription-id>/resourceGroups/crux-ai-demo \
+  --scopes /subscriptions/<subscription-id>/resourceGroups/vhona-ai-demo \
   --sdk-auth
 ```
 
@@ -308,10 +308,10 @@ Put the JSON document in `AZURE_CREDENTIALS`. Scope it to the demo resource grou
 Publish path used by the workflow and by a manual zip deploy:
 
 ```bash
-dotnet publish src/CruxAI.Web/CruxAI.Web.csproj -c Release -o ./publish
+dotnet publish src/VhonaAI.Web/VhonaAI.Web.csproj -c Release -o ./publish
 ```
 
-`publish/CruxAI.Web.dll` is the App Service entry point (`DOTNETCORE|8.0`). `WEBSITE_RUN_FROM_PACKAGE=1`. Sample CSVs are published under `testdata/` so **Use sample CSV** works on the host.
+`publish/VhonaAI.Web.dll` is the App Service entry point (`DOTNETCORE|8.0`). `WEBSITE_RUN_FROM_PACKAGE=1`. Sample CSVs are published under `testdata/` so **Use sample CSV** works on the host.
 
 ### Entra and the five-minute path
 
@@ -326,15 +326,15 @@ Cold sample CSV → first trusted receipted why is meant to stay within five min
 7. **Extra profile attributes** on the user flow. Each extra screen is time. Keep the flow to existing-user sign-in.
 8. **In-circuit navigation to sign-in.** The Sign in control opts out of Blazor enhanced navigation. Replacing it with `NavigateTo` without a full page load leaves the circuit anonymous.
 9. **Cold start.** The first boot runs EF `EnsureCreated` against Azure SQL Basic. Basic does not pause. A serverless database can spend the whole five minutes waking up. B1 Always On keeps the process up after that first boot.
-10. **Auth cookie lost on restart.** Data-protection keys are stored in the `crux-keys` blob when storage is Azure Blob, so a restart does not drop the session in the middle of map → why.
+10. **Auth cookie lost on restart.** Data-protection keys are stored in the `vhona-keys` blob when storage is Azure Blob, so a restart does not drop the session in the middle of map → why.
 11. **ARR affinity off.** Blazor Server drops the circuit if the next request lands on another instance. The template turns client affinity and WebSockets on, and the plan is one worker.
 12. **`/healthz` still says `auth: Demo`.** Blob and SQL are live, but the timed path has not started. Set `Auth__Provider` to `EntraExternalId` and fill the Entra settings.
 
-`/healthz` does not touch the database. It reports the active providers and whether the clean sample CSV was published. The product Health page stays at `/health`. Partner events are unchanged: `finishes_upload`, `asks_why_session_one`, `rates_explanation_trustworthy`, `returns_for_brief_within_7_days`, `pay_or_waitlist_signal`, plus `map_abandon`, `receipt_open`, and `receipt_distrust`. On the host they append to `/home/crux/partner-events.jsonl` (Kudu SSH). While signed in, `GET /internal/partner-events` returns the same JSON as locally.
+`/healthz` does not touch the database. It reports the active providers and whether the clean sample CSV was published. The product Health page stays at `/health`. Partner events are unchanged: `finishes_upload`, `asks_why_session_one`, `rates_explanation_trustworthy`, `returns_for_brief_within_7_days`, `pay_or_waitlist_signal`, plus `map_abandon`, `receipt_open`, and `receipt_distrust`. On the host they append to `/home/vhona/partner-events.jsonl` (Kudu SSH). While signed in, `GET /internal/partner-events` returns the same JSON as locally.
 
 ### Manual smoke on the hosted URL
 
-`dotnet test src/CruxAI.sln` is the automated check. This is the manual check after deploy. Use the clean sample. Time it from the sign-in click.
+`dotnet test src/VhonaAI.sln` is the automated check. This is the manual check after deploy. Use the clean sample. Time it from the sign-in click.
 
 1. `curl https://<webAppName>.azurewebsites.net/healthz` returns `status: ok`, `database: AzureSql`, `storage: AzureBlob`, `sampleCsv: true`, and `auth` equal to the provider you deployed.
 2. Sign in. Entra: one existing user, full-page Sign in, land on Home signed in as Harbour Street Studio. Demo: **Continue as demo owner**.
@@ -347,11 +347,43 @@ Cold sample CSV → first trusted receipted why is meant to stay within five min
 9. After the cited why, choose **Send me the morning brief**. Sign out and sign in again (next visit). Home shows yesterday's snapshot plus one receipted explanation, or **No verified brief today** with a path back to **Ask why**.
 10. While signed in, `GET /internal/partner-events` includes the signals from the session (`finishes_upload`, and `receipt_open` if you opened the receipt).
 
-Local `dotnet run --project src/CruxAI.Web --launch-profile http` is unchanged: Demo, SQLite, and `App_Data/uploads`. User-secrets override those defaults on that machine only. Set the three providers back to `Demo`, `Sqlite`, and `Local` to return to the local path.
+Local `dotnet run --project src/VhonaAI.Web --launch-profile http` is unchanged: Demo, SQLite, and `App_Data/uploads`. User-secrets override those defaults on that machine only. Set the three providers back to `Demo`, `Sqlite`, and `Local` to return to the local path.
 
 ## Marketing site
 
-Public landing page for **Vhona AI**: [https://tinashealvin.github.io/crux-ai/](https://tinashealvin.github.io/crux-ai/). Source in [`docs/`](docs/).
+Public landing page for **Vhona AI**: [https://tinashealvin.github.io/vhona-ai/](https://tinashealvin.github.io/vhona-ai/). Source in [`docs/`](docs/). That GitHub Pages path follows the repository name. Until `TinasheAlvin/crux-ai` is renamed to `TinasheAlvin/vhona-ai`, the live Pages site remains [https://tinashealvin.github.io/crux-ai/](https://tinashealvin.github.io/crux-ai/).
+
+Cloudflare Pages may still serve [https://crux-ai.pages.dev](https://crux-ai.pages.dev) until that project is renamed. See [Names that stay](#names-that-stay).
+
+## Names that stay
+
+Azure cannot rename a resource in place, and this repo does not call Azure to do it. `infra/main.bicep` defaults are for the **next** resource group (`namePrefix` `vhonaai`, SQL login `vhonaadmin`, database `vhonaai`, blob container `vhona-keys`, partner events `/home/vhona/partner-events.jsonl`, tag `project=vhona-ai`).
+
+If the demo was already deployed, these names are still the live ones. Keep passing them (or leave the existing App Service settings) instead of redeploying the new defaults into the same group:
+
+| What | Already deployed name |
+| --- | --- |
+| Resource group | `crux-ai-demo` |
+| Name prefix (web app, plan, SQL server, storage, vault, insights) | `cruxai` |
+| SQL admin login | `cruxadmin` |
+| SQL database | `cruxai` |
+| Data-protection blob container | `crux-keys` |
+| Partner event file on App Service | `/home/crux/partner-events.jsonl` |
+| Deploy service principal example | `crux-ai-deploy` |
+| GitHub Actions artifact (previous) | `crux-web` |
+
+The workflow deploy step still uses the secret `AZURE_WEBAPP_NAME`, so a code deploy keeps hitting the existing app. The published entry point is now `VhonaAI.Web.dll`. A custom startup command that still names `CruxAI.Web.dll` has to change. Data-protection application name is `vhona-ai` and the auth cookie is `vhonaai.auth`, so existing browser sessions sign in again after this build. Local SQLite moves to `App_Data/vhonaai.db` (delete the old `cruxai.db` if you want a clean file). The Web `UserSecretsId` is `vhonaai-web-local-dev`; secrets stored under the old id are not picked up.
+
+GitHub repository rename (owner, Settings — this change set cannot rename the repo):
+
+1. Open [https://github.com/TinasheAlvin/crux-ai/settings](https://github.com/TinasheAlvin/crux-ai/settings).
+2. Under **General**, set **Repository name** to `vhona-ai` and confirm **Rename**.
+3. GitHub redirects `TinasheAlvin/crux-ai` links. Update a local remote with `git remote set-url origin https://github.com/TinasheAlvin/vhona-ai.git`.
+4. Pages → confirm **Deploy from a branch**, `main`, folder `/docs`. The project site becomes [https://tinashealvin.github.io/vhona-ai/](https://tinashealvin.github.io/vhona-ai/).
+
+The same rename from an admin shell is `gh repo rename vhona-ai --repo TinasheAlvin/crux-ai --yes`.
+
+For Benaiah: Cloudflare Pages project **crux-ai** can keep answering at [https://crux-ai.pages.dev](https://crux-ai.pages.dev) after the GitHub rename. In the Cloudflare dashboard, Workers & Pages → **crux-ai** → Settings, rename the project if the `pages.dev` hostname should become `vhona-ai.pages.dev`, and update any custom domain or DNS that still targets the old project. The old `pages.dev` name does not follow the GitHub repository automatically.
 
 ## License / product
 

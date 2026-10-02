@@ -28,18 +28,18 @@ jobs:
 
       - name: Restore, build, and test
         run: |
-          dotnet build src/CruxAI.sln --configuration Release
-          dotnet test src/CruxAI.sln --configuration Release --no-build
+          dotnet build src/VhonaAI.sln --configuration Release
+          dotnet test src/VhonaAI.sln --configuration Release --no-build
 
       - name: Publish web
-        run: dotnet publish src/CruxAI.Web/CruxAI.Web.csproj --configuration Release --output publish
+        run: dotnet publish src/VhonaAI.Web/VhonaAI.Web.csproj --configuration Release --output publish
 
       - name: Sample CSVs ship with the site
         run: |
           test -f publish/testdata/sample-transactions.csv
           test -f publish/testdata/sample-transactions-clean.csv
           test -f publish/testdata/sample-transactions-with-cash.csv
-          test -f publish/CruxAI.Web.dll
+          test -f publish/VhonaAI.Web.dll
 
       - name: Build Bicep
         run: |
@@ -51,7 +51,7 @@ jobs:
         if: vars.AZURE_DEPLOY_ENABLED == 'true' && (github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main')
         uses: actions/upload-artifact@v4
         with:
-          name: crux-web
+          name: vhona-web
           path: publish
           retention-days: 5
 
@@ -63,7 +63,7 @@ jobs:
       - name: Download publish artifact
         uses: actions/download-artifact@v4
         with:
-          name: crux-web
+          name: vhona-web
           path: publish
 
       - name: Azure login
