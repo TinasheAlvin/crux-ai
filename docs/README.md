@@ -1,4 +1,4 @@
-# Crux AI marketing site
+# Vhona AI marketing site
 
 Static single-file landing page. GitHub Pages hosts it with no build step.
 
