@@ -64,7 +64,7 @@
       border-radius: 0.35rem;
     }
     .nav-home:hover { color: var(--teal-dark); background: rgba(13, 148, 136, 0.08); }
-    .screen { display: none; padding: 1.75rem 0 3.25rem; scroll-margin-top: 5.25rem; }
+    .screen { display: none; padding: 0.35rem 0 3.25rem; scroll-margin-top: 7.4rem; }
     .screen:focus { outline: none; }
     #books { display: block; }
     #steel:target,
@@ -79,12 +79,20 @@
     #service-fee:target ~ #books,
     #deposit-fees:target ~ #books,
     #talk:target ~ #books { display: none; }
+    .sample-bar {
+      position: sticky;
+      top: 4.5rem;
+      z-index: 30;
+      background: rgba(245, 240, 232, 0.96);
+      padding: 0.55rem 0 0.45rem;
+    }
     .sample-label {
       display: inline-block;
-      margin-bottom: 1rem;
+      margin: 0;
       padding: 0.12rem 0.45rem;
       border: 1px solid var(--brass);
       border-radius: 999px;
+      background: var(--cream);
       color: var(--charcoal);
       font-size: 0.68rem;
       font-weight: 700;
@@ -346,10 +354,15 @@
     </div>
   </header>
 
+  <div class="sample-bar">
+    <div class="col">
+      <p class="sample-label">Sample</p>
+    </div>
+  </div>
+
   <main>
     <article id="steel" class="screen" tabindex="-1" aria-labelledby="steel-title">
       <div class="col">
-        <p class="sample-label">Sample</p>
         <a class="back" href="#books">← Back to the list</a>
         <div class="receipt">
           <p class="kicker">Receipt</p>
@@ -366,7 +379,6 @@
 
     <article id="fuel" class="screen" tabindex="-1" aria-labelledby="fuel-title">
       <div class="col">
-        <p class="sample-label">Sample</p>
         <a class="back" href="#books">← Back to the list</a>
         <div class="receipt">
           <p class="kicker">Receipt</p>
@@ -382,7 +394,6 @@
 
     <article id="crew" class="screen" tabindex="-1" aria-labelledby="crew-title">
       <div class="col">
-        <p class="sample-label">Sample</p>
         <a class="back" href="#books">← Back to the list</a>
         <div class="receipt">
           <p class="kicker">Receipt</p>
@@ -398,7 +409,6 @@
 
     <article id="service-fee" class="screen" tabindex="-1" aria-labelledby="service-title">
       <div class="col">
-        <p class="sample-label">Sample</p>
         <a class="back" href="#books">← Back to the list</a>
         <div class="receipt">
           <p class="kicker">Receipt</p>
@@ -413,7 +423,6 @@
 
     <article id="deposit-fees" class="screen" tabindex="-1" aria-labelledby="deposit-title">
       <div class="col">
-        <p class="sample-label">Sample</p>
         <a class="back" href="#books">← Back to the list</a>
         <div class="receipt">
           <p class="kicker">Receipt</p>
@@ -428,7 +437,6 @@
 
     <section id="talk" class="screen" tabindex="-1" aria-labelledby="talk-title">
       <div class="col talk-lead">
-        <p class="sample-label">Sample</p>
         <a class="back" href="#books">← Back to the list</a>
       </div>
       <div class="band-wrap">
@@ -473,7 +481,6 @@
 
     <section id="books" class="screen" tabindex="-1" aria-labelledby="profit-answer">
       <div class="col">
-        <p class="sample-label">Sample</p>
         <div class="profit">
           <p><span>Last month profit</span><strong>R234&nbsp;600</strong></p>
           <p><span>This month profit</span><strong>R186&nbsp;400</strong></p>
