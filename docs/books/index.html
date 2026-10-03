@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Profit · Vhona AI</title>
+  <meta name="description" content="Profit was R48 200 lower than last month, and these rows are almost all of it." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,560;0,9..144,640;1,9..144,560&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --cream: #F5F0E8;
+      --cream-deep: #EDE6DA;
+      --paper: #FFFFFF;
+      --teal: #0D9488;
+      --teal-dark: #0F766E;
+      --brass: #B8956A;
+      --indigo: #1E293B;
+      --charcoal: #1C1917;
+      --muted: #57534E;
+      --line: rgba(28, 25, 23, 0.1);
+      --serif: "Fraunces", Georgia, "Times New Roman", serif;
+      --sans: "Source Sans 3", "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+    body {
+      font-family: var(--sans);
+      background: var(--cream);
+      color: var(--charcoal);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    a { color: inherit; text-decoration: none; }
+    :focus-visible { outline: 2px solid var(--teal-dark); outline-offset: 3px; }
+    .wrap { max-width: 72rem; margin: 0 auto; padding: 0 1.25rem; }
+    .col { max-width: 44rem; margin: 0 auto; padding: 0 1.25rem; }
+    .wordmark { display: inline-flex; align-items: center; line-height: 0; }
+    .wordmark img { display: block; height: 32px; width: auto; }
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(245, 240, 232, 0.92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 4.5rem;
+      gap: 1rem;
+    }
+    .nav-home {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #3c3833;
+      padding: 0.4rem 0.15rem;
+      border-radius: 0.35rem;
+    }
+    .nav-home:hover { color: var(--teal-dark); background: rgba(13, 148, 136, 0.08); }
+    .screen { display: none; padding: 0.35rem 0 3.25rem; scroll-margin-top: 7.4rem; }
+    .screen:focus { outline: none; }
+    #books { display: block; }
+    #steel:target,
+    #fuel:target,
+    #crew:target,
+    #service-fee:target,
+    #deposit-fees:target,
+    #talk:target { display: block; }
+    #steel:target ~ #books,
+    #fuel:target ~ #books,
+    #crew:target ~ #books,
+    #service-fee:target ~ #books,
+    #deposit-fees:target ~ #books,
+    #talk:target ~ #books { display: none; }
+    .sample-bar {
+      position: sticky;
+      top: 4.5rem;
+      z-index: 30;
+      background: rgba(245, 240, 232, 0.96);
+      padding: 0.55rem 0 0.45rem;
+    }
+    .sample-label {
+      display: inline-block;
+      margin: 0;
+      padding: 0.12rem 0.45rem;
+      border: 1px solid var(--brass);
+      border-radius: 999px;
+      background: var(--cream);
+      color: var(--charcoal);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      line-height: 1.4;
+    }
+    .profit {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem 1.25rem;
+      margin-bottom: 1.35rem;
+      padding-bottom: 1.2rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .profit span {
+      display: block;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .profit strong {
+      display: block;
+      margin-top: 0.15rem;
+      font-size: clamp(1.65rem, 3vw, 2.15rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.15;
+    }
+    .answer {
+      font-family: var(--serif);
+      font-weight: 560;
+      font-size: clamp(1.55rem, 2.5vw, 2rem);
+      letter-spacing: -0.03em;
+      line-height: 1.25;
+      margin-bottom: 0.75rem;
+    }
+    .answer:focus { outline: none; }
+    .absent {
+      font-size: 1.05rem;
+      max-width: 38rem;
+      margin-bottom: 0.25rem;
+    }
+    .volume {
+      list-style: none;
+      margin-top: 1.15rem;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-left: 8px solid var(--charcoal);
+      border-radius: 0.35rem 1rem 1rem 0.35rem;
+      overflow: hidden;
+    }
+    .entry {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      column-gap: 0.85rem;
+      align-items: center;
+      padding: 0.9rem 1rem 0.9rem 1.05rem;
+      border-top: 1px solid var(--line);
+      color: inherit;
+    }
+    .volume li:first-child .entry { border-top: 0; }
+    .entry:hover { background: #fbf8f2; }
+    .entry-kind {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--teal-dark);
+    }
+    .entry-name {
+      display: block;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .entry-meta {
+      display: block;
+      margin-top: 0.05rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    .entry-compare {
+      display: block;
+      margin-top: 0.28rem;
+      font-size: 0.95rem;
+    }
+    .entry-amount {
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+    }
+    .entry-open {
+      color: var(--teal);
+      flex: none;
+    }
+    .close {
+      display: inline-flex;
+      margin-top: 1.35rem;
+    }
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin: 0 0 1rem;
+      color: var(--teal-dark);
+      font-weight: 700;
+    }
+    .back:hover { text-decoration: underline; text-underline-offset: 0.15em; }
+    .receipt {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-left: 8px solid var(--charcoal);
+      border-radius: 0.35rem 1rem 1rem 0.35rem;
+      padding: 1.5rem 1.45rem 1.35rem;
+    }
+    .receipt .kicker {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 0.65rem;
+    }
+    .receipt h1 {
+      font-family: var(--sans);
+      font-size: clamp(1.7rem, 3vw, 2.15rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+    }
+    .receipt h1:focus { outline: none; }
+    .receipt .kind {
+      margin-top: 0.35rem;
+      color: var(--teal-dark);
+      font-weight: 600;
+    }
+    .receipt .facts {
+      margin-top: 1.1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--line);
+    }
+    .receipt .facts p {
+      font-size: 1.05rem;
+      margin-bottom: 0.35rem;
+    }
+    .receipt .amount {
+      margin-top: 0.85rem;
+      font-size: clamp(1.7rem, 3vw, 2.15rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      font-variant-numeric: tabular-nums;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 0.95rem;
+      line-height: 1;
+      padding: 0.85rem 1.25rem;
+      cursor: pointer;
+    }
+    .btn-teal { background: var(--teal); color: #fff; }
+    .btn-teal:hover { background: var(--teal-dark); }
+    .btn-light { background: #fff; color: var(--teal-dark); }
+    .btn-light:hover { background: var(--cream); }
+    .talk-lead { margin-bottom: 1rem; }
+    .band-wrap { padding: 0 0 3.25rem; }
+    #talk { padding-bottom: 0; }
+    .band {
+      background: var(--indigo);
+      color: #f8f5ef;
+      border-radius: 1.35rem;
+      padding: 1.75rem 1.5rem 1.5rem;
+      box-shadow: 0 18px 40px rgba(30, 41, 59, 0.18);
+    }
+    .band :focus-visible { outline-color: #F5F0E8; }
+    .band h1 {
+      font-family: var(--serif);
+      font-weight: 560;
+      font-size: clamp(1.8rem, 3vw, 2.35rem);
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+    }
+    .band h1:focus { outline: none; }
+    .band .promise { color: rgba(248, 245, 239, 0.82); margin-top: 0.55rem; max-width: 36rem; }
+    .flow { display: flex; flex-wrap: wrap; gap: 0.55rem 0.35rem; align-items: center; margin-top: 1.15rem; }
+    .flow-step strong { display: block; font-size: 0.92rem; }
+    .flow-step span { display: block; color: rgba(248, 245, 239, 0.72); font-size: 0.82rem; }
+    .flow-arrow { color: rgba(248, 245, 239, 0.45); padding: 0 0.25rem; }
+    .band form {
+      margin-top: 1.35rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      display: grid;
+      gap: 0.75rem;
+    }
+    .form-row { display: grid; gap: 0.75rem; }
+    .band label { display: grid; gap: 0.3rem; font-size: 0.82rem; font-weight: 600; color: rgba(248, 245, 239, 0.88); }
+    .hint { font-weight: 500; color: rgba(248, 245, 239, 0.62); }
+    .band input, .band textarea {
+      width: 100%;
+      font: inherit;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 0.8rem;
+      padding: 0.7rem 0.8rem;
+    }
+    .band textarea { min-height: 5.5rem; resize: vertical; }
+    .band input::placeholder, .band textarea::placeholder { color: rgba(248, 245, 239, 0.45); }
+    .band-actions { display: flex; flex-wrap: wrap; gap: 0.85rem 1.25rem; align-items: center; }
+    .direct { font-size: 0.92rem; color: rgba(248, 245, 239, 0.8); }
+    .direct a { color: #fff; text-decoration: underline; text-underline-offset: 0.15em; }
+    .privacy { font-size: 0.8rem; color: rgba(248, 245, 239, 0.62); }
+    .site-footer {
+      position: relative;
+      color: #FFFFFF;
+      background: #1C1917 url("../footer-dry-stone.jpg") center / cover no-repeat;
+      padding: 2.75rem 0 1.5rem;
+    }
+    .site-footer::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(28, 25, 23, 0.36);
+    }
+    .footer-inner { position: relative; z-index: 1; }
+    .site-footer .wordmark {
+      background: var(--cream);
+      border-radius: 0.45rem;
+      padding: 0.4rem 0.6rem;
+    }
+    .site-footer .wordmark img { height: 30px; }
+    .site-footer p { max-width: 22rem; color: rgba(246, 241, 232, 0.86); margin-top: 0.65rem; }
+    .foot-meta { margin-top: 1rem; color: rgba(255, 255, 255, 0.82); font-size: 0.92rem; }
+    @media (min-width: 800px) {
+      .band { padding: 2rem 2rem 1.6rem; }
+      .form-row { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 640px) {
+      .profit { grid-template-columns: 1fr; }
+      .entry { grid-template-columns: minmax(0, 1fr) auto; }
+      .entry-open { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="wordmark" href="../index.html"><img src="../vhona-wordmark.png" alt="Vhona AI" /></a>
+      <a class="nav-home" href="../index.html">← Back to Vhona</a>
+    </div>
+  </header>
+
+  <div class="sample-bar">
+    <div class="col">
+      <p class="sample-label">Sample</p>
+    </div>
+  </div>
+
+  <main>
+    <article id="steel" class="screen" tabindex="-1" aria-labelledby="steel-title">
+      <div class="col">
+        <a class="back" href="#books">← Back to the list</a>
+        <div class="receipt">
+          <p class="kicker">Receipt</p>
+          <h1 id="steel-title">Steel and Co</h1>
+          <p class="kind">Supplier payment</p>
+          <div class="facts">
+            <p>Invoice 4412</p>
+            <p>4 March</p>
+            <p class="amount">R22&nbsp;600</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article id="fuel" class="screen" tabindex="-1" aria-labelledby="fuel-title">
+      <div class="col">
+        <a class="back" href="#books">← Back to the list</a>
+        <div class="receipt">
+          <p class="kicker">Receipt</p>
+          <h1 id="fuel-title">fuel levy top up</h1>
+          <p class="kind">Supplier payment</p>
+          <div class="facts">
+            <p>11 March</p>
+            <p class="amount">R12&nbsp;400</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article id="crew" class="screen" tabindex="-1" aria-labelledby="crew-title">
+      <div class="col">
+        <a class="back" href="#books">← Back to the list</a>
+        <div class="receipt">
+          <p class="kicker">Receipt</p>
+          <h1 id="crew-title">casual crew</h1>
+          <p class="kind">Supplier payment</p>
+          <div class="facts">
+            <p>week of 17 March</p>
+            <p class="amount">R8&nbsp;900</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article id="service-fee" class="screen" tabindex="-1" aria-labelledby="service-title">
+      <div class="col">
+        <a class="back" href="#books">← Back to the list</a>
+        <div class="receipt">
+          <p class="kicker">Receipt</p>
+          <h1 id="service-title">March service fee</h1>
+          <p class="kind">Bank charge</p>
+          <div class="facts">
+            <p class="amount">R2&nbsp;850</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article id="deposit-fees" class="screen" tabindex="-1" aria-labelledby="deposit-title">
+      <div class="col">
+        <a class="back" href="#books">← Back to the list</a>
+        <div class="receipt">
+          <p class="kicker">Receipt</p>
+          <h1 id="deposit-title">cash deposit fees</h1>
+          <p class="kind">Bank charge</p>
+          <div class="facts">
+            <p class="amount">R1&nbsp;450</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <section id="talk" class="screen" tabindex="-1" aria-labelledby="talk-title">
+      <div class="col talk-lead">
+        <a class="back" href="#books">← Back to the list</a>
+      </div>
+      <div class="band-wrap">
+        <div class="wrap">
+          <div class="band">
+            <h1 id="talk-title">Talk to us</h1>
+            <p class="promise">Request a conversation. Send a short note. We reply within one business day. If it looks like a fit, we arrange a focused conversation of 30 minutes to 1 hour, then a diagnostic of 3 to 6 weeks. The decision is yours.</p>
+            <div class="flow" aria-label="What happens next">
+              <div class="flow-step"><strong>Reply</strong><span>1 business day</span></div>
+              <span class="flow-arrow" aria-hidden="true">→</span>
+              <div class="flow-step"><strong>Conversation</strong><span>30 to 60 min</span></div>
+              <span class="flow-arrow" aria-hidden="true">→</span>
+              <div class="flow-step"><strong>Diagnostic</strong><span>3 to 6 weeks</span></div>
+              <span class="flow-arrow" aria-hidden="true">→</span>
+              <div class="flow-step"><strong>Decision</strong><span>Your choice</span></div>
+            </div>
+            <form id="conversation-form" action="mailto:tnyawasha@gmail.com?subject=Vhona%20AI%3A%20request%20a%20conversation" method="post" enctype="text/plain">
+              <div class="form-row">
+                <label>Name
+                  <input name="name" type="text" autocomplete="name" required maxlength="120" />
+                </label>
+                <label>Email
+                  <input name="email" type="email" autocomplete="email" required maxlength="200" />
+                </label>
+              </div>
+              <label>Company <span class="hint">(optional)</span>
+                <input name="company" type="text" autocomplete="organization" maxlength="160" />
+              </label>
+              <label>Short note
+                <textarea name="note" required maxlength="1000" placeholder="What you want to trust in the numbers."></textarea>
+              </label>
+              <div class="band-actions">
+                <button class="btn btn-light" type="submit">Request a conversation <span aria-hidden="true">→</span></button>
+                <p class="direct">Prefer to write directly? <a href="mailto:tnyawasha@gmail.com?subject=Vhona%20AI%3A%20request%20a%20conversation">tnyawasha@gmail.com</a> · <a href="tel:+27615067323">061 506 7323</a></p>
+              </div>
+              <p class="privacy">This opens an email in your mail app. This page does not store what you type. Please do not send confidential client data until we agree a secure route.</p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="books" class="screen" tabindex="-1" aria-labelledby="profit-answer">
+      <div class="col">
+        <div class="profit">
+          <p><span>Last month profit</span><strong>R234&nbsp;600</strong></p>
+          <p><span>This month profit</span><strong>R186&nbsp;400</strong></p>
+          <p><span>Down</span><strong>R48&nbsp;200</strong></p>
+        </div>
+        <h1 class="answer" id="profit-answer">Profit was R48&nbsp;200 lower than last month, and these rows are almost all of it.</h1>
+        <p class="absent">None of these five were on last month's books.</p>
+        <ul class="volume">
+          <li>
+            <a class="entry" href="#steel">
+              <span>
+                <span class="entry-kind">Supplier payment</span>
+                <span class="entry-name">Steel and Co</span>
+                <span class="entry-meta">Invoice 4412 · 4 March</span>
+                <span class="entry-compare">Not on last month's books.</span>
+              </span>
+              <span class="entry-amount">R22&nbsp;600</span>
+              <svg class="entry-open" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+            </a>
+          </li>
+          <li>
+            <a class="entry" href="#fuel">
+              <span>
+                <span class="entry-kind">Supplier payment</span>
+                <span class="entry-name">fuel levy top up</span>
+                <span class="entry-meta">11 March</span>
+                <span class="entry-compare">Not on last month's books.</span>
+              </span>
+              <span class="entry-amount">R12&nbsp;400</span>
+              <svg class="entry-open" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+            </a>
+          </li>
+          <li>
+            <a class="entry" href="#crew">
+              <span>
+                <span class="entry-kind">Supplier payment</span>
+                <span class="entry-name">casual crew</span>
+                <span class="entry-meta">week of 17 March</span>
+                <span class="entry-compare">Not on last month's books.</span>
+              </span>
+              <span class="entry-amount">R8&nbsp;900</span>
+              <svg class="entry-open" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+            </a>
+          </li>
+          <li>
+            <a class="entry" href="#service-fee">
+              <span>
+                <span class="entry-kind">Bank charge</span>
+                <span class="entry-name">March service fee</span>
+                <span class="entry-compare">Not on last month's books.</span>
+              </span>
+              <span class="entry-amount">R2&nbsp;850</span>
+              <svg class="entry-open" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+            </a>
+          </li>
+          <li>
+            <a class="entry" href="#deposit-fees">
+              <span>
+                <span class="entry-kind">Bank charge</span>
+                <span class="entry-name">cash deposit fees</span>
+                <span class="entry-compare">Not on last month's books.</span>
+              </span>
+              <span class="entry-amount">R1&nbsp;450</span>
+              <svg class="entry-open" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+            </a>
+          </li>
+        </ul>
+        <a class="btn btn-teal close" href="#talk">Talk to us <span aria-hidden="true">→</span></a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <a class="wordmark" href="../index.html"><img src="../vhona-wordmark.png" alt="Vhona AI" /></a>
+      <p>Business intelligence for South African service SMBs. Cited answers, or no answer.</p>
+      <p class="foot-meta">Built with purpose in South Africa. © 2026 Vhona AI. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var form = document.getElementById("conversation-form");
+      if (!form) return;
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        var data = new FormData(form);
+        var name = String(data.get("name") || "").trim();
+        var email = String(data.get("email") || "").trim();
+        var company = String(data.get("company") || "").trim();
+        var note = String(data.get("note") || "").trim();
+        var lines = ["Name: " + name, "Email: " + email];
+        if (company) lines.push("Company: " + company);
+        lines.push("", note);
+        window.location.href = "mailto:tnyawasha@gmail.com?subject=" +
+          encodeURIComponent("Vhona AI: request a conversation") +
+          "&body=" + encodeURIComponent(lines.join("\n"));
+      });
+    })();
+    (function () {
+      function focusScreen() {
+        var id = (location.hash || "").replace("#", "");
+        if (!id) return;
+        var screen = document.getElementById(id);
+        if (screen) screen.focus({ preventScroll: true });
+      }
+      window.addEventListener("hashchange", focusScreen);
+    })();
+  </script>
+</body>
+</html>
