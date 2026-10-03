@@ -139,6 +139,23 @@
       gap: 2.5rem;
       align-items: center;
     }
+    .hero-grid > .lift:first-child { position: relative; }
+    .hero-grid > .lift:first-child::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      pointer-events: none;
+      top: -4.25rem;
+      bottom: -3.5rem;
+      left: calc(-1 * (max(0px, (100vw - 72rem) / 2) + 1.25rem));
+      right: -1.65rem;
+      background: linear-gradient(
+        90deg,
+        var(--cream) 0%,
+        var(--cream) calc(100% - 1.65rem),
+        rgba(245, 240, 232, 0) 100%
+      );
+    }
     .hero h1 {
       font-family: var(--serif);
       font-weight: 560;
@@ -155,12 +172,12 @@
     }
     .hero-lead {
       font-size: 1.15rem;
-      color: var(--muted);
+      color: var(--charcoal);
       max-width: 34rem;
       margin-bottom: 1.6rem;
     }
     .hero-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.35rem; }
-    .reassure { display: flex; flex-wrap: wrap; gap: 0.9rem 1.25rem; color: var(--stone); font-size: 0.92rem; }
+    .reassure { display: flex; flex-wrap: wrap; gap: 1.2rem 1.25rem; color: var(--charcoal); font-size: 0.92rem; }
     .reassure span { display: inline-flex; align-items: center; gap: 0.4rem; }
     .reassure svg { color: var(--teal); flex: none; }
     .hero-visual { position: relative; min-height: 22rem; }
@@ -623,6 +640,16 @@
       .app-nav a { width: auto; white-space: nowrap; }
       .brief-float { position: static; width: auto; margin-top: 0.85rem; }
       .hero-stone { inset: auto 0 0 0; height: 46%; background-position: center 42%; -webkit-mask-image: linear-gradient(180deg, transparent, #000 36%); mask-image: linear-gradient(180deg, transparent, #000 36%); }
+      .hero-grid > .lift:first-child::before {
+        right: calc(-1 * (max(0px, (100vw - 72rem) / 2) + 1.25rem));
+        bottom: -2.15rem;
+        background: linear-gradient(
+          180deg,
+          var(--cream) 0%,
+          var(--cream) calc(100% - 1.15rem),
+          rgba(245, 240, 232, 0) 100%
+        );
+      }
     }
   </style>
 </head>
