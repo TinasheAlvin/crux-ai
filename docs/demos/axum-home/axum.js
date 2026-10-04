@@ -17,31 +17,82 @@
     byPair[key]["day" + row.day_offset] = row;
   });
 
-  function dayRatio(rec) {
-    if (!rec) return null;
-    if (!(rec.forecast_units > 0)) return Infinity;
-    return (rec.high - rec.low) / rec.forecast_units;
+  var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+  function fmtNum(value) {
+    return value.toLocaleString("en-US", { maximumFractionDigits: 2 });
   }
 
-  function labelFromRatio(ratio) {
-    if (!(ratio <= 2)) return "Low";
-    if (ratio > 1) return "Medium";
+  function prettyDate(iso) {
+    var parts = String(iso).split("-");
+    return Number(parts[2]) + " " + months[Number(parts[1]) - 1] + " " + parts[0];
+  }
+
+  var spanInfo = (function () {
+    var min = Infinity;
+    var max = -Infinity;
+    data.forecastAll.forEach(function (row) {
+      if (row.forecast_units < min) min = row.forecast_units;
+      if (row.forecast_units > max) max = row.forecast_units;
+    });
+    var span = max - min;
+    return { min: min, max: max, cut1: min + span / 3, cut2: min + (2 * span) / 3 };
+  })();
+
+  function newestHistoryDate() {
+    var newest = "";
+    var signals = data.historySignal || {};
+    Object.keys(signals).forEach(function (key) {
+      var last = signals[key].last_date || "";
+      if (last > newest) newest = last;
+    });
+    return newest;
+  }
+
+  function pairPoint(pair) {
+    var values = [];
+    if (pair.day1) values.push(pair.day1.forecast_units);
+    if (pair.day2) values.push(pair.day2.forecast_units);
+    if (!values.length) return null;
+    var value = values[0];
+    for (var i = 1; i < values.length; i += 1) {
+      if (values[i] > value) value = values[i];
+    }
+    return value;
+  }
+
+  function thirdOf(value) {
+    if (value < spanInfo.cut1) return "Low";
+    if (value < spanInfo.cut2) return "Medium";
     return "High";
   }
 
-  function confidenceOfPair(pair) {
-    var ratios = [dayRatio(pair.day1), dayRatio(pair.day2)].filter(function (ratio) { return ratio !== null; });
-    if (!ratios.length) return "n/a";
-    var wider = ratios[0];
-    for (var i = 1; i < ratios.length; i += 1) {
-      if (ratios[i] > wider) wider = ratios[i];
+  function holdReason(key) {
+    var signal = data.historySignal && data.historySignal[key];
+    var newest = newestHistoryDate();
+    if (!signal) return "No order history is stored for this row, so it cannot sit in High.";
+    if (signal.last_date < newest) {
+      return "Order history stopped on " + prettyDate(signal.last_date) + ", before the newest day in the sample (" + prettyDate(newest) + ").";
     }
-    return labelFromRatio(wider);
+    if (signal.typical_miss > signal.mean_units) {
+      return "Past days swing by about " + fmtNum(signal.typical_miss) + " units, more than their average of " + fmtNum(signal.mean_units) + ".";
+    }
+    return "";
+  }
+
+  function assessPair(pair, key) {
+    var value = pairPoint(pair);
+    if (value === null) return { label: "n/a", third: "n/a", held: false, reason: "" };
+    var third = thirdOf(value);
+    var reason = holdReason(key);
+    var held = third === "High" && reason !== "";
+    return { label: held ? "Medium" : third, third: third, held: held, reason: held ? reason : "" };
   }
 
   var rowsData = Object.keys(byPair).map(function (key) {
     var parts = key.split("||");
     var pair = byPair[key];
+    var assessed = assessPair(pair, key);
     return {
       sku: parts[0],
       region: parts[1],
@@ -52,7 +103,9 @@
       d2: pair.day2 ? pair.day2.forecast_units : null,
       d2_low: pair.day2 ? pair.day2.low : null,
       d2_high: pair.day2 ? pair.day2.high : null,
-      conf: confidenceOfPair(pair)
+      conf: assessed.label,
+      held: assessed.held,
+      reason: assessed.reason
     };
   });
 
@@ -104,7 +157,8 @@
         "<td>" + esc(row.region) + "</td>" +
         '<td class="num">' + (row.d1 !== null ? row.d1.toLocaleString() + (rangeText(row.d1_low, row.d1_high, true) ? " · " + rangeText(row.d1_low, row.d1_high, true) : "") : "None") + "</td>" +
         '<td class="num">' + (row.d2 !== null ? row.d2.toLocaleString() + (rangeText(row.d2_low, row.d2_high, true) ? " · " + rangeText(row.d2_low, row.d2_high, true) : "") : "None") + "</td>" +
-        '<td class="conf">' + esc(row.conf) + "</td></tr>";
+        '<td class="conf"' + (row.reason ? ' title="' + esc(row.reason) + '"' : "") + ">" + esc(row.conf) +
+        (row.held ? "<small>Held from the upper third</small>" : "") + "</td></tr>";
     }).join("");
     document.getElementById("rowCountLabel").textContent = rows.length + " combinations · page " + currentPage + " of " + totalPages;
 
@@ -169,6 +223,21 @@
     document.getElementById("skuFilter").insertAdjacentHTML("beforeend", '<option value="' + esc(sku) + '">' + esc(sku) + "</option>");
   });
   document.getElementById("modelCount").textContent = Object.keys(byPair).length + " SKU × region models";
+
+  var newestDay = newestHistoryDate();
+  document.getElementById("confidenceThirds").textContent =
+    "Point forecasts in this sample run from " + fmtNum(spanInfo.min) + " to " + fmtNum(spanInfo.max) +
+    ". The span from the lowest to the highest is split into three equal thirds. Below " + fmtNum(spanInfo.cut1) +
+    " is Low. From " + fmtNum(spanInfo.cut1) + " and below " + fmtNum(spanInfo.cut2) +
+    " is Medium. From " + fmtNum(spanInfo.cut2) + " through " + fmtNum(spanInfo.max) +
+    " is High. A row uses its higher day.";
+  document.getElementById("confidenceHistory").textContent =
+    "A second check can hold a row out of High. The row stays High only when its order history reaches the newest day in the sample (" +
+    prettyDate(newestDay) + ") and the past days swing less than their own average. If the history stopped earlier, or the days swing more than that average, the label drops to Medium and the range is drawn wider. A fresh series that passes this check stays where the third puts it.";
+  document.querySelector('th[data-sort="conf"]').title =
+    "Three equal thirds of the sample span, from " + fmtNum(spanInfo.min) + " to " + fmtNum(spanInfo.max) +
+    ". History can hold a row out of High.";
+
   renderTable();
 
   var attention = rowsData.filter(function (row) { return row.conf === "Low" && row.d1 !== null; })
@@ -295,7 +364,8 @@
     var pair = byPair[key];
     if (!pair) return;
     document.getElementById("modalTitle").textContent = sku + ", " + region;
-    var conf = confidenceOfPair(pair);
+    var assessed = assessPair(pair, key);
+    var conf = assessed.label;
     function cell(label, value) {
       return '<article class="paper kpi"><span>' + label + "</span><strong>" + value + "</strong></article>";
     }
@@ -319,12 +389,12 @@
     var note = document.getElementById("modalNote");
     if (hist && forecastPts) {
       wrap.hidden = false;
-      note.textContent = pair.day1 ? "Day 1 range " + pair.day1.low.toLocaleString() + " to " + pair.day1.high.toLocaleString() + (pair.day2 ? ". Day 2 range " + pair.day2.low.toLocaleString() + " to " + pair.day2.high.toLocaleString() + "." : ".") : "";
+      note.textContent = (pair.day1 ? "Day 1 range " + pair.day1.low.toLocaleString() + " to " + pair.day1.high.toLocaleString() + (pair.day2 ? ". Day 2 range " + pair.day2.low.toLocaleString() + " to " + pair.day2.high.toLocaleString() + "." : ".") : "") + (assessed.held ? " " + assessed.reason + " The label drops to Medium, and the range is drawn wider." : "");
       presentDialog(modal);
       modalChart = buildBandedChart("modalChart", hist, forecastPts);
     } else {
       wrap.hidden = true;
-      note.textContent = "Daily history chart not embedded for this pair in the demo. The forecast table still shows its forecast and range.";
+      note.textContent = "Daily history chart not embedded for this pair in the demo. The forecast table still shows its forecast and range." + (assessed.held ? " " + assessed.reason + " The label drops to Medium, and the range is drawn wider." : "");
       presentDialog(modal);
     }
   }
@@ -343,14 +413,14 @@
       tab: "explorer",
       sel: "#next-two-days",
       title: "The next two days",
-      text: "Each product and region has a forecast for the next two days. Confidence is on the row."
+      text: "Each product and region has a forecast for the next two days. The note above the table explains the two checks behind High, Medium, and Low."
     },
     {
       tab: "explorer",
       sel: "#modalNote",
       title: "The range",
       openKey: "GC210 Glass cleaner lemon||Gauteng, Johannesburg Area",
-      text: "This row is open so you can see the range around those two days. High is no wider than the forecast. Medium is up to twice the forecast. Low is wider than that."
+      text: "This row is open so you can see the range around those two days. The label follows three equal thirds of the sample. History can hold a row out of High when the series stopped early or the past days swing more than their own average."
     },
     {
       tab: "quality",
