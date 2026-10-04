@@ -154,6 +154,7 @@
       padding: 0.9rem 1rem 0.9rem 1.05rem;
       border-top: 1px solid var(--line);
       color: inherit;
+      cursor: pointer;
     }
     .volume li:first-child .entry { border-top: 0; }
     .entry:hover { background: #fbf8f2; }
@@ -168,6 +169,7 @@
       font-size: 1.05rem;
       font-weight: 700;
       letter-spacing: -0.02em;
+      color: var(--teal);
     }
     .entry-meta {
       display: block;
@@ -346,8 +348,6 @@
     }
     @media (max-width: 640px) {
       .profit { grid-template-columns: 1fr; }
-      .entry { grid-template-columns: minmax(0, 1fr) auto; }
-      .entry-open { display: none; }
     }
   </style>
 </head>
