@@ -1,5 +1,5 @@
 (function () {
-  var data = window.CASA_MIA;
+  var data = window.AXUM_HOME;
   if (!data) return;
 
   function esc(value) {
@@ -89,8 +89,8 @@
       return '<tr class="' + (row.conf === "Low" ? "is-low" : "") + '" data-key="' + esc(row.key) + '">' +
         "<td>" + esc(row.sku) + "</td>" +
         "<td>" + esc(row.region.toUpperCase()) + "</td>" +
-        '<td class="num">' + (row.d1 !== null ? row.d1.toLocaleString() : "—") + "<br><span class=\"meta\">" + rangeText(row.d1_low, row.d1_high, row.d1 !== null) + "</span></td>" +
-        '<td class="num">' + (row.d2 !== null ? row.d2.toLocaleString() : "—") + "<br><span class=\"meta\">" + rangeText(row.d2_low, row.d2_high, row.d2 !== null) + "</span></td>" +
+        '<td class="num">' + (row.d1 !== null ? row.d1.toLocaleString() + (rangeText(row.d1_low, row.d1_high, true) ? " · " + rangeText(row.d1_low, row.d1_high, true) : "") : "—") + "</td>" +
+        '<td class="num">' + (row.d2 !== null ? row.d2.toLocaleString() + (rangeText(row.d2_low, row.d2_high, true) ? " · " + rangeText(row.d2_low, row.d2_high, true) : "") : "—") + "</td>" +
         '<td class="conf">' + esc(row.conf) + "</td></tr>";
     }).join("");
     document.getElementById("rowCountLabel").textContent = rows.length + " combinations · page " + currentPage + " of " + totalPages;
@@ -138,7 +138,7 @@
     var blob = new Blob([header + body], { type: "text/csv" });
     var a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "casa_mia_forecast_export.csv";
+    a.download = "axum_home_forecast_export.csv";
     a.click();
   });
 
@@ -255,7 +255,7 @@
     tab.addEventListener("click", function () { showPanel(tab.getAttribute("data-tab")); });
   });
 
-  buildBandedChart("lcreamChart", data.lcreamHistory, data.lcreamForecast);
+  buildBandedChart("workedChart", data.workedHistory, data.workedForecast);
 
   function openDetail(key) {
     var parts = key.split("||");
@@ -275,9 +275,9 @@
     if (modalChart) { modalChart.destroy(); modalChart = null; }
     var hist = data.historyByCombo[key];
     var forecastPts = null;
-    if (key === "LCREAM||jhb") {
-      hist = data.lcreamHistory;
-      forecastPts = data.lcreamForecast;
+    if (key === "GC210 Glass cleaner lemon||jhb") {
+      hist = data.workedHistory;
+      forecastPts = data.workedForecast;
     } else if (hist && hist.length) {
       var last = hist[hist.length - 1].date;
       forecastPts = [pair.day1, pair.day2].filter(Boolean).map(function (row, index) {
