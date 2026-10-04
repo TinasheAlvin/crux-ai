@@ -265,7 +265,17 @@
 
   buildBandedChart("workedChart", data.workedHistory, data.workedForecast);
 
-  function openDetail(key) {
+  function presentDialog(modal) {
+    var dialog = document.getElementById("detailDialog");
+    var wantModal = modal !== false;
+    if (dialog.open && dialog.matches(":modal") !== wantModal) dialog.close();
+    if (!dialog.open) {
+      if (wantModal) dialog.showModal();
+      else dialog.show();
+    }
+  }
+
+  function openDetail(key, modal) {
     var parts = key.split("||");
     var sku = parts[0];
     var region = parts[1];
@@ -283,7 +293,7 @@
     if (modalChart) { modalChart.destroy(); modalChart = null; }
     var hist = data.historyByCombo[key];
     var forecastPts = null;
-    if (key === "GC210 Glass cleaner lemon||Gauteng, Johannesburg zone") {
+    if (key === "GC210 Glass cleaner lemon||Gauteng, Johannesburg Area") {
       hist = data.workedHistory;
       forecastPts = data.workedForecast;
     } else if (hist && hist.length) {
@@ -294,19 +304,120 @@
     }
     var wrap = document.getElementById("modalChartWrap");
     var note = document.getElementById("modalNote");
-    var dialog = document.getElementById("detailDialog");
     if (hist && forecastPts) {
       wrap.hidden = false;
       note.textContent = pair.day1 ? "Day 1 range " + pair.day1.low.toLocaleString() + " to " + pair.day1.high.toLocaleString() + (pair.day2 ? ". Day 2 range " + pair.day2.low.toLocaleString() + " to " + pair.day2.high.toLocaleString() + "." : ".") : "";
-      dialog.showModal();
+      presentDialog(modal);
       modalChart = buildBandedChart("modalChart", hist, forecastPts);
     } else {
       wrap.hidden = true;
       note.textContent = "Daily history chart not embedded for this pair in the demo. The forecast table still shows its forecast and range.";
-      dialog.showModal();
+      presentDialog(modal);
     }
   }
   document.getElementById("closeDetail").addEventListener("click", function () {
     document.getElementById("detailDialog").close();
   });
+
+  var steps = [
+    {
+      tab: "overview",
+      sel: "#cleaned-orders",
+      title: "Cleaned orders",
+      text: "Glass cleaner lemon in Gauteng, Johannesburg Area. This chart starts from cleaned orders: the last 30 days of actual demand."
+    },
+    {
+      tab: "explorer",
+      sel: "#next-two-days",
+      title: "The next two days",
+      text: "Each product and region has a forecast for the next two days. Confidence is on the row."
+    },
+    {
+      tab: "explorer",
+      sel: "#modalNote",
+      title: "The range",
+      openKey: "GC210 Glass cleaner lemon||Gauteng, Johannesburg Area",
+      text: "This row is open so you can see the range around those two days. A wider range means lower confidence."
+    },
+    {
+      tab: "quality",
+      sel: "#cleanup",
+      title: "What was thrown out",
+      text: "The data quality screen shows what was thrown out of the raw export, and the pairs that are not forecasted yet."
+    }
+  ];
+  var ti = 0;
+  var hl = null;
+  var walk = document.getElementById("walk");
+
+  function clearHL() {
+    if (hl) hl.classList.remove("is-focus");
+    hl = null;
+  }
+  function closeDetailQuiet() {
+    var dialog = document.getElementById("detailDialog");
+    if (dialog.open) dialog.close();
+  }
+  function parkWalk(inline) {
+    if (inline) {
+      document.querySelector("#detailDialog .sheet-body").appendChild(walk);
+      walk.classList.add("is-inline");
+    } else {
+      document.body.appendChild(walk);
+      walk.classList.remove("is-inline");
+    }
+  }
+  function showWalk(inline) {
+    parkWalk(inline);
+    walk.hidden = false;
+  }
+  function hideWalk() {
+    parkWalk(false);
+    walk.hidden = true;
+  }
+  function showStep(i) {
+    ti = i;
+    var step = steps[i];
+    if (step.openKey) {
+      showPanel(step.tab);
+      openDetail(step.openKey);
+      showWalk(true);
+    } else {
+      showWalk(false);
+      closeDetailQuiet();
+      showPanel(step.tab);
+    }
+    clearHL();
+    window.setTimeout(function () {
+      var el = document.querySelector(step.sel);
+      if (!el) return;
+      el.classList.add("is-focus");
+      hl = el;
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 60);
+    document.getElementById("walk-count").textContent = (i + 1) + " of " + steps.length;
+    document.getElementById("walk-title").textContent = step.title;
+    document.getElementById("walk-text").textContent = step.text;
+    document.getElementById("walk-back").disabled = i === 0;
+    document.getElementById("walk-next").textContent = "Next";
+  }
+  function endWalk() {
+    clearHL();
+    closeDetailQuiet();
+    hideWalk();
+  }
+  document.getElementById("start-walk").addEventListener("click", function () { showStep(0); });
+  document.getElementById("look-around").addEventListener("click", function () {
+    endWalk();
+    showPanel("overview");
+    document.querySelector(".rail").scrollIntoView({ block: "nearest" });
+  });
+  document.getElementById("walk-next").addEventListener("click", function () {
+    if (ti < steps.length - 1) showStep(ti + 1);
+    else endWalk();
+  });
+  document.getElementById("walk-back").addEventListener("click", function () {
+    if (ti > 0) showStep(ti - 1);
+  });
+  document.getElementById("walk-end").addEventListener("click", endWalk);
 })();

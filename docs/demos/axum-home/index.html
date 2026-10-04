@@ -75,6 +75,15 @@
     .clean { display: grid; gap: 0.65rem; }
     .clean li { margin-left: 1.1rem; }
     .detail-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6rem; margin-bottom: 0.8rem; }
+    .walk.is-inline {
+      position: static;
+      left: auto;
+      right: auto;
+      bottom: auto;
+      transform: none;
+      width: auto;
+      margin-top: 1rem;
+    }
   </style>
 </head>
 <body class="axum">
@@ -100,8 +109,12 @@
       <div class="intro">
         <p class="sample-label">Sample</p>
         <h1 class="serif">Axum Home</h1>
-        <p class="sub">Orders come in, get cleaned, and a model forecasts the next two days for each product and region.</p>
+        <p class="sub">Orders come in, get cleaned, and a model forecasts the next two days for each product and region. Walk through the sample, or look around.</p>
         <p class="proto">Prototype. Not production data.</p>
+        <div class="actions">
+          <button class="btn btn-teal" type="button" id="start-walk">Walk through</button>
+          <button class="btn btn-ghost" type="button" id="look-around">Look around</button>
+        </div>
       </div>
 
       <ol class="pipe">
@@ -126,9 +139,9 @@
         <div>
           <section class="panel is-on stack" id="panel-overview" data-panel="overview">
             <div class="split two">
-              <article class="paper block-pad">
+              <article class="paper block-pad" id="cleaned-orders">
                 <h2>Glass cleaner lemon, Johannesburg</h2>
-                <p class="meta" style="margin:0.25rem 0 0.7rem;">GC210 · Gauteng, Johannesburg zone. Last 30 days actual, next 2 days forecast, with the confidence range.</p>
+                <p class="meta" style="margin:0.25rem 0 0.7rem;">GC210 · Gauteng, Johannesburg Area. Last 30 days actual, next 2 days forecast, with the confidence range.</p>
                 <div class="chart-box chart-tall"><canvas id="workedChart"></canvas></div>
               </article>
               <article class="paper">
@@ -148,7 +161,7 @@
           </section>
 
           <section class="panel" id="panel-explorer" data-panel="explorer">
-            <article class="paper block-pad">
+            <article class="paper block-pad" id="next-two-days">
               <div class="head-row">
                 <h2>Next 2 days</h2>
                 <span class="meta" id="modelCount"></span>
@@ -242,6 +255,17 @@
       </div>
     </div>
   </main>
+
+  <div class="walk" id="walk" hidden>
+    <p class="walk-count" id="walk-count"></p>
+    <h2 id="walk-title"></h2>
+    <p id="walk-text"></p>
+    <div class="walk-actions">
+      <button class="btn btn-ghost" type="button" id="walk-end">End</button>
+      <button class="btn btn-ghost" type="button" id="walk-back">Back</button>
+      <button class="btn btn-teal" type="button" id="walk-next">Next</button>
+    </div>
+  </div>
 
   <dialog class="sheet" id="detailDialog">
     <div class="sheet-card">
