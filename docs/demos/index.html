@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Demos · Vhona AI</title>
+  <meta name="description" content="Sample walks for Vhona AI: Karoo Kitchen, a fictional Cape Town restaurant group, and a Casa Mia demand forecast prototype." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,560;0,9..144,640;1,9..144,560&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="site.css" />
+  <style>
+    .paths { display: grid; gap: 2.25rem; margin-top: 2.25rem; }
+    .paths article { max-width: 40rem; }
+    .paths h2 {
+      font-family: var(--serif);
+      font-weight: 560;
+      font-size: clamp(1.7rem, 2.5vw, 2.15rem);
+      letter-spacing: -0.03em;
+      margin: 0.85rem 0 0.55rem;
+    }
+    .paths p { color: var(--muted); font-size: 1.05rem; margin-bottom: 1rem; }
+    .paths .proto { color: var(--charcoal); font-weight: 600; }
+    h1 { font-size: clamp(2.4rem, 4vw, 3.4rem); margin: 0.85rem 0 0.7rem; }
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="wordmark" href="../index.html"><img src="../vhona-wordmark.png" alt="Vhona AI" /></a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="../index.html#product">Product</a>
+        <a href="../pulsechat/">PulseChat</a>
+        <a class="is-active" href="./" aria-current="page">Demos</a>
+        <a href="../index.html#how-it-works">How it works</a>
+        <a href="../index.html#connectors">Connectors</a>
+        <a href="../index.html#about">Trust</a>
+      </nav>
+      <div class="nav-cta">
+        <a class="btn btn-teal" href="../index.html#contact">Talk to us</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="wrap">
+      <p class="sample-label">Sample</p>
+      <h1 class="serif">Demos</h1>
+      <p class="lede">Two places you can walk through. The figures are the sample already prepared. They are not production data.</p>
+      <div class="paths">
+        <article>
+          <h2>Karoo Kitchen</h2>
+          <p>A fictional Cape Town restaurant group, three branches. Walk the executive overview, the health score, the VAT alert, the full profit and loss, the branch results, the scenario planner, the ask box, a report you can open, and the WhatsApp briefing. Or look around on your own.</p>
+          <a class="btn btn-teal" href="karoo/">Open Karoo Kitchen</a>
+        </article>
+        <article>
+          <h2>Casa Mia</h2>
+          <p>A demand forecast prototype. Orders come in, get cleaned, and a model forecasts the next two days for each product and region. Filter the table, open one product, read the lemon creams example for Johannesburg, and open the data quality screen.</p>
+          <p class="proto">Prototype. Not production data.</p>
+          <a class="btn btn-teal" href="casa-mia/">Open Casa Mia</a>
+        </article>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer" style="--stone: url('../footer-dry-stone.jpg')">
+    <div class="wrap footer-inner">
+      <div>
+        <a class="wordmark" href="../index.html"><img src="../vhona-wordmark.png" alt="Vhona AI" /></a>
+        <p>Business intelligence for South African service SMBs. Cited answers, or no answer.</p>
+      </div>
+      <nav class="foot-links" aria-label="Footer">
+        <a href="../index.html#product">Product</a>
+        <a href="../pulsechat/">PulseChat</a>
+        <a href="./">Demos</a>
+        <a href="../index.html#how-it-works">How it works</a>
+        <a href="../index.html#connectors">Connectors</a>
+        <a href="../index.html#about">Trust</a>
+        <a href="../index.html#contact">Talk to us</a>
+      </nav>
+      <div class="foot-meta">
+        <span><a href="mailto:tnyawasha@gmail.com">tnyawasha@gmail.com</a></span>
+        <span><a href="tel:+27615067323">061 506 7323</a></span>
+        <span>Built with purpose in South Africa.</span>
+        <span>© 2026 Vhona AI. All rights reserved.</span>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
