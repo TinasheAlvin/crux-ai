@@ -84,6 +84,30 @@
       width: auto;
       margin-top: 1rem;
     }
+    body.axum .nav {
+      background: var(--cream);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+    #panel-overview .table-scroll table.data {
+      width: 100%;
+      min-width: 0;
+      table-layout: fixed;
+    }
+    #panel-overview .table-scroll table.data th,
+    #panel-overview .table-scroll table.data td {
+      padding-left: 0.35rem;
+      padding-right: 0.35rem;
+      white-space: normal;
+    }
+    #panel-overview .table-scroll table.data th:nth-child(1),
+    #attentionBody td:nth-child(1) { width: 26%; }
+    #panel-overview .table-scroll table.data th:nth-child(2),
+    #attentionBody td:nth-child(2) { width: 31%; }
+    #panel-overview .table-scroll table.data th:nth-child(3),
+    #attentionBody td:nth-child(3) { width: 20%; white-space: nowrap; }
+    #panel-overview .table-scroll table.data th:nth-child(4),
+    #attentionBody td:nth-child(4) { width: 23%; white-space: nowrap; }
   </style>
 </head>
 <body class="axum">
