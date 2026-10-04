@@ -58,8 +58,8 @@
     table.data td { white-space: nowrap; }
     #forecastBody tr, #attentionBody tr { cursor: pointer; }
     #forecastBody td:first-child { color: var(--teal); font-weight: 700; }
-    th.row-go, td.row-go { width: 2rem; color: var(--teal); text-align: right; }
-    td.row-go svg { display: block; margin-left: auto; }
+    #forecastBody .sku-open { display: inline-flex; align-items: center; gap: 0.45rem; }
+    #forecastBody .sku-open svg { flex: none; }
     tr.is-low td { background: var(--cream-deep); }
     .conf { font-weight: 700; }
     .pages { display: flex; flex-wrap: wrap; gap: 0.3rem; justify-content: flex-end; max-width: 100%; }
@@ -182,7 +182,6 @@
                       <th class="num" data-sort="d1">Day 1 forecast</th>
                       <th class="num" data-sort="d2">Day 2 forecast</th>
                       <th data-sort="conf">Confidence</th>
-                      <th class="row-go" aria-hidden="true"></th>
                     </tr>
                   </thead>
                   <tbody id="forecastBody"></tbody>
