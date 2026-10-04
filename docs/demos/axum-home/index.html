@@ -56,7 +56,10 @@
     table.data { width: max-content; min-width: 100%; }
     table.data th,
     table.data td { white-space: nowrap; }
-    table.data tbody tr { cursor: pointer; }
+    #forecastBody tr, #attentionBody tr { cursor: pointer; }
+    #forecastBody td:first-child { color: var(--teal); font-weight: 700; }
+    th.row-go, td.row-go { width: 2rem; color: var(--teal); text-align: right; }
+    td.row-go svg { display: block; margin-left: auto; }
     tr.is-low td { background: var(--cream-deep); }
     .conf { font-weight: 700; }
     .pages { display: flex; flex-wrap: wrap; gap: 0.3rem; justify-content: flex-end; max-width: 100%; }
@@ -102,7 +105,7 @@
       </div>
 
       <ol class="pipe">
-        <li><span class="n">1</span>Order export</li>
+        <li><span class="n">1</span>Skynamo order export</li>
         <li><span class="n">2</span>Clean and aggregate by SKU, region, and day</li>
         <li><span class="n">3</span>Prophet model per SKU and region</li>
         <li><span class="n">4</span>2 day forecast and a confidence range</li>
@@ -179,6 +182,7 @@
                       <th class="num" data-sort="d1">Day 1 forecast</th>
                       <th class="num" data-sort="d2">Day 2 forecast</th>
                       <th data-sort="conf">Confidence</th>
+                      <th class="row-go" aria-hidden="true"></th>
                     </tr>
                   </thead>
                   <tbody id="forecastBody"></tbody>
