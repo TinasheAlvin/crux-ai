@@ -64,7 +64,7 @@
 
   function rangeText(low, high, has) {
     if (!has) return "";
-    return low.toLocaleString() + "–" + high.toLocaleString();
+    return low.toLocaleString() + " to " + high.toLocaleString();
   }
 
   function renderTable() {
@@ -89,8 +89,8 @@
       return '<tr class="' + (row.conf === "Low" ? "is-low" : "") + '" data-key="' + esc(row.key) + '">' +
         "<td>" + esc(row.sku) + "</td>" +
         "<td>" + esc(row.region) + "</td>" +
-        '<td class="num">' + (row.d1 !== null ? row.d1.toLocaleString() + (rangeText(row.d1_low, row.d1_high, true) ? " · " + rangeText(row.d1_low, row.d1_high, true) : "") : "—") + "</td>" +
-        '<td class="num">' + (row.d2 !== null ? row.d2.toLocaleString() + (rangeText(row.d2_low, row.d2_high, true) ? " · " + rangeText(row.d2_low, row.d2_high, true) : "") : "—") + "</td>" +
+        '<td class="num">' + (row.d1 !== null ? row.d1.toLocaleString() + (rangeText(row.d1_low, row.d1_high, true) ? " · " + rangeText(row.d1_low, row.d1_high, true) : "") : "None") + "</td>" +
+        '<td class="num">' + (row.d2 !== null ? row.d2.toLocaleString() + (rangeText(row.d2_low, row.d2_high, true) ? " · " + rangeText(row.d2_low, row.d2_high, true) : "") : "None") + "</td>" +
         '<td class="conf">' + esc(row.conf) + "</td></tr>";
     }).join("");
     document.getElementById("rowCountLabel").textContent = rows.length + " combinations · page " + currentPage + " of " + totalPages;
@@ -271,14 +271,14 @@
     var region = parts[1];
     var pair = byPair[key];
     if (!pair) return;
-    document.getElementById("modalTitle").textContent = sku + " — " + region;
+    document.getElementById("modalTitle").textContent = sku + ", " + region;
     var conf = confidenceOf(pair.day1);
     function cell(label, value) {
       return '<article class="paper kpi"><span>' + label + "</span><strong>" + value + "</strong></article>";
     }
     document.getElementById("modalKpis").innerHTML =
-      cell("Day 1", pair.day1 ? pair.day1.forecast_units.toLocaleString() : "—") +
-      cell("Day 2", pair.day2 ? pair.day2.forecast_units.toLocaleString() : "—") +
+      cell("Day 1", pair.day1 ? pair.day1.forecast_units.toLocaleString() : "None") +
+      cell("Day 2", pair.day2 ? pair.day2.forecast_units.toLocaleString() : "None") +
       cell("Confidence", conf);
     if (modalChart) { modalChart.destroy(); modalChart = null; }
     var hist = data.historyByCombo[key];
@@ -297,12 +297,12 @@
     var dialog = document.getElementById("detailDialog");
     if (hist && forecastPts) {
       wrap.hidden = false;
-      note.textContent = pair.day1 ? "Day 1 range " + pair.day1.low.toLocaleString() + "–" + pair.day1.high.toLocaleString() + (pair.day2 ? ". Day 2 range " + pair.day2.low.toLocaleString() + "–" + pair.day2.high.toLocaleString() + "." : ".") : "";
+      note.textContent = pair.day1 ? "Day 1 range " + pair.day1.low.toLocaleString() + " to " + pair.day1.high.toLocaleString() + (pair.day2 ? ". Day 2 range " + pair.day2.low.toLocaleString() + " to " + pair.day2.high.toLocaleString() + "." : ".") : "";
       dialog.showModal();
       modalChart = buildBandedChart("modalChart", hist, forecastPts);
     } else {
       wrap.hidden = true;
-      note.textContent = "Daily history chart not embedded for this pair in the demo — the forecast table still shows its forecast and range.";
+      note.textContent = "Daily history chart not embedded for this pair in the demo. The forecast table still shows its forecast and range.";
       dialog.showModal();
     }
   }
