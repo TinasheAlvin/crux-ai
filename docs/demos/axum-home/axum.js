@@ -17,13 +17,26 @@
     byPair[key]["day" + row.day_offset] = row;
   });
 
-  function confidenceOf(rec) {
-    if (!rec) return "n/a";
-    var width = rec.high - rec.low;
-    var ratio = rec.forecast_units > 0 ? width / rec.forecast_units : width;
-    if (ratio > 3) return "Low";
-    if (ratio > 1.3) return "Medium";
+  function dayRatio(rec) {
+    if (!rec) return null;
+    if (!(rec.forecast_units > 0)) return Infinity;
+    return (rec.high - rec.low) / rec.forecast_units;
+  }
+
+  function labelFromRatio(ratio) {
+    if (!(ratio <= 2)) return "Low";
+    if (ratio > 1) return "Medium";
     return "High";
+  }
+
+  function confidenceOfPair(pair) {
+    var ratios = [dayRatio(pair.day1), dayRatio(pair.day2)].filter(function (ratio) { return ratio !== null; });
+    if (!ratios.length) return "n/a";
+    var wider = ratios[0];
+    for (var i = 1; i < ratios.length; i += 1) {
+      if (ratios[i] > wider) wider = ratios[i];
+    }
+    return labelFromRatio(wider);
   }
 
   var rowsData = Object.keys(byPair).map(function (key) {
@@ -39,7 +52,7 @@
       d2: pair.day2 ? pair.day2.forecast_units : null,
       d2_low: pair.day2 ? pair.day2.low : null,
       d2_high: pair.day2 ? pair.day2.high : null,
-      conf: confidenceOf(pair.day1)
+      conf: confidenceOfPair(pair)
     };
   });
 
@@ -282,7 +295,7 @@
     var pair = byPair[key];
     if (!pair) return;
     document.getElementById("modalTitle").textContent = sku + ", " + region;
-    var conf = confidenceOf(pair.day1);
+    var conf = confidenceOfPair(pair);
     function cell(label, value) {
       return '<article class="paper kpi"><span>' + label + "</span><strong>" + value + "</strong></article>";
     }
@@ -337,7 +350,7 @@
       sel: "#modalNote",
       title: "The range",
       openKey: "GC210 Glass cleaner lemon||Gauteng, Johannesburg Area",
-      text: "This row is open so you can see the range around those two days. A wider range means lower confidence."
+      text: "This row is open so you can see the range around those two days. High is no wider than the forecast. Medium is up to twice the forecast. Low is wider than that."
     },
     {
       tab: "quality",
