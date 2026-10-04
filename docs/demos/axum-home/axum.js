@@ -64,7 +64,7 @@
 
   function rangeText(low, high, has) {
     if (!has) return "";
-    return low.toLocaleString() + "–" + high.toLocaleString();
+    return low.toLocaleString() + " to " + high.toLocaleString();
   }
 
   function renderTable() {
@@ -88,9 +88,9 @@
     document.getElementById("forecastBody").innerHTML = pageRows.map(function (row) {
       return '<tr class="' + (row.conf === "Low" ? "is-low" : "") + '" data-key="' + esc(row.key) + '">' +
         "<td>" + esc(row.sku) + "</td>" +
-        "<td>" + esc(row.region.toUpperCase()) + "</td>" +
-        '<td class="num">' + (row.d1 !== null ? row.d1.toLocaleString() + (rangeText(row.d1_low, row.d1_high, true) ? " · " + rangeText(row.d1_low, row.d1_high, true) : "") : "—") + "</td>" +
-        '<td class="num">' + (row.d2 !== null ? row.d2.toLocaleString() + (rangeText(row.d2_low, row.d2_high, true) ? " · " + rangeText(row.d2_low, row.d2_high, true) : "") : "—") + "</td>" +
+        "<td>" + esc(row.region) + "</td>" +
+        '<td class="num">' + (row.d1 !== null ? row.d1.toLocaleString() + (rangeText(row.d1_low, row.d1_high, true) ? " · " + rangeText(row.d1_low, row.d1_high, true) : "") : "None") + "</td>" +
+        '<td class="num">' + (row.d2 !== null ? row.d2.toLocaleString() + (rangeText(row.d2_low, row.d2_high, true) ? " · " + rangeText(row.d2_low, row.d2_high, true) : "") : "None") + "</td>" +
         '<td class="conf">' + esc(row.conf) + "</td></tr>";
     }).join("");
     document.getElementById("rowCountLabel").textContent = rows.length + " combinations · page " + currentPage + " of " + totalPages;
@@ -132,8 +132,13 @@
   document.getElementById("exportBtn").addEventListener("click", function () {
     var rows = getFiltered();
     var header = "sku,region,day1_forecast,day1_low,day1_high,day2_forecast,day2_low,day2_high,confidence\n";
+    function csvCell(value) {
+      var text = value === null || value === undefined ? "" : String(value);
+      if (/[",\n]/.test(text)) return '"' + text.replace(/"/g, '""') + '"';
+      return text;
+    }
     var body = rows.map(function (row) {
-      return [row.sku, row.region, row.d1, row.d1_low, row.d1_high, row.d2, row.d2_low, row.d2_high, row.conf].join(",");
+      return [row.sku, row.region, row.d1, row.d1_low, row.d1_high, row.d2, row.d2_low, row.d2_high, row.conf].map(csvCell).join(",");
     }).join("\n");
     var blob = new Blob([header + body], { type: "text/csv" });
     var a = document.createElement("a");
@@ -145,7 +150,7 @@
   var regions = Array.from(new Set(rowsData.map(function (row) { return row.region; }))).sort();
   var skus = Array.from(new Set(rowsData.map(function (row) { return row.sku; }))).sort();
   regions.forEach(function (region) {
-    document.getElementById("regionFilter").insertAdjacentHTML("beforeend", '<option value="' + esc(region) + '">' + esc(region.toUpperCase()) + "</option>");
+    document.getElementById("regionFilter").insertAdjacentHTML("beforeend", '<option value="' + esc(region) + '">' + esc(region) + "</option>");
   });
   skus.forEach(function (sku) {
     document.getElementById("skuFilter").insertAdjacentHTML("beforeend", '<option value="' + esc(sku) + '">' + esc(sku) + "</option>");
@@ -157,7 +162,7 @@
     .sort(function (a, b) { return b.d1 - a.d1; })
     .slice(0, 12);
   document.getElementById("attentionBody").innerHTML = attention.map(function (row) {
-    return '<tr data-key="' + esc(row.key) + '"><td>' + esc(row.sku) + "</td><td>" + esc(row.region.toUpperCase()) + '</td><td class="num">' + row.d1.toLocaleString() + '</td><td class="conf">' + esc(row.conf) + "</td></tr>";
+    return '<tr data-key="' + esc(row.key) + '"><td>' + esc(row.sku) + "</td><td>" + esc(row.region) + '</td><td class="num">' + row.d1.toLocaleString() + '</td><td class="conf">' + esc(row.conf) + "</td></tr>";
   }).join("");
   document.querySelectorAll("#attentionBody tr").forEach(function (tr) {
     tr.addEventListener("click", function () { openDetail(tr.dataset.key); });
@@ -171,7 +176,7 @@
     '<article class="paper kpi"><span>SKU × region models</span><strong>' + Object.keys(byPair).length + "</strong></article>";
 
   document.getElementById("skippedBody").innerHTML = data.skippedCombos.map(function (row) {
-    return "<tr><td>" + esc(row.sku) + "</td><td>" + esc(row.region.toUpperCase()) + '</td><td class="num">' + row.days + '</td><td class="num">' + row.total_units.toLocaleString() + "</td></tr>";
+    return "<tr><td>" + esc(row.sku) + "</td><td>" + esc(row.region) + '</td><td class="num">' + row.days + '</td><td class="num">' + row.total_units.toLocaleString() + "</td></tr>";
   }).join("");
 
   function addDays(iso, days) {
@@ -228,7 +233,10 @@
     charts[canvasId] = new Chart(document.getElementById(canvasId), {
       type: "bar",
       data: {
-        labels: items.map(function (item) { return String(item[labelKey]).toUpperCase(); }),
+        labels: items.map(function (item) {
+          var value = String(item[labelKey]);
+          return labelKey === "region" ? value : value.toUpperCase();
+        }),
         datasets: [{ label: "Forecast units", data: items.map(function (item) { return item.units; }), backgroundColor: "#1C1917", borderRadius: 3 }]
       },
       options: {
@@ -263,19 +271,19 @@
     var region = parts[1];
     var pair = byPair[key];
     if (!pair) return;
-    document.getElementById("modalTitle").textContent = sku + " — " + region.toUpperCase();
+    document.getElementById("modalTitle").textContent = sku + ", " + region;
     var conf = confidenceOf(pair.day1);
     function cell(label, value) {
       return '<article class="paper kpi"><span>' + label + "</span><strong>" + value + "</strong></article>";
     }
     document.getElementById("modalKpis").innerHTML =
-      cell("Day 1", pair.day1 ? pair.day1.forecast_units.toLocaleString() : "—") +
-      cell("Day 2", pair.day2 ? pair.day2.forecast_units.toLocaleString() : "—") +
+      cell("Day 1", pair.day1 ? pair.day1.forecast_units.toLocaleString() : "None") +
+      cell("Day 2", pair.day2 ? pair.day2.forecast_units.toLocaleString() : "None") +
       cell("Confidence", conf);
     if (modalChart) { modalChart.destroy(); modalChart = null; }
     var hist = data.historyByCombo[key];
     var forecastPts = null;
-    if (key === "GC210 Glass cleaner lemon||jhb") {
+    if (key === "GC210 Glass cleaner lemon||Gauteng, Johannesburg zone") {
       hist = data.workedHistory;
       forecastPts = data.workedForecast;
     } else if (hist && hist.length) {
@@ -289,12 +297,12 @@
     var dialog = document.getElementById("detailDialog");
     if (hist && forecastPts) {
       wrap.hidden = false;
-      note.textContent = pair.day1 ? "Day 1 range " + pair.day1.low.toLocaleString() + "–" + pair.day1.high.toLocaleString() + (pair.day2 ? ". Day 2 range " + pair.day2.low.toLocaleString() + "–" + pair.day2.high.toLocaleString() + "." : ".") : "";
+      note.textContent = pair.day1 ? "Day 1 range " + pair.day1.low.toLocaleString() + " to " + pair.day1.high.toLocaleString() + (pair.day2 ? ". Day 2 range " + pair.day2.low.toLocaleString() + " to " + pair.day2.high.toLocaleString() + "." : ".") : "";
       dialog.showModal();
       modalChart = buildBandedChart("modalChart", hist, forecastPts);
     } else {
       wrap.hidden = true;
-      note.textContent = "Daily history chart not embedded for this pair in the demo — the forecast table still shows its forecast and range.";
+      note.textContent = "Daily history chart not embedded for this pair in the demo. The forecast table still shows its forecast and range.";
       dialog.showModal();
     }
   }

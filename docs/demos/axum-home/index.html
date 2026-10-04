@@ -10,13 +10,18 @@
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,560;0,9..144,640;1,9..144,560&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../site.css" />
   <style>
-    body.axum .wrap { max-width: none; }
-    body.axum main .wrap { width: max-content; min-width: 100%; }
     .intro h1 { font-size: clamp(2.2rem, 4vw, 3.2rem); margin: 0.75rem 0 0.35rem; }
     .intro .sub { color: var(--muted); max-width: 46rem; margin-bottom: 0.4rem; }
     .proto { font-weight: 700; margin-bottom: 1.1rem; }
-    .pipe { display: grid; gap: 0.75rem 1.5rem; margin: 0.4rem 0 1.25rem; }
-    .pipe li { list-style: none; }
+    .pipe {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: 0.75rem 1.5rem;
+      margin: 0.4rem 0 1.25rem;
+      max-width: 100%;
+    }
+    .pipe li { list-style: none; max-width: 100%; white-space: normal; }
     .pipe .n {
       display: inline-grid;
       place-items: center;
@@ -29,8 +34,8 @@
       font-weight: 700;
       margin-right: 0.4rem;
     }
-    .filters { display: flex; flex-wrap: nowrap; gap: 0.6rem 0.75rem; align-items: end; margin-bottom: 0.8rem; }
-    .filters label { display: grid; gap: 0.25rem; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+    .filters { display: flex; flex-wrap: wrap; gap: 0.6rem 0.75rem; align-items: end; margin-bottom: 0.8rem; max-width: 100%; }
+    .filters label { display: grid; gap: 0.25rem; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); min-width: 0; max-width: 100%; }
     .filters input, .filters select {
       background: var(--paper);
       border: 1px solid rgba(28, 25, 23, 0.16);
@@ -42,29 +47,31 @@
       text-transform: none;
       letter-spacing: 0;
       color: var(--charcoal);
-      min-width: 11rem;
+      width: 14rem;
+      max-width: 100%;
+      min-width: 0;
     }
-    #skuFilter { min-width: 22rem; }
-    #searchBox { min-width: 16rem; }
+    #skuFilter { width: 18rem; }
+    #searchBox { width: 14rem; }
     table.data { width: max-content; min-width: 100%; }
     table.data th,
     table.data td { white-space: nowrap; }
     table.data tbody tr { cursor: pointer; }
     tr.is-low td { background: var(--cream-deep); }
     .conf { font-weight: 700; }
-    .pages { display: flex; flex-wrap: nowrap; gap: 0.3rem; justify-content: flex-end; }
+    .pages { display: flex; flex-wrap: wrap; gap: 0.3rem; justify-content: flex-end; max-width: 100%; }
     .pages button { padding: 0.4rem 0.65rem; }
     .pages button.is-on { background: var(--charcoal); color: var(--cream); border-color: var(--charcoal); }
-    .table-scroll { max-height: 28rem; overflow: auto; }
+    .workspace > div,
+    .panel,
+    .paper,
+    .chart-box { min-width: 0; max-width: 100%; }
+    .table-scroll { max-height: 28rem; max-width: 100%; overflow: auto; }
     .chart-tall { height: 280px; }
     .chart-wide { height: 520px; }
     .clean { display: grid; gap: 0.65rem; }
     .clean li { margin-left: 1.1rem; }
-    .detail-kpis { display: grid; grid-template-columns: repeat(3, minmax(12rem, 1fr)); gap: 0.6rem; margin-bottom: 0.8rem; }
-    .workspace { grid-template-columns: 13.5rem max-content; width: max-content; min-width: 100%; }
-    @media (min-width: 800px) {
-      .pipe { grid-template-columns: repeat(5, max-content); }
-    }
+    .detail-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6rem; margin-bottom: 0.8rem; }
   </style>
 </head>
 <body class="axum">
@@ -98,7 +105,7 @@
         <li><span class="n">1</span>Skynamo order export</li>
         <li><span class="n">2</span>Clean and aggregate by SKU, region, and day</li>
         <li><span class="n">3</span>Prophet model per SKU and region</li>
-        <li><span class="n">4</span>2-day forecast and a confidence range</li>
+        <li><span class="n">4</span>2 day forecast and a confidence range</li>
         <li><span class="n">5</span>Next: an Azure ML pipeline on a schedule, feeding dispatch planning</li>
       </ol>
 
@@ -118,7 +125,7 @@
             <div class="split two">
               <article class="paper block-pad">
                 <h2>Glass cleaner lemon, Johannesburg</h2>
-                <p class="meta" style="margin:0.25rem 0 0.7rem;">GC210 · JHB. Last 30 days actual, next 2 days forecast, with the confidence range.</p>
+                <p class="meta" style="margin:0.25rem 0 0.7rem;">GC210 · Gauteng, Johannesburg zone. Last 30 days actual, next 2 days forecast, with the confidence range.</p>
                 <div class="chart-box chart-tall"><canvas id="workedChart"></canvas></div>
               </article>
               <article class="paper">
@@ -126,7 +133,7 @@
                   <h2>Needs attention</h2>
                   <span class="meta">Low confidence, high volume</span>
                 </div>
-                <p class="meta" style="padding:0 1rem 0.5rem;">Biggest-volume forecasts where the model’s uncertainty is widest.</p>
+                <p class="meta" style="padding:0 1rem 0.5rem;">Biggest volume forecasts where the model’s uncertainty is widest.</p>
                 <div class="table-scroll">
                   <table class="data">
                     <thead><tr><th>SKU</th><th>Region</th><th class="num">Forecast</th><th>Confidence</th></tr></thead>
@@ -186,7 +193,7 @@
 
           <section class="panel" id="panel-region" data-panel="region">
             <article class="paper block-pad">
-              <h2>Forecasted units, day 1, by region — top 15</h2>
+              <h2>Forecasted units, day 1, by region, top 15</h2>
               <div class="chart-box chart-wide" style="margin-top:0.8rem;"><canvas id="regionChart"></canvas></div>
             </article>
           </section>
@@ -194,7 +201,7 @@
           <section class="panel" id="panel-sku" data-panel="sku">
             <article class="paper block-pad">
               <h2>Forecasted units, day 1, by SKU</h2>
-              <div class="chart-box chart-wide" style="margin-top:0.8rem; min-width: 64rem;"><canvas id="skuChart"></canvas></div>
+              <div class="chart-box chart-wide" style="margin-top:0.8rem;"><canvas id="skuChart"></canvas></div>
             </article>
           </section>
 
@@ -203,7 +210,7 @@
               <article class="paper">
                 <div class="block-pad">
                   <h2>Combos not forecasted yet</h2>
-                  <p class="meta" style="margin-top:0.35rem;">SKU and region pairs with under 30 days of order history — not enough to learn a weekly pattern from. Ranked by volume, since these are the ones worth watching as more data comes in.</p>
+                  <p class="meta" style="margin-top:0.35rem;">SKU and region pairs with under 30 days of order history. Not enough to learn a weekly pattern from. Ranked by volume, since these are the ones worth watching as more data comes in.</p>
                 </div>
                 <div class="table-scroll">
                   <table class="data">
@@ -216,17 +223,17 @@
                 <h2>What was thrown out</h2>
                 <p class="meta" style="margin:0.35rem 0 0.7rem;">Cleanup applied to the raw export.</p>
                 <ul class="clean">
-                  <li><strong>1,141 cancelled orders</strong> excluded — never shipped, not real demand.</li>
-                  <li><strong>“moh” codes</strong> reclassified as a customer code, removed from the region breakdown.</li>
-                  <li><strong>299+ one-off region codes</strong> folded into “other” (typos, stray notes, mis-keyed order numbers).</li>
-                  <li><strong>Stray far-future schedule dates</strong> (a handful of orders dated months ahead) capped out of the training window — they were distorting the weekly pattern.</li>
+                  <li><strong>1,141 cancelled orders</strong> excluded. Never shipped, not real demand.</li>
+                  <li><strong>“kivo” codes</strong> reclassified as a customer code, removed from the region breakdown.</li>
+                  <li><strong>299+ one off region codes</strong> folded into “other” (typos, stray notes, miskeyed order numbers).</li>
+                  <li><strong>Stray far future schedule dates</strong> (a handful of orders dated months ahead) capped out of the training window. They were distorting the weekly pattern.</li>
                   <li><strong>229 real SKU columns</strong> reshaped from the wide order sheet into one row per day, region, and SKU.</li>
                 </ul>
               </article>
             </div>
           </section>
 
-          <p class="meta" style="margin-top:1rem;">Forecasts are generated by a Prophet model trained per SKU and region on about 3 months of Skynamo order history. Confidence reflects the width of the model’s prediction interval relative to the forecast size — a narrow range is high confidence. Open any row in the forecast to see that product.</p>
+          <p class="meta" style="margin-top:1rem;">Forecasts are generated by a Prophet model trained per SKU and region on about 3 months of Skynamo order history. Confidence reflects the width of the model’s prediction interval relative to the forecast size. A narrow range is high confidence. Open any row in the forecast to see that product.</p>
           <p class="also">Also in Demos: <a href="../karoo/">Karoo Kitchen</a></p>
         </div>
       </div>
