@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Karoo Kitchen · Demos · Vhona AI</title>
+  <meta name="description" content="A sample walk through Karoo Kitchen Group, a fictional three-branch Cape Town restaurant company." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,560;0,9..144,640;1,9..144,560&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../site.css" />
+  <style>
+    .intro h1 { font-size: clamp(2.2rem, 4vw, 3.2rem); margin: 0.75rem 0 0.45rem; }
+    .intro .sub { color: var(--muted); max-width: 38rem; margin-bottom: 1rem; }
+    .branch-row {
+      display: grid;
+      grid-template-columns: 7.5rem 1fr 4.5rem 4.5rem;
+      gap: 0.65rem;
+      align-items: center;
+      padding: 0.55rem 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .branch-row:last-child { border-bottom: 0; }
+    .track { height: 0.7rem; background: var(--cream-deep); border-radius: 999px; overflow: hidden; }
+    .track i { display: block; height: 100%; background: var(--charcoal); border-radius: inherit; }
+    .num { font-variant-numeric: tabular-nums; text-align: right; font-weight: 600; }
+    .slider-row {
+      display: grid;
+      grid-template-columns: minmax(8rem, 11rem) 1fr 3.5rem;
+      gap: 0.75rem;
+      align-items: center;
+      padding: 0.7rem 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .slider-row:last-child { border-bottom: 0; }
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 0.25rem;
+      background: rgba(28, 25, 23, 0.18);
+      border-radius: 999px;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 0.95rem;
+      height: 0.95rem;
+      border-radius: 50%;
+      background: var(--charcoal);
+      border: 2px solid var(--paper);
+    }
+    .result { background: #f6f3ec; text-align: center; }
+    .result .r-val {
+      font-family: var(--serif);
+      font-weight: 560;
+      font-size: 2.4rem;
+      letter-spacing: -0.03em;
+      margin: 0.25rem 0;
+    }
+    .chips, .presets { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .chips { padding: 0.75rem 1rem; border-top: 1px solid var(--line); }
+    .chip, .preset {
+      background: var(--paper);
+      border: 1px solid rgba(28, 25, 23, 0.16);
+      border-radius: 999px;
+      padding: 0.4rem 0.7rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--charcoal);
+    }
+    .chip:hover, .preset:hover { border-color: rgba(28, 25, 23, 0.32); }
+    .log { display: flex; flex-direction: column; gap: 0.55rem; min-height: 8rem; max-height: 22rem; overflow: auto; padding: 0.9rem 1rem; }
+    .msg { max-width: 36rem; padding: 0.65rem 0.75rem; border-radius: 0.85rem; font-size: 0.95rem; line-height: 1.5; }
+    .msg.user { align-self: flex-end; background: var(--cream-deep); }
+    .msg.ai { align-self: flex-start; background: #f6f3ec; }
+    .msg .who { display: block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.2rem; }
+    .ask-form { display: flex; gap: 0.5rem; padding: 0.75rem 1rem 0.9rem; border-top: 1px solid var(--line); }
+    .ask-form input {
+      flex: 1;
+      background: var(--paper);
+      border: 1px solid rgba(28, 25, 23, 0.16);
+      border-radius: 0.8rem;
+      padding: 0.7rem 0.8rem;
+      font: inherit;
+    }
+    .score {
+      display: flex;
+      gap: 1.25rem;
+      align-items: center;
+    }
+    .score b {
+      font-family: var(--serif);
+      font-weight: 560;
+      font-size: 3.4rem;
+      letter-spacing: -0.04em;
+      line-height: 1;
+    }
+    .score b span { font-size: 1.1rem; color: var(--muted); font-family: var(--sans); font-weight: 600; }
+    .bar { height: 0.45rem; background: var(--cream-deep); border-radius: 999px; overflow: hidden; margin-bottom: 0.35rem; }
+    .bar i { display: block; height: 100%; width: 78%; background: var(--charcoal); }
+    .zones { display: flex; justify-content: space-between; color: var(--muted); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+    .phone {
+      max-width: 18rem;
+      border: 1px solid var(--line);
+      border-radius: 1.25rem;
+      background: var(--cream);
+      padding: 0.7rem;
+    }
+    .bubble {
+      background: var(--paper);
+      border-radius: 0.85rem;
+      padding: 0.75rem 0.8rem;
+      font-size: 0.92rem;
+    }
+    .bubble .time { display: block; text-align: right; color: var(--muted); font-size: 0.75rem; margin-top: 0.4rem; }
+    .setting {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .setting p { color: var(--muted); font-size: 0.88rem; }
+    .switch { position: relative; width: 2.4rem; height: 1.35rem; flex: none; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .switch span {
+      position: absolute;
+      inset: 0;
+      background: rgba(28, 25, 23, 0.18);
+      border-radius: 999px;
+    }
+    .switch span::before {
+      content: "";
+      position: absolute;
+      width: 1rem;
+      height: 1rem;
+      left: 0.18rem;
+      top: 0.16rem;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.15s ease;
+    }
+    .switch input:checked + span { background: var(--teal); }
+    .switch input:checked + span::before { transform: translateX(1.05rem); }
+    .wa { display: grid; gap: 1rem; }
+    .reps { display: grid; gap: 0.75rem; }
+    .rep h3 { font-size: 1.05rem; margin: 0.35rem 0; }
+    .rep p { color: var(--muted); font-size: 0.92rem; margin-bottom: 0.8rem; }
+    .conn { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: 0.55rem; }
+    .conn div { background: #f6f3ec; border-radius: 0.75rem; padding: 0.75rem; }
+    .conn strong { display: block; }
+    .conn span { color: var(--muted); font-size: 0.82rem; font-weight: 600; }
+    .rep-doc h2 { font-family: var(--serif); font-weight: 560; font-size: 1.6rem; letter-spacing: -0.03em; margin-top: 0.2rem; }
+    .rep-top { display: flex; justify-content: space-between; gap: 1rem; border-bottom: 2px solid var(--charcoal); padding-bottom: 0.8rem; margin-bottom: 1rem; }
+    .rep-top .brand { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+    .rep-top .meta { text-align: right; }
+    .rep-doc h3 { font-size: 1rem; margin: 1rem 0 0.4rem; }
+    .rep-doc p { margin-bottom: 0.45rem; }
+    .rep-foot { margin-top: 1.2rem; padding-top: 0.7rem; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.8rem; }
+    @media (min-width: 800px) {
+      .reps { grid-template-columns: 1fr 1fr; }
+      .wa { grid-template-columns: minmax(0, 1fr) 18rem; align-items: start; }
+    }
+    @media (max-width: 640px) {
+      .score { flex-direction: column; align-items: flex-start; }
+      .slider-row { grid-template-columns: 1fr; }
+      .branch-row { grid-template-columns: 6rem 1fr 3.6rem; }
+      .branch-row .yoy { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="wordmark" href="../../index.html"><img src="../../vhona-wordmark.png" alt="Vhona AI" /></a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="../../index.html#product">Product</a>
+        <a href="../../pulsechat/">PulseChat</a>
+        <a class="is-active" href="../" aria-current="page">Demos</a>
+        <a href="../../index.html#how-it-works">How it works</a>
+        <a href="../../index.html#connectors">Connectors</a>
+        <a href="../../index.html#about">Trust</a>
+      </nav>
+      <div class="nav-cta">
+        <a class="btn btn-teal" href="../../index.html#contact">Talk to us</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="wrap">
+      <div class="intro">
+        <p class="sample-label">Sample</p>
+        <h1 class="serif">Karoo Kitchen</h1>
+        <p class="sub">A fictional Cape Town restaurant group. Three branches. June 2026, as at 13 July 2026. Walk through the sample, or look around.</p>
+        <div class="actions">
+          <button class="btn btn-teal" type="button" id="start-walk">Walk through</button>
+          <button class="btn btn-ghost" type="button" id="look-around">Look around</button>
+        </div>
+      </div>
+
+      <div class="workspace" style="margin-top:1.5rem;">
+        <nav class="rail" aria-label="Karoo Kitchen">
+          <button type="button" class="is-on" data-tab="overview">Overview</button>
+          <button type="button" data-tab="pnl">Profit and loss</button>
+          <button type="button" data-tab="cash">Cash flow</button>
+          <button type="button" data-tab="branches">Branches</button>
+          <button type="button" data-tab="plan">Scenario planner</button>
+          <button type="button" data-tab="ask">Ask</button>
+          <button type="button" data-tab="reports">Reports</button>
+          <button type="button" data-tab="delivery">WhatsApp delivery</button>
+          <button type="button" data-tab="sources">Sources in this sample</button>
+        </nav>
+
+        <div>
+          <section class="panel is-on stack" id="panel-overview" data-panel="overview">
+            <div class="note" id="vat-alert">
+              <strong>Action required.</strong> VAT payment of R118 400 due Saturday 25 July. Projected bank balance on that date: R293 400. Headroom after payroll: R89 000. No action needed — flag for awareness.
+            </div>
+            <div class="kpis" id="overview-kpis">
+              <article class="paper kpi" id="kpi-revenue"><span>Revenue · June</span><strong>R741k</strong><em>▲ 3.1% vs Jun '25</em></article>
+              <article class="paper kpi"><span>Net profit · June</span><strong>R86.1k</strong><em>▼ 0.8pt margin YoY</em></article>
+              <article class="paper kpi"><span>Cash on hand</span><strong>R412k</strong><em>VAT R118k due 25 Jul</em></article>
+              <article class="paper kpi"><span>Food cost ratio</span><strong>34.0%</strong><em>▲ 2.5pt above average</em></article>
+            </div>
+            <div class="split two">
+              <article class="paper block-pad">
+                <div class="head-row"><h2>Revenue trend — 12 months</h2><span class="meta">R thousands</span></div>
+                <div class="chart-box"><canvas id="revChart"></canvas></div>
+              </article>
+              <article class="paper" id="health">
+                <div class="block-pad" style="padding-bottom:0.4rem;">
+                  <div class="head-row"><h2>Business health score</h2><span class="meta">From this sample</span></div>
+                </div>
+                <div class="score block-pad" style="padding-top:0;">
+                  <b>78<span>/100</span></b>
+                  <div style="flex:1;">
+                    <div class="bar" aria-hidden="true"><i></i></div>
+                    <div class="zones"><span>Critical</span><span>Watch</span><span>Healthy</span><span>Strong</span></div>
+                    <p style="margin-top:0.55rem;">Revenue trend: <strong>+3pts</strong> · Margin health: <strong>−4pts</strong> · Cash cover: <strong>+5pts</strong> · Branch balance: <strong>−2pts</strong></p>
+                  </div>
+                </div>
+                <div class="block-pad" style="padding-top:0;">
+                  <div class="note">Food cost at 34.0% has triggered a watch flag. One branch (Sea Point) is pulling the score down with a 14.2% rent-to-revenue ratio. Both are addressable before peak season.</div>
+                </div>
+              </article>
+            </div>
+            <article class="paper block-pad">
+              <div class="head-row"><h2>Monday 13 July 2026</h2><span class="meta">Sample note · 08:00 to 3 recipients</span></div>
+              <div class="stack" style="max-width:52rem;">
+                <p>June closed 8.7% below May — consistent with winter seasonality — and <strong>3.1% ahead of June 2025</strong>. The top-line is performing. Two items require attention before end of month.</p>
+                <p><strong>Food cost pressure:</strong> Cost of goods reached 34.0% of revenue against a 12-month running average of 31.5%. Supplier invoices confirm dairy up 11% and beef up 9% since April. A 4–6% menu reprice on the eight highest-volume dishes would restore margin without a material customer impact.</p>
+                <p><strong>Sea Point underperformance:</strong> Revenue down 14% year-on-year while Gardens grew 10.2% and Stellenbosch 6.4%. Sea Point's rent-to-revenue ratio now stands at 14.2% — against a group average of 7.4%. The lease break in November is the natural decision point.</p>
+              </div>
+            </article>
+          </section>
+
+          <section class="panel stack" id="panel-pnl" data-panel="pnl">
+            <div class="head-row">
+              <div>
+                <h2 class="panel-title">Profit and loss</h2>
+                <p class="meta">June 2026 · Consolidated · All branches</p>
+              </div>
+            </div>
+            <article class="paper" id="pnl-statement">
+              <div class="block-pad head-row" style="margin-bottom:0;"><h2>Income statement — June 2026 vs June 2025</h2><span class="meta">Sample</span></div>
+              <div class="scroll">
+                <table class="data">
+                  <thead>
+                    <tr><th>Line item</th><th class="num">Jun 2026</th><th class="num">Jun 2025</th><th class="num">Change</th><th class="num">% of revenue</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Revenue</td><td class="num">R741 200</td><td class="num">R718 900</td><td class="num">+3.1%</td><td class="num">100.0%</td></tr>
+                    <tr><td>Food &amp; beverage</td><td class="num">(R252 000)</td><td class="num">(R224 300)</td><td class="num">+12.3%</td><td class="num">34.0%</td></tr>
+                    <tr><td>Staff costs</td><td class="num">(R209 000)</td><td class="num">(R201 800)</td><td class="num">+3.6%</td><td class="num">28.2%</td></tr>
+                    <tr><td>Rent &amp; occupancy</td><td class="num">(R76 500)</td><td class="num">(R72 900)</td><td class="num">+4.9%</td><td class="num">10.3%</td></tr>
+                    <tr><td>Utilities</td><td class="num">(R38 900)</td><td class="num">(R35 200)</td><td class="num">+10.5%</td><td class="num">5.2%</td></tr>
+                    <tr><td>Marketing</td><td class="num">(R21 400)</td><td class="num">(R19 600)</td><td class="num">+9.2%</td><td class="num">2.9%</td></tr>
+                    <tr><td>Other operating</td><td class="num">(R57 300)</td><td class="num">(R76 000)</td><td class="num">−24.6%</td><td class="num">7.7%</td></tr>
+                    <tr class="total"><td>Net profit</td><td class="num">R86 100</td><td class="num">R89 100</td><td class="num">−3.4%</td><td class="num">11.6%</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+            <article class="paper block-pad">
+              <div class="head-row"><h2>Cost breakdown — % of revenue</h2><span class="meta">June 2026</span></div>
+              <div class="chart-box"><canvas id="costChart"></canvas></div>
+            </article>
+          </section>
+
+          <section class="panel stack" id="panel-cash" data-panel="cash">
+            <div class="head-row">
+              <div>
+                <h2 class="panel-title">Cash flow</h2>
+                <p class="meta">6-week projection · Sample</p>
+              </div>
+            </div>
+            <div class="note"><strong>25 July:</strong> VAT payment R118 400 — balance drops to R293 400. Payroll on 28 July: R209 000. Both commitments are met on current projections. No action required.</div>
+            <div class="kpis">
+              <article class="paper kpi"><span>Current balance</span><strong>R412k</strong><em>As at today</em></article>
+              <article class="paper kpi"><span>Expected in · this week</span><strong>R168k</strong><em>Card R151k + deposit R17k</em></article>
+              <article class="paper kpi"><span>Expected out · this week</span><strong>R143k</strong><em>Suppliers R96k · wages R32k</em></article>
+              <article class="paper kpi"><span>Projected Friday close</span><strong>R438k</strong><em>▲ R26k from today</em></article>
+            </div>
+            <article class="paper block-pad">
+              <div class="head-row"><h2>6-week projected closing balance</h2><span class="meta">Every Friday · R thousands</span></div>
+              <div class="chart-box"><canvas id="cashChart"></canvas></div>
+            </article>
+            <article class="paper">
+              <div class="block-pad head-row" style="margin-bottom:0;"><h2>Upcoming commitments</h2><span class="meta">Next 30 days</span></div>
+              <div class="scroll">
+                <table class="data">
+                  <thead><tr><th>Date</th><th>Description</th><th>Category</th><th class="num">Amount</th><th>Status</th></tr></thead>
+                  <tbody>
+                    <tr><td>17 Jul</td><td>Supplier — Freshy Produce</td><td>Cost of goods</td><td class="num">R31 200</td><td>Due</td></tr>
+                    <tr><td>20 Jul</td><td>Staff wages advance</td><td>Payroll</td><td class="num">R31 500</td><td>Due</td></tr>
+                    <tr><td>25 Jul</td><td>VAT201 — SARS</td><td>Tax</td><td class="num">R118 400</td><td>Priority</td></tr>
+                    <tr><td>28 Jul</td><td>Full payroll — all branches</td><td>Payroll</td><td class="num">R209 000</td><td>Scheduled</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+          </section>
+
+          <section class="panel stack" id="panel-branches" data-panel="branches">
+            <div class="head-row">
+              <div>
+                <h2 class="panel-title">Branch results</h2>
+                <p class="meta">June 2026 vs June 2025 · All three locations</p>
+              </div>
+            </div>
+            <article class="paper block-pad" id="branch-results">
+              <div class="head-row"><h2>Revenue by branch</h2><span class="meta">June 2026 vs June 2025</span></div>
+              <div class="branch-row meta"><span>Branch</span><span>Revenue (max R320k)</span><span class="num">Revenue</span><span class="num yoy">YoY</span></div>
+              <div class="branch-row"><span>Gardens</span><div class="track"><i style="width:100%"></i></div><span class="num">R318k</span><span class="num yoy">+10.2%</span></div>
+              <div class="branch-row"><span>Stellenbosch</span><div class="track"><i style="width:77%"></i></div><span class="num">R246k</span><span class="num yoy">+6.4%</span></div>
+              <div class="branch-row"><span>Sea Point</span><div class="track"><i style="width:55%"></i></div><span class="num">R177k</span><span class="num yoy">−14.0%</span></div>
+            </article>
+            <article class="paper">
+              <div class="block-pad head-row" style="margin-bottom:0;"><h2>Branch profitability</h2><span class="meta">June 2026</span></div>
+              <div class="scroll">
+                <table class="data">
+                  <thead>
+                    <tr><th>Branch</th><th class="num">Revenue</th><th class="num">Food cost</th><th class="num">Staff</th><th class="num">Rent</th><th class="num">Rent/Rev</th><th class="num">Net profit</th><th class="num">Net margin</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Gardens</td><td class="num">R318 400</td><td class="num">R108k</td><td class="num">R71k</td><td class="num">R22 000</td><td class="num">6.9%</td><td class="num">R47 100</td><td class="num">14.8%</td></tr>
+                    <tr><td>Stellenbosch</td><td class="num">R245 700</td><td class="num">R83k</td><td class="num">R55k</td><td class="num">R18 500</td><td class="num">7.5%</td><td class="num">R29 300</td><td class="num">11.9%</td></tr>
+                    <tr><td>Sea Point</td><td class="num">R177 100</td><td class="num">R61k</td><td class="num">R83k</td><td class="num">R25 100</td><td class="num">14.2%</td><td class="num">R9 900</td><td class="num">5.6%</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+            <div class="note"><strong>Sea Point flag:</strong> Rent-to-revenue ratio of 14.2% is 91% above group average. At current trajectory, a 6% further revenue decline makes this branch loss-making. Lease break clause in November is the natural review point.</div>
+          </section>
+
+          <section class="panel stack" id="panel-plan" data-panel="plan">
+            <div class="head-row">
+              <div>
+                <h2 class="panel-title">Scenario planner</h2>
+                <p class="meta">Based on June 2026 actuals</p>
+              </div>
+            </div>
+            <div class="presets" id="presets">
+              <button class="preset" type="button" data-p="5" data-v="0" data-f="0" data-n="0">Reprice menu +5%</button>
+              <button class="preset" type="button" data-p="0" data-v="-15" data-f="0" data-n="0">Winter: −15% covers</button>
+              <button class="preset" type="button" data-p="0" data-v="8" data-f="0" data-n="2">Hire 2, +8% covers</button>
+              <button class="preset" type="button" data-p="0" data-v="0" data-f="10" data-n="0">Supplier increase +10%</button>
+              <button class="preset" type="button" data-p="0" data-v="0" data-f="0" data-n="0">Reset to June actuals</button>
+            </div>
+            <div class="split plan">
+              <article class="paper block-pad" id="planner">
+                <div class="head-row"><h2>Input variables</h2><span class="meta">Move a slider</span></div>
+                <div class="slider-row"><label for="sP">Menu price change</label><input id="sP" type="range" min="-10" max="15" value="0" /><span class="num" id="oP">0%</span></div>
+                <div class="slider-row"><label for="sV">Customer volume</label><input id="sV" type="range" min="-20" max="20" value="0" /><span class="num" id="oV">0%</span></div>
+                <div class="slider-row"><label for="sF">Supplier cost change</label><input id="sF" type="range" min="-10" max="20" value="0" /><span class="num" id="oF">0%</span></div>
+                <div class="slider-row"><label for="sN">Additional headcount</label><input id="sN" type="range" min="0" max="6" value="0" /><span class="num" id="oN">0</span></div>
+              </article>
+              <article class="paper block-pad result" id="plan-result">
+                <p class="quiet">Projected net profit / month</p>
+                <p class="r-val" id="rVal">R86 100</p>
+                <p class="delta" id="rDelta">Baseline · June actuals · 11.6% margin</p>
+                <p class="meta" id="rText" style="margin-top:0.8rem;">Adjust the input variables or select a preset scenario to model an outcome.</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="panel" id="panel-ask" data-panel="ask">
+            <div class="head-row">
+              <div>
+                <h2 class="panel-title">Ask</h2>
+                <p class="meta">Set answers on this sample</p>
+              </div>
+            </div>
+            <article class="paper" id="ask" style="margin-top:0.85rem;">
+              <div class="block-pad head-row" style="margin-bottom:0;"><h2>Karoo Kitchen Group</h2><span class="meta">Sample</span></div>
+              <div class="log" id="chatLog" aria-live="polite"></div>
+              <div class="chips">
+                <button class="chip" type="button" data-q="yoy">Revenue YoY comparison</button>
+                <button class="chip" type="button" data-q="branch">Branch profitability ranking</button>
+                <button class="chip" type="button" data-q="hire">Headcount affordability analysis</button>
+                <button class="chip" type="button" data-q="food">Food cost variance explanation</button>
+              </div>
+              <form class="ask-form" id="askForm">
+                <input id="askInput" type="text" placeholder="Enter your question…" autocomplete="off" />
+                <button class="btn btn-teal" type="submit">Submit</button>
+              </form>
+            </article>
+          </section>
+
+          <section class="panel stack" id="panel-reports" data-panel="reports">
+            <div class="head-row">
+              <div>
+                <h2 class="panel-title">Reports</h2>
+                <p class="meta">Sample documents you can open</p>
+              </div>
+            </div>
+            <div class="reps" id="reports">
+              <article class="paper block-pad rep">
+                <p class="meta">Ready</p>
+                <h3>June management report</h3>
+                <p>Consolidated profit and loss, branch analysis, cash position, and the notes from this sample. Generated 1 July, 06:15.</p>
+                <button class="btn btn-teal open-rep" type="button" data-r="monthly">Open report</button>
+              </article>
+              <article class="paper block-pad rep">
+                <p class="meta">Ready</p>
+                <h3>Weekly cash flow briefing</h3>
+                <p>Week of 13 July — expected inflows, outflows, and the 6-week projected balance.</p>
+                <button class="btn btn-teal open-rep" type="button" data-r="weekly">Open report</button>
+              </article>
+              <article class="paper block-pad rep">
+                <p class="meta">Scheduled 20 Jul</p>
+                <h3>VAT readiness summary</h3>
+                <p>Reconciled output VAT, input VAT, and net payable — formatted for a VAT201 filing.</p>
+                <button class="btn" type="button" disabled>Scheduled</button>
+              </article>
+              <article class="paper block-pad rep">
+                <p class="meta">On demand</p>
+                <h3>Branch comparison report</h3>
+                <p>Side-by-side performance of all three branches — revenue, margin, rent ratio, and year-on-year change.</p>
+                <button class="btn btn-teal open-rep" type="button" data-r="monthly">Generate</button>
+              </article>
+            </div>
+          </section>
+
+          <section class="panel stack" id="panel-delivery" data-panel="delivery">
+            <div class="head-row">
+              <div>
+                <h2 class="panel-title">WhatsApp delivery</h2>
+                <p class="meta">Monday briefing in the message</p>
+              </div>
+            </div>
+            <article class="paper block-pad" id="whatsapp">
+              <div class="wa">
+                <div>
+                  <div class="setting"><div><strong>Monday briefing</strong><p>Delivered 08:00 every Monday · +27 82 ••• 4471 and 2 others</p></div><label class="switch"><input type="checkbox" checked /><span></span></label></div>
+                  <div class="setting"><div><strong>Alert notifications</strong><p>A message when a threshold in this sample is breached</p></div><label class="switch"><input type="checkbox" checked /><span></span></label></div>
+                  <div class="setting"><div><strong>Month-end report summary</strong><p>Key metrics on the 1st of each month</p></div><label class="switch"><input type="checkbox" /><span></span></label></div>
+                </div>
+                <div class="phone">
+                  <p class="meta" style="margin-bottom:0.45rem;">Vhona AI</p>
+                  <div class="bubble">
+                    <strong>Monday briefing · 13 Jul</strong><br />
+                    Jun closed +3.1% YoY. ⚠️ Food cost 34.0% — action needed. VAT R118k due 25 Jul — covered. Sea Point −14% YoY — review required.<br />
+                    June management report is in Reports.
+                    <span class="time">08:00</span>
+                  </div>
+                </div>
+              </div>
+            </article>
+            <article class="paper">
+              <div class="block-pad head-row" style="margin-bottom:0;"><h2>Monitoring rules in this sample</h2><span class="meta">5 rules</span></div>
+              <div class="scroll">
+                <table class="data">
+                  <thead><tr><th>Rule</th><th>Condition</th><th>Last triggered</th><th>Status</th></tr></thead>
+                  <tbody>
+                    <tr><td>Food cost alert</td><td>Cost of goods &gt; 33% of revenue</td><td>4 July 2026</td><td>Active</td></tr>
+                    <tr><td>Revenue drop alert</td><td>Any branch drops &gt;15% week-on-week</td><td>Never</td><td>Active</td></tr>
+                    <tr><td>Cash floor alert</td><td>Bank balance falls below R150 000</td><td>Never</td><td>Active</td></tr>
+                    <tr><td>SARS deadline · VAT</td><td>3 days before VAT201 due date</td><td>22 July (upcoming)</td><td>Pending</td></tr>
+                    <tr><td>SARS deadline · PAYE</td><td>3 days before EMP201 due date</td><td>4 July 2026</td><td>Active</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+          </section>
+
+          <section class="panel stack" id="panel-sources" data-panel="sources">
+            <div class="head-row">
+              <div>
+                <h2 class="panel-title">Sources in this sample</h2>
+                <p class="meta">Listed for the sample.</p>
+              </div>
+            </div>
+            <article class="paper block-pad">
+              <div class="conn">
+                <div><strong>Xero</strong><span>In this sample</span></div>
+                <div><strong>GAAP POS</strong><span>In this sample</span></div>
+                <div><strong>Google Sheets</strong><span>In this sample</span></div>
+                <div><strong>Sage</strong><span>Not in this sample</span></div>
+                <div><strong>QuickBooks</strong><span>Not in this sample</span></div>
+              </div>
+            </article>
+          </section>
+
+          <p class="also">Also in Demos: <a href="../casa-mia/">Casa Mia forecast</a></p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="walk" id="walk" hidden>
+    <p class="walk-count" id="walk-count"></p>
+    <h2 id="walk-title"></h2>
+    <p id="walk-text"></p>
+    <div class="walk-actions">
+      <button class="btn btn-ghost" type="button" id="walk-end">End</button>
+      <button class="btn btn-ghost" type="button" id="walk-back">Back</button>
+      <button class="btn btn-teal" type="button" id="walk-next">Next</button>
+    </div>
+  </div>
+
+  <dialog class="sheet" id="reportDialog">
+    <div class="sheet-card">
+      <div class="sheet-bar">
+        <button class="btn btn-ghost" type="button" id="printReport">Download PDF</button>
+        <button class="btn btn-teal" type="button" id="closeReport">Close</button>
+      </div>
+      <div class="sheet-body rep-doc" id="reportBody"></div>
+    </div>
+  </dialog>
+
+  <template id="tpl-monthly">
+    <div class="rep-top">
+      <div><div class="brand">Vhona AI</div><h2>Monthly management report — June 2026</h2></div>
+      <div class="meta">Karoo Kitchen Group<br />Generated 1 July 2026, 06:15<br />Confidential</div>
+    </div>
+    <h3>Executive summary</h3>
+    <p>Revenue of <strong>R741 200</strong> closed 8.7% below May, consistent with winter seasonality, and 3.1% ahead of June 2025. Net profit was <strong>R86 100</strong> (11.6% margin), down 0.8 percentage points year-on-year — entirely attributable to food input cost inflation. Cash position remains strong at R412 300, covering all known July commitments including the VAT payment of R118 400 due 25 July.</p>
+    <h3>Profit and loss</h3>
+    <div class="scroll">
+      <table class="data">
+        <thead><tr><th>Line item</th><th class="num">Jun 2026</th><th class="num">Jun 2025</th><th class="num">Change</th></tr></thead>
+        <tbody>
+          <tr><td>Revenue</td><td class="num">R741 200</td><td class="num">R718 900</td><td class="num">+3.1%</td></tr>
+          <tr><td>Food &amp; beverage</td><td class="num">(R252 000)</td><td class="num">(R224 300)</td><td class="num">+12.3%</td></tr>
+          <tr><td>Staff</td><td class="num">(R209 000)</td><td class="num">(R201 800)</td><td class="num">+3.6%</td></tr>
+          <tr><td>Rent</td><td class="num">(R76 500)</td><td class="num">(R72 900)</td><td class="num">+4.9%</td></tr>
+          <tr><td>Utilities</td><td class="num">(R38 900)</td><td class="num">(R35 200)</td><td class="num">+10.5%</td></tr>
+          <tr><td>Marketing</td><td class="num">(R21 400)</td><td class="num">(R19 600)</td><td class="num">+9.2%</td></tr>
+          <tr><td>Other operating</td><td class="num">(R57 300)</td><td class="num">(R76 000)</td><td class="num">−24.6%</td></tr>
+          <tr class="total"><td>Net profit</td><td class="num">R86 100</td><td class="num">R89 100</td><td class="num">−3.4%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Branch performance</h3>
+    <div class="scroll">
+      <table class="data">
+        <thead><tr><th>Branch</th><th class="num">Revenue</th><th class="num">YoY</th><th class="num">Net margin</th><th class="num">Rent/Rev</th></tr></thead>
+        <tbody>
+          <tr><td>Gardens</td><td class="num">R318 400</td><td class="num">+10.2%</td><td class="num">14.8%</td><td class="num">6.9%</td></tr>
+          <tr><td>Stellenbosch</td><td class="num">R245 700</td><td class="num">+6.4%</td><td class="num">11.9%</td><td class="num">7.5%</td></tr>
+          <tr><td>Sea Point</td><td class="num">R177 100</td><td class="num">−14.0%</td><td class="num">5.6%</td><td class="num">14.2%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Recommended actions</h3>
+    <p>1. Implement a 4–6% selective menu reprice on the eight highest-volume dishes to address food cost pressure.</p>
+    <p>2. Initiate a Sea Point lease renegotiation strategy ahead of the November break clause — current rent-to-revenue ratio (14.2%) is unsustainable.</p>
+    <p>3. Defer non-critical capital expenditure until August to maintain cash cover through the 25 July VAT payment.</p>
+    <p class="rep-foot">Karoo Kitchen Group (Pty) Ltd · Prepared by Vhona AI</p>
+  </template>
+  <template id="tpl-weekly">
+    <div class="rep-top">
+      <div><div class="brand">Vhona AI</div><h2>Weekly cash flow briefing — week of 13 July 2026</h2></div>
+      <div class="meta">Karoo Kitchen Group<br />Monday 13 July, 08:00<br />Confidential</div>
+    </div>
+    <h3>Opening position</h3>
+    <p>Bank balance as at Monday 13 July: <strong>R412 300</strong>. Expected inflows this week: R168 500 (card settlements R151 200, function deposit R17 300). Expected outflows: R142 900 (suppliers R96 400, wages advance R31 500, utilities R15 000).</p>
+    <p>Projected closing balance Friday 17 July: <strong>R437 900</strong>.</p>
+    <h3>Key commitments — next 30 days</h3>
+    <table class="data">
+      <thead><tr><th>Date</th><th>Description</th><th class="num">Amount</th><th>Coverage</th></tr></thead>
+      <tbody>
+        <tr><td>25 Jul</td><td>VAT201 — SARS</td><td class="num">R118 400</td><td>Covered</td></tr>
+        <tr><td>28 Jul</td><td>Full payroll — all branches</td><td class="num">R209 000</td><td>Covered</td></tr>
+      </tbody>
+    </table>
+    <p class="rep-foot">Karoo Kitchen Group (Pty) Ltd · Prepared by Vhona AI</p>
+  </template>
+
+  <footer class="site-footer" style="--stone: url('../../footer-dry-stone.jpg')">
+    <div class="wrap footer-inner">
+      <div>
+        <a class="wordmark" href="../../index.html"><img src="../../vhona-wordmark.png" alt="Vhona AI" /></a>
+        <p>Business intelligence for South African service SMBs. Cited answers, or no answer.</p>
+      </div>
+      <nav class="foot-links" aria-label="Footer">
+        <a href="../../index.html#product">Product</a>
+        <a href="../../pulsechat/">PulseChat</a>
+        <a href="../">Demos</a>
+        <a href="../../index.html#contact">Talk to us</a>
+      </nav>
+      <div class="foot-meta">
+        <span><a href="mailto:tnyawasha@gmail.com">tnyawasha@gmail.com</a></span>
+        <span><a href="tel:+27615067323">061 506 7323</a></span>
+        <span>Built with purpose in South Africa.</span>
+        <span>© 2026 Vhona AI. All rights reserved.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../chart.umd.min.js"></script>
+  <script>
+    (function () {
+      var $ = function (id) { return document.getElementById(id); };
+      var panels = document.querySelectorAll("[data-panel]");
+      var tabs = document.querySelectorAll(".rail button");
+      var drawn = {};
+
+      function showPanel(name) {
+        panels.forEach(function (panel) {
+          panel.classList.toggle("is-on", panel.getAttribute("data-panel") === name);
+        });
+        tabs.forEach(function (tab) {
+          tab.classList.toggle("is-on", tab.getAttribute("data-tab") === name);
+        });
+        draw(name);
+      }
+      tabs.forEach(function (tab) {
+        tab.addEventListener("click", function () { showPanel(tab.getAttribute("data-tab")); });
+      });
+
+      function draw(name) {
+        if (drawn[name] || typeof Chart === "undefined") return;
+        var canvas = name === "overview" ? $("revChart") : name === "pnl" ? $("costChart") : name === "cash" ? $("cashChart") : null;
+        if (!canvas) return;
+        drawn[name] = true;
+        Chart.defaults.font.family = '"Source Sans 3", "Segoe UI", sans-serif';
+        Chart.defaults.font.size = 12;
+        Chart.defaults.color = "#57534E";
+        var grid = "rgba(28, 25, 23, 0.08)";
+        var ink = "#1C1917";
+        if (name === "overview") {
+          new Chart(canvas, {
+            type: "line",
+            data: {
+              labels: ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+              datasets: [
+                { label: "FY2026", data: [702, 731, 748, 802, 861, 1148, 976, 838, 872, 894, 812, 741], borderColor: ink, backgroundColor: "rgba(28,25,23,0.06)", fill: true, tension: 0.3, pointRadius: 2, borderWidth: 2 },
+                { label: "FY2025", data: [668, 690, 703, 742, 801, 1042, 915, 779, 806, 821, 769, 719], borderColor: "#57534E", borderDash: [4, 4], fill: false, tension: 0.3, pointRadius: 0, borderWidth: 1.5 }
+              ]
+            },
+            options: { maintainAspectRatio: false, plugins: { legend: { position: "bottom", labels: { boxWidth: 12, boxHeight: 2, padding: 12 } } }, scales: { y: { grid: { color: grid }, ticks: { callback: function (v) { return "R" + v + "k"; } } }, x: { grid: { display: false } } } }
+          });
+        }
+        if (name === "cash") {
+          new Chart(canvas, {
+            type: "bar",
+            data: {
+              labels: ["17 Jul", "24 Jul", "31 Jul", "7 Aug", "14 Aug", "21 Aug"],
+              datasets: [{ label: "Closing balance", data: [438, 406, 293, 352, 401, 447], backgroundColor: function (c) { return c.dataIndex === 2 ? "#57534E" : ink; }, borderRadius: 3 }]
+            },
+            options: {
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false }, tooltip: { callbacks: { label: function (c) { return "R" + c.raw + "k"; }, afterLabel: function (c) { return c.dataIndex === 2 ? "VAT payment R118k" : ""; } } } },
+              scales: { y: { grid: { color: grid }, ticks: { callback: function (v) { return "R" + v + "k"; } } }, x: { grid: { display: false } } }
+            }
+          });
+        }
+        if (name === "pnl") {
+          new Chart(canvas, {
+            type: "bar",
+            data: {
+              labels: ["Food & bev", "Staff", "Rent", "Utilities", "Marketing", "Other"],
+              datasets: [{ label: "% of revenue", data: [34.0, 28.2, 10.3, 5.2, 2.9, 7.7], backgroundColor: ink, borderRadius: 3 }]
+            },
+            options: { indexAxis: "y", maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: grid }, ticks: { callback: function (v) { return v + "%"; } } }, y: { grid: { display: false } } } }
+          });
+        }
+      }
+      draw("overview");
+
+      var base = { rev: 741.2, food: 252.0, staff: 209.0, fixed: 194.1, profit: 86.1 };
+      function fmtR(k) {
+        var n = Math.round(k * 1000);
+        return (n < 0 ? "\u2212R" : "R") + Math.abs(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+      }
+      function calcPlan() {
+        var p = +$("sP").value, v = +$("sV").value, f = +$("sF").value, n = +$("sN").value;
+        $("oP").textContent = (p > 0 ? "+" : "") + p + "%";
+        $("oV").textContent = (v > 0 ? "+" : "") + v + "%";
+        $("oF").textContent = (f > 0 ? "+" : "") + f + "%";
+        $("oN").textContent = n === 0 ? "0" : "+" + n;
+        var rev = base.rev * (1 + p / 100) * (1 + v / 100);
+        var food = base.food * (1 + v / 100) * (1 + f / 100);
+        var staff = base.staff + n * 7.8;
+        var profit = rev - food - staff - base.fixed;
+        var d = profit - base.profit;
+        var margin = rev > 0 ? (profit / rev * 100).toFixed(1) : "0.0";
+        $("rVal").textContent = fmtR(profit);
+        var delta = $("rDelta");
+        if (Math.abs(d) < 0.05) delta.textContent = "Baseline \u2014 June actuals \u00B7 11.6% margin";
+        else if (d > 0) delta.textContent = "\u25B2 " + fmtR(d) + "/month \u00B7 " + margin + "% margin";
+        else delta.textContent = "\u25BC " + fmtR(Math.abs(d)) + "/month \u00B7 " + margin + "% margin";
+        var msg;
+        if (profit < 0) {
+          var rw = (412.3 / Math.abs(profit)).toFixed(1);
+          msg = "This scenario generates a monthly loss of " + fmtR(Math.abs(profit)) + ". At this burn rate, current cash reserves of R412k cover approximately " + rw + " months.";
+        } else if (d > 1) {
+          msg = "This scenario adds " + fmtR(d) + " per month (" + fmtR(d * 12) + " annually)." + (p > 0 ? " Price adjustments under 6% rarely impact cover counts materially." : "") + (n > 0 ? " The additional headcount cost of " + fmtR(n * 7.8) + "/month is fully absorbed." : "");
+        } else if (d < -1) {
+          msg = "The business remains profitable at " + fmtR(profit) + "/month. VAT and payroll commitments remain covered on this projection.";
+        } else {
+          msg = "Adjust the input variables or select a preset scenario to model an outcome.";
+        }
+        $("rText").textContent = msg;
+      }
+      ["sP", "sV", "sF", "sN"].forEach(function (id) { $(id).addEventListener("input", calcPlan); });
+      document.querySelectorAll(".preset").forEach(function (button) {
+        button.addEventListener("click", function () {
+          $("sP").value = button.dataset.p;
+          $("sV").value = button.dataset.v;
+          $("sF").value = button.dataset.f;
+          $("sN").value = button.dataset.n;
+          calcPlan();
+        });
+      });
+      calcPlan();
+
+      var answers = {
+        yoy: "June 2026 revenue: <b>R741 200</b> vs R718 900 in June 2025 — an increase of <b>3.1% YoY</b>. However, gross margin contracted: food cost ratio moved from 31.2% to 34.0%, compressing net profit by R3 000 despite higher revenue. Net margin: 11.6% (June 2026) vs 12.4% (June 2025). Volume growth is holding; the issue is input cost inflation.",
+        branch: "Branch net margin ranking for June 2026: <b>(1) Gardens — 14.8%</b> (R318k revenue), <b>(2) Stellenbosch — 11.9%</b> (R246k), <b>(3) Sea Point — 5.6%</b> (R177k). Sea Point carries a rent-to-revenue ratio of 14.2% vs group average of 7.4%. It is the primary drag on consolidated margin and warrants a review before the November lease break.",
+        hire: "Two full-time waiters at standard rates cost approximately <b>R15 600/month</b> (inclusive of UIF and basic uniform allowance). Against June net profit of R86 100, this is affordable in isolation. However, with R118 400 VAT due 25 July, end-July projected balance is R293k. Recommendation: <b>hire one now</b> for the Gardens weekend shift (highest revenue branch) and revisit the second position in September when summer trading recovers.",
+        food: "Food cost in June: <b>34.0% of revenue</b> vs 12-month average of 31.5% — a <b>250 basis point adverse variance</b>. Root cause from supplier invoices: dairy category +11% and beef +9% since April. Sea Point also shows above-average portion waste relative to the other branches. Recommended action: 4–6% selective menu reprice on the eight highest-volume dishes to restore margin without impacting price-sensitive covers.",
+        _: "This sample answers the four questions above. Try one of those."
+      };
+      var qMap = { yoy: "Revenue YoY comparison", branch: "Branch profitability ranking", hire: "Headcount affordability analysis", food: "Food cost variance explanation" };
+      var log = $("chatLog");
+      function addMsg(html, who) {
+        var d = document.createElement("div");
+        d.className = "msg " + who;
+        d.innerHTML = who === "ai" ? '<span class="who">Vhona AI</span>' + html : html;
+        log.appendChild(d);
+        d.scrollIntoView({ block: "nearest" });
+        return d;
+      }
+      function respond(key) {
+        var t = addMsg("…", "ai");
+        window.setTimeout(function () { t.innerHTML = '<span class="who">Vhona AI</span>' + (answers[key] || answers._); }, 400);
+      }
+      document.querySelectorAll(".chip").forEach(function (chip) {
+        chip.addEventListener("click", function () {
+          addMsg(qMap[chip.dataset.q], "user");
+          respond(chip.dataset.q);
+        });
+      });
+      $("askForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+        var v = $("askInput").value.trim();
+        if (!v) return;
+        addMsg(v.replace(/&/g, "&amp;").replace(/</g, "&lt;"), "user");
+        $("askInput").value = "";
+        var l = v.toLowerCase();
+        var k = "_";
+        if (l.indexOf("branch") !== -1 || l.indexOf("profit") !== -1) k = "branch";
+        else if (l.indexOf("hire") !== -1 || l.indexOf("waiter") !== -1 || l.indexOf("staff") !== -1 || l.indexOf("headcount") !== -1) k = "hire";
+        else if (l.indexOf("food") !== -1 || l.indexOf("cost") !== -1 || l.indexOf("margin") !== -1) k = "food";
+        else if (l.indexOf("year") !== -1 || l.indexOf("compare") !== -1 || l.indexOf("june") !== -1 || l.indexOf("yoy") !== -1) k = "yoy";
+        respond(k);
+      });
+
+      var reportDialog = $("reportDialog");
+      document.querySelectorAll(".open-rep").forEach(function (button) {
+        button.addEventListener("click", function () {
+          var tpl = $("tpl-" + button.dataset.r);
+          $("reportBody").replaceChildren(tpl.content.cloneNode(true));
+          reportDialog.showModal();
+        });
+      });
+      $("closeReport").addEventListener("click", function () { reportDialog.close(); });
+      $("printReport").addEventListener("click", function () { window.print(); });
+
+      var steps = [
+        { tab: "overview", sel: "#overview-kpis", title: "Executive overview", text: "June for Karoo Kitchen Group. Revenue, net profit, cash on hand, and the food cost ratio, from this sample." },
+        { tab: "overview", sel: "#health", title: "Health score", text: "78 out of 100, from this group’s own pattern: revenue trend, margin, cash cover, and how the three branches sit together." },
+        { tab: "overview", sel: "#vat-alert", title: "VAT alert", text: "VAT of R118 400 is due Saturday 25 July. The sample balance that day is R293 400, with R89 000 headroom after payroll." },
+        { tab: "pnl", sel: "#pnl-statement", title: "Profit and loss", text: "June 2026 against June 2025. Every line, and each line as a share of revenue." },
+        { tab: "branches", sel: "#branch-results", title: "Branch results", text: "Gardens, Stellenbosch, and Sea Point. Sea Point’s rent is 14.2% of its revenue. The group average is 7.4%." },
+        { tab: "plan", sel: "#planner", title: "Scenario planner", text: "Move price, covers, supplier cost, or headcount. Profit for the month recalculates from the June actuals." },
+        { tab: "ask", sel: "#ask", title: "Ask", text: "Four set answers sit on this sample. Try one." },
+        { tab: "reports", sel: "#reports", title: "Report", text: "Open the June management report. The figures inside are this same sample." },
+        { tab: "delivery", sel: "#whatsapp", title: "WhatsApp delivery", text: "The Monday 13 July briefing, in the message. The full report is the one you can open here." }
+      ];
+      var ti = 0;
+      var hl = null;
+      var walk = $("walk");
+      function clearHL() { if (hl) hl.classList.remove("is-focus"); hl = null; }
+      function showStep(i) {
+        ti = i;
+        var s = steps[i];
+        showPanel(s.tab);
+        clearHL();
+        window.setTimeout(function () {
+          var el = document.querySelector(s.sel);
+          if (!el) return;
+          el.classList.add("is-focus");
+          hl = el;
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 60);
+        $("walk-count").textContent = (i + 1) + " of " + steps.length;
+        $("walk-title").textContent = s.title;
+        $("walk-text").textContent = s.text;
+        $("walk-back").hidden = i === 0;
+        $("walk-next").textContent = i === steps.length - 1 ? "Finish" : "Next";
+        walk.hidden = false;
+      }
+      function endWalk() {
+        clearHL();
+        walk.hidden = true;
+      }
+      $("start-walk").addEventListener("click", function () { showStep(0); });
+      $("look-around").addEventListener("click", function () {
+        endWalk();
+        showPanel("overview");
+        document.querySelector(".rail").scrollIntoView({ block: "nearest" });
+      });
+      $("walk-next").addEventListener("click", function () {
+        if (ti < steps.length - 1) showStep(ti + 1);
+        else endWalk();
+      });
+      $("walk-back").addEventListener("click", function () { if (ti > 0) showStep(ti - 1); });
+      $("walk-end").addEventListener("click", endWalk);
+    })();
+  </script>
+</body>
+</html>
