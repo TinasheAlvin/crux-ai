@@ -428,7 +428,7 @@
     .path-step h3 { font-size: 1.05rem; margin: 0.75rem 0 0.35rem; }
     .path-step p { color: var(--muted); font-size: 0.95rem; }
     .arrow { display: none; color: #b7b0a4; align-self: center; }
-    .band-wrap { padding: 0 0 4.5rem; }
+    .band-wrap { padding: 0 0 4.5rem; background: var(--cream); }
     .band {
       background: var(--indigo);
       color: #f8f5ef;
@@ -498,6 +498,7 @@
     .products-strip {
       border-top: 1px solid var(--line);
       padding: 2.5rem 0 4.5rem;
+      background: var(--cream);
     }
     .products-strip h2 {
       margin: 0 0 1rem;
@@ -977,8 +978,8 @@
       .need-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; }
       .delivery-layout {
         grid-template-columns: minmax(0, 1fr) minmax(18rem, 22.5rem);
-        gap: 3rem;
-        align-items: center;
+        gap: 2rem 3rem;
+        align-items: start;
       }
     }
   </style>
@@ -1395,7 +1396,7 @@
 
     <section class="band-wrap" id="contact">
       <div class="wrap">
-        <div class="band lift">
+        <div class="band">
           <div class="band-top">
             <div>
               <h2>Talk to us</h2>
