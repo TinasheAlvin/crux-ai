@@ -815,23 +815,126 @@
       text-decoration: underline;
       text-underline-offset: 0.15em;
     }
-    .channel-pair {
+    .delivery-layout {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.75rem;
-      margin-top: 1.35rem;
-      max-width: 28rem;
+      gap: 1.75rem;
+      margin-top: 1.5rem;
+      align-items: start;
     }
-    .channel-pair span {
-      display: block;
-      text-align: center;
-      padding: 0.7rem 0.5rem;
-      border-radius: 0.8rem;
-      border: 1px solid rgba(28, 25, 23, 0.1);
-      background: #FBF8F2;
+    .tick-list {
+      list-style: none;
+      display: grid;
+      gap: 0.75rem;
+      margin-top: 1.15rem;
+    }
+    .tick-list li {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 0.65rem;
+      align-items: start;
       color: var(--charcoal);
+      font-size: 1.02rem;
+    }
+    .tick-list svg { color: var(--teal); margin-top: 0.15rem; }
+    .phone {
+      width: min(100%, 22.5rem);
+      margin-inline: auto;
+      background: var(--charcoal);
+      border-radius: 1.85rem;
+      padding: 0.55rem;
+      box-shadow: 0 18px 40px rgba(28, 25, 23, 0.14);
+    }
+    .phone-screen {
+      background: var(--cream);
+      border-radius: 1.4rem;
+      overflow: hidden;
+    }
+    .phone-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+      background: var(--teal-dark);
+      color: #fff;
+      padding: 0.75rem 0.85rem;
+    }
+    .phone-top strong { font-size: 0.95rem; font-weight: 700; }
+    .phone-sample {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--charcoal);
+      background: var(--cream);
+      border-radius: 999px;
+      padding: 0.18rem 0.5rem;
+    }
+    .phone-thread {
+      display: grid;
+      gap: 0.55rem;
+      padding: 0.75rem 0.7rem 0.9rem;
+    }
+    .bubble {
+      border-radius: 0.9rem;
+      padding: 0.7rem 0.75rem;
+      font-size: 0.8rem;
+      line-height: 1.35;
+      color: var(--charcoal);
+    }
+    .bubble.in {
+      background: #fff;
+      border: 1px solid rgba(28, 25, 23, 0.08);
+    }
+    .bubble.out {
+      justify-self: end;
+      max-width: 92%;
+      background: rgba(13, 148, 136, 0.16);
       font-weight: 700;
     }
+    .bubble-lead { margin-bottom: 0.5rem; }
+    .proof {
+      list-style: none;
+      display: grid;
+      gap: 0.35rem;
+    }
+    .proof li {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.45rem;
+      align-items: baseline;
+      padding-top: 0.35rem;
+      border-top: 1px solid rgba(28, 25, 23, 0.08);
+    }
+    .proof small {
+      display: block;
+      color: var(--muted);
+      font-size: 0.7rem;
+      font-weight: 500;
+    }
+    .proof strong {
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .old-list {
+      list-style: none;
+      display: grid;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      max-width: 40rem;
+    }
+    .old-list li {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 0.75rem;
+      align-items: center;
+      background: #FBF8F2;
+      border: 1px solid rgba(28, 25, 23, 0.1);
+      border-radius: 0.9rem;
+      padding: 0.95rem 1.05rem;
+      color: var(--charcoal);
+      font-size: 1.02rem;
+    }
+    .old-list svg { color: var(--brass); }
     .place-list {
       list-style: none;
       margin-top: 1.5rem;
@@ -872,6 +975,11 @@
     }
     @media (min-width: 960px) {
       .need-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; }
+      .delivery-layout {
+        grid-template-columns: minmax(0, 1fr) minmax(18rem, 22.5rem);
+        gap: 3rem;
+        align-items: center;
+      }
     }
   </style>
 </head>
@@ -1157,17 +1265,95 @@
           <p class="restore-eyebrow">Delivery</p>
           <h2 id="delivery-title">Get insights where you already work</h2>
           <p class="restore-copy">Morning brief in product, and insights where the team already works: Slack and WhatsApp.</p>
-          <div class="channel-pair" aria-hidden="true">
-            <span>Slack</span>
-            <span>WhatsApp</span>
+          <div class="delivery-layout">
+            <div>
+              <ul class="tick-list">
+                <li>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.2 10.6 15l5.2-6"/></svg>
+                  <span>A morning brief</span>
+                </li>
+                <li>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.2 10.6 15l5.2-6"/></svg>
+                  <span>An alert when a number moves</span>
+                </li>
+                <li>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.2 10.6 15l5.2-6"/></svg>
+                  <span>A weekly check on Monday</span>
+                </li>
+                <li>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.2 10.6 15l5.2-6"/></svg>
+                  <span>The same in Slack</span>
+                </li>
+              </ul>
+              <p class="restore-support">Connectors and delivery channels rolling out. <a href="#contact">Talk to us</a> for your stack.</p>
+            </div>
+            <article class="phone" aria-label="Sample WhatsApp brief. Profit is down R48 200.">
+              <div class="phone-screen">
+                <div class="phone-top">
+                  <strong>WhatsApp</strong>
+                  <span class="phone-sample">Sample</span>
+                </div>
+                <div class="phone-thread">
+                  <div class="bubble in">
+                    <p class="bubble-lead">Profit is down R48&nbsp;200. These five rows were not on last month's books.</p>
+                    <ul class="proof">
+                      <li>
+                        <span>Steel and Co<small>Invoice 4412 · 4 March</small></span>
+                        <strong>R22&nbsp;600</strong>
+                      </li>
+                      <li>
+                        <span>fuel levy top up<small>11 March</small></span>
+                        <strong>R12&nbsp;400</strong>
+                      </li>
+                      <li>
+                        <span>casual crew<small>week of 17 March</small></span>
+                        <strong>R8&nbsp;900</strong>
+                      </li>
+                      <li>
+                        <span>March service fee</span>
+                        <strong>R2&nbsp;850</strong>
+                      </li>
+                      <li>
+                        <span>cash deposit fees</span>
+                        <strong>R1&nbsp;450</strong>
+                      </li>
+                    </ul>
+                  </div>
+                  <p class="bubble out">Steel and Co, R22&nbsp;600</p>
+                </div>
+              </div>
+            </article>
           </div>
-          <p class="restore-support">Connectors and delivery channels rolling out. <a href="#contact">Talk to us</a> for your stack.</p>
+        </div>
+      </section>
+
+      <section class="restore-section" id="old-way" aria-labelledby="old-way-title">
+        <div class="wrap">
+          <h2 id="old-way-title">The old way</h2>
+          <ul class="old-list">
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>
+              <span>Exporting CSVs and pasting them into spreadsheets.</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>
+              <span>Month end reports nobody trusts.</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>
+              <span>Paying someone to build a dashboard.</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>
+              <span>Getting the insight after the moment has passed.</span>
+            </li>
+          </ul>
         </div>
       </section>
 
       <section class="restore-section" id="about" aria-labelledby="place-title">
         <div class="wrap">
-          <p class="restore-eyebrow">In one place</p>
+          <p class="restore-eyebrow">The Vhona way</p>
           <h2 id="place-title">One place that connects the books, the why, and the brief</h2>
           <ul class="place-list">
             <li>
