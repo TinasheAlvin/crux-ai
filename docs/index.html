@@ -277,11 +277,25 @@
       line-height: 1.3;
     }
     .hero-books li:last-child { border-bottom: 0; }
-    .hero-book-kind, .hero-book-name, .hero-book-meta, .hero-book-note { display: block; }
+    .hero-book-why {
+      margin: 0 0 0.15rem;
+      font-size: 0.78rem;
+      line-height: 1.35;
+      color: var(--charcoal);
+    }
+    .hero-scenario { margin-top: 0.7rem; }
+    .hero-scenario h3 {
+      margin: 0 0 0.15rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      line-height: 1.3;
+      color: var(--charcoal);
+    }
+    .hero-scenario .hero-books { border-top: 0; }
+    .hero-book-kind, .hero-book-name, .hero-book-meta { display: block; }
     .hero-book-kind { color: var(--teal-dark); font-weight: 600; }
     .hero-book-name { font-weight: 700; }
     .hero-book-meta { color: var(--muted); }
-    .hero-book-note { margin-top: 0.08rem; }
     .hero-book-amount {
       font-weight: 700;
       font-variant-numeric: tabular-nums;
@@ -1048,51 +1062,60 @@
                 <p><span>This month profit</span><strong>R186&nbsp;400</strong></p>
                 <p><span>Down</span><strong>R48&nbsp;200</strong></p>
               </div>
-              <ul class="hero-books">
-                <li>
-                  <span>
-                    <span class="hero-book-kind">Supplier payment</span>
-                    <span class="hero-book-name">Steel and Co</span>
-                    <span class="hero-book-meta">Invoice 4412 · 4 March</span>
-                    <span class="hero-book-note">Not on last month's books.</span>
-                  </span>
-                  <span class="hero-book-amount">R22&nbsp;600</span>
-                </li>
-                <li>
-                  <span>
-                    <span class="hero-book-kind">Supplier payment</span>
-                    <span class="hero-book-name">fuel levy top up</span>
-                    <span class="hero-book-meta">11 March</span>
-                    <span class="hero-book-note">Not on last month's books.</span>
-                  </span>
-                  <span class="hero-book-amount">R12&nbsp;400</span>
-                </li>
-                <li>
-                  <span>
-                    <span class="hero-book-kind">Supplier payment</span>
-                    <span class="hero-book-name">casual crew</span>
-                    <span class="hero-book-meta">week of 17 March</span>
-                    <span class="hero-book-note">Not on last month's books.</span>
-                  </span>
-                  <span class="hero-book-amount">R8&nbsp;900</span>
-                </li>
-                <li>
-                  <span>
-                    <span class="hero-book-kind">Bank charge</span>
-                    <span class="hero-book-name">March service fee</span>
-                    <span class="hero-book-note">Not on last month's books.</span>
-                  </span>
-                  <span class="hero-book-amount">R2&nbsp;850</span>
-                </li>
-                <li>
-                  <span>
-                    <span class="hero-book-kind">Bank charge</span>
-                    <span class="hero-book-name">cash deposit fees</span>
-                    <span class="hero-book-note">Not on last month's books.</span>
-                  </span>
-                  <span class="hero-book-amount">R1&nbsp;450</span>
-                </li>
-              </ul>
+              <p class="hero-book-why">Profit is down R48&nbsp;200. These receipts show where it went.</p>
+              <section class="hero-scenario" id="hero-scenario-new">
+                <h3>New costs that were not on last month's books, R31&nbsp;500.</h3>
+                <ul class="hero-books">
+                  <li>
+                    <span>
+                      <span class="hero-book-kind">Supplier payment</span>
+                      <span class="hero-book-name">Steel and Co</span>
+                      <span class="hero-book-meta">Invoice 4412 · 4 March</span>
+                    </span>
+                    <span class="hero-book-amount">R22&nbsp;600</span>
+                  </li>
+                  <li>
+                    <span>
+                      <span class="hero-book-kind">Supplier payment</span>
+                      <span class="hero-book-name">casual crew</span>
+                      <span class="hero-book-meta">week of 17 March</span>
+                    </span>
+                    <span class="hero-book-amount">R8&nbsp;900</span>
+                  </li>
+                </ul>
+              </section>
+              <section class="hero-scenario" id="hero-scenario-late">
+                <h3>A late invoice booked in this month, R12&nbsp;400.</h3>
+                <ul class="hero-books">
+                  <li>
+                    <span>
+                      <span class="hero-book-kind">Supplier payment</span>
+                      <span class="hero-book-name">fuel levy top up</span>
+                      <span class="hero-book-meta">Invoice 3381 · 18 February, booked 6 March</span>
+                    </span>
+                    <span class="hero-book-amount">R12&nbsp;400</span>
+                  </li>
+                </ul>
+              </section>
+              <section class="hero-scenario" id="hero-scenario-fees">
+                <h3>Bank fees spiked this month, R4&nbsp;300.</h3>
+                <ul class="hero-books">
+                  <li>
+                    <span>
+                      <span class="hero-book-kind">Bank charge</span>
+                      <span class="hero-book-name">March service fee</span>
+                    </span>
+                    <span class="hero-book-amount">R2&nbsp;850</span>
+                  </li>
+                  <li>
+                    <span>
+                      <span class="hero-book-kind">Bank charge</span>
+                      <span class="hero-book-name">cash deposit fees</span>
+                    </span>
+                    <span class="hero-book-amount">R1&nbsp;450</span>
+                  </li>
+                </ul>
+              </section>
               <a class="hero-to-demos" href="demos/">Demos</a>
             </div>
           </article>

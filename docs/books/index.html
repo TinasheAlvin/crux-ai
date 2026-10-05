@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Profit · Vhona AI</title>
-  <meta name="description" content="Profit was R48 200 lower than last month, and these rows are almost all of it." />
+  <meta name="description" content="Profit is down R48 200. These receipts show where it went." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,560;0,9..144,640;1,9..144,560&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -132,14 +132,17 @@
       margin-bottom: 0.75rem;
     }
     .answer:focus { outline: none; }
-    .absent {
+    .scenario { margin-top: 1.45rem; }
+    .scenario h2 {
       font-size: 1.05rem;
-      max-width: 38rem;
-      margin-bottom: 0.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.35;
+      margin-bottom: 0.55rem;
     }
     .volume {
       list-style: none;
-      margin-top: 1.15rem;
+      margin-top: 0;
       background: var(--paper);
       border: 1px solid var(--line);
       border-left: 8px solid var(--charcoal);
@@ -175,11 +178,6 @@
       display: block;
       margin-top: 0.05rem;
       color: var(--muted);
-      font-size: 0.95rem;
-    }
-    .entry-compare {
-      display: block;
-      margin-top: 0.28rem;
       font-size: 0.95rem;
     }
     .entry-amount {
@@ -248,11 +246,6 @@
       font-weight: 700;
       letter-spacing: -0.03em;
       font-variant-numeric: tabular-nums;
-    }
-    .receipt-compare {
-      margin-top: 0.9rem;
-      font-size: 1.05rem;
-      font-weight: 400;
     }
     .btn {
       display: inline-flex;
@@ -380,7 +373,6 @@
             <p>Invoice 4412</p>
             <p>4 March</p>
             <p class="amount">R22&nbsp;600</p>
-            <p class="receipt-compare">Not on last month's books.</p>
           </div>
         </div>
       </div>
@@ -394,9 +386,9 @@
           <h1 id="fuel-title">fuel levy top up</h1>
           <p class="kind">Supplier payment</p>
           <div class="facts">
-            <p>11 March</p>
+            <p>Invoice 3381</p>
+            <p>18 February, booked 6 March</p>
             <p class="amount">R12&nbsp;400</p>
-            <p class="receipt-compare">Not on last month's books.</p>
           </div>
         </div>
       </div>
@@ -412,7 +404,6 @@
           <div class="facts">
             <p>week of 17 March</p>
             <p class="amount">R8&nbsp;900</p>
-            <p class="receipt-compare">Not on last month's books.</p>
           </div>
         </div>
       </div>
@@ -427,7 +418,6 @@
           <p class="kind">Bank charge</p>
           <div class="facts">
             <p class="amount">R2&nbsp;850</p>
-            <p class="receipt-compare">Not on last month's books.</p>
           </div>
         </div>
       </div>
@@ -442,7 +432,6 @@
           <p class="kind">Bank charge</p>
           <div class="facts">
             <p class="amount">R1&nbsp;450</p>
-            <p class="receipt-compare">Not on last month's books.</p>
           </div>
         </div>
       </div>
@@ -499,68 +488,75 @@
           <p><span>This month profit</span><strong>R186&nbsp;400</strong></p>
           <p><span>Down</span><strong>R48&nbsp;200</strong></p>
         </div>
-        <h1 class="answer" id="profit-answer">Profit was R48&nbsp;200 lower than last month, and these rows are almost all of it.</h1>
-        <p class="absent">None of these five were on last month's books.</p>
-        <ul class="volume">
-          <li>
-            <a class="entry" href="#steel">
-              <span>
-                <span class="entry-kind">Supplier payment</span>
-                <span class="entry-name">Steel and Co</span>
-                <span class="entry-meta">Invoice 4412 · 4 March</span>
-                <span class="entry-compare">Not on last month's books.</span>
-              </span>
-              <span class="entry-amount">R22&nbsp;600</span>
-              <svg class="entry-open" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
-            </a>
-          </li>
-          <li>
-            <a class="entry" href="#fuel">
-              <span>
-                <span class="entry-kind">Supplier payment</span>
-                <span class="entry-name">fuel levy top up</span>
-                <span class="entry-meta">11 March</span>
-                <span class="entry-compare">Not on last month's books.</span>
-              </span>
-              <span class="entry-amount">R12&nbsp;400</span>
-              <svg class="entry-open" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
-            </a>
-          </li>
-          <li>
-            <a class="entry" href="#crew">
-              <span>
-                <span class="entry-kind">Supplier payment</span>
-                <span class="entry-name">casual crew</span>
-                <span class="entry-meta">week of 17 March</span>
-                <span class="entry-compare">Not on last month's books.</span>
-              </span>
-              <span class="entry-amount">R8&nbsp;900</span>
-              <svg class="entry-open" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
-            </a>
-          </li>
-          <li>
-            <a class="entry" href="#service-fee">
-              <span>
-                <span class="entry-kind">Bank charge</span>
-                <span class="entry-name">March service fee</span>
-                <span class="entry-compare">Not on last month's books.</span>
-              </span>
-              <span class="entry-amount">R2&nbsp;850</span>
-              <svg class="entry-open" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
-            </a>
-          </li>
-          <li>
-            <a class="entry" href="#deposit-fees">
-              <span>
-                <span class="entry-kind">Bank charge</span>
-                <span class="entry-name">cash deposit fees</span>
-                <span class="entry-compare">Not on last month's books.</span>
-              </span>
-              <span class="entry-amount">R1&nbsp;450</span>
-              <svg class="entry-open" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
-            </a>
-          </li>
-        </ul>
+        <h1 class="answer" id="profit-answer">Profit is down R48&nbsp;200. These receipts show where it went.</h1>
+        <section class="scenario" id="scenario-new" aria-labelledby="scenario-new-title">
+          <h2 id="scenario-new-title">New costs that were not on last month's books, R31&nbsp;500.</h2>
+          <ul class="volume">
+            <li>
+              <a class="entry" href="#steel">
+                <span>
+                  <span class="entry-kind">Supplier payment</span>
+                  <span class="entry-name">Steel and Co</span>
+                  <span class="entry-meta">Invoice 4412 · 4 March</span>
+                </span>
+                <span class="entry-amount">R22&nbsp;600</span>
+                <svg class="entry-open" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+              </a>
+            </li>
+            <li>
+              <a class="entry" href="#crew">
+                <span>
+                  <span class="entry-kind">Supplier payment</span>
+                  <span class="entry-name">casual crew</span>
+                  <span class="entry-meta">week of 17 March</span>
+                </span>
+                <span class="entry-amount">R8&nbsp;900</span>
+                <svg class="entry-open" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+              </a>
+            </li>
+          </ul>
+        </section>
+        <section class="scenario" id="scenario-late" aria-labelledby="scenario-late-title">
+          <h2 id="scenario-late-title">A late invoice booked in this month, R12&nbsp;400.</h2>
+          <ul class="volume">
+            <li>
+              <a class="entry" href="#fuel">
+                <span>
+                  <span class="entry-kind">Supplier payment</span>
+                  <span class="entry-name">fuel levy top up</span>
+                  <span class="entry-meta">Invoice 3381 · 18 February, booked 6 March</span>
+                </span>
+                <span class="entry-amount">R12&nbsp;400</span>
+                <svg class="entry-open" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+              </a>
+            </li>
+          </ul>
+        </section>
+        <section class="scenario" id="scenario-fees" aria-labelledby="scenario-fees-title">
+          <h2 id="scenario-fees-title">Bank fees spiked this month, R4&nbsp;300.</h2>
+          <ul class="volume">
+            <li>
+              <a class="entry" href="#service-fee">
+                <span>
+                  <span class="entry-kind">Bank charge</span>
+                  <span class="entry-name">March service fee</span>
+                </span>
+                <span class="entry-amount">R2&nbsp;850</span>
+                <svg class="entry-open" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+              </a>
+            </li>
+            <li>
+              <a class="entry" href="#deposit-fees">
+                <span>
+                  <span class="entry-kind">Bank charge</span>
+                  <span class="entry-name">cash deposit fees</span>
+                </span>
+                <span class="entry-amount">R1&nbsp;450</span>
+                <svg class="entry-open" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+              </a>
+            </li>
+          </ul>
+        </section>
         <a class="btn btn-teal close" href="#talk">Talk to us <span aria-hidden="true">→</span></a>
       </div>
     </section>
