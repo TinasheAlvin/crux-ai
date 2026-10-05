@@ -133,6 +133,13 @@
     return low.toLocaleString() + " to " + high.toLocaleString();
   }
 
+  function forecastCell(value, low, high) {
+    if (value === null) return "None";
+    var band = rangeText(low, high, true);
+    if (!band) return value.toLocaleString();
+    return value.toLocaleString() + '<span class="band">' + band + "</span>";
+  }
+
   function renderTable() {
     var rows = getFiltered();
     rows.sort(function (a, b) {
@@ -155,8 +162,8 @@
       return '<tr class="' + (row.conf === "Low" ? "is-low" : "") + '" data-key="' + esc(row.key) + '">' +
         '<td><span class="sku-open">' + esc(row.sku) + '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5"/></svg></span></td>' +
         "<td>" + esc(row.region) + "</td>" +
-        '<td class="num">' + (row.d1 !== null ? row.d1.toLocaleString() + (rangeText(row.d1_low, row.d1_high, true) ? " · " + rangeText(row.d1_low, row.d1_high, true) : "") : "None") + "</td>" +
-        '<td class="num">' + (row.d2 !== null ? row.d2.toLocaleString() + (rangeText(row.d2_low, row.d2_high, true) ? " · " + rangeText(row.d2_low, row.d2_high, true) : "") : "None") + "</td>" +
+        '<td class="num">' + forecastCell(row.d1, row.d1_low, row.d1_high) + "</td>" +
+        '<td class="num">' + forecastCell(row.d2, row.d2_low, row.d2_high) + "</td>" +
         '<td class="conf"' + (row.reason ? ' title="' + esc(row.reason) + '"' : "") + ">" + esc(row.conf) +
         (row.held ? "<small>Held from the upper third</small>" : "") + "</td></tr>";
     }).join("");
