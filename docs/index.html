@@ -789,29 +789,49 @@
       font-size: 0.92rem;
       line-height: 1.45;
     }
+    .run-block { text-align: center; }
+    .run-sub {
+      margin: 0.85rem auto 0;
+      max-width: 36rem;
+      color: rgba(28, 25, 23, 0.8);
+      font-size: 1rem;
+    }
     .run-steps {
       list-style: none;
       display: grid;
-      gap: 1.35rem;
-      margin-top: 1.75rem;
-    }
-    .run-steps li h3 {
-      font-size: 1.05rem;
-      font-weight: 700;
-      margin: 0.35rem 0 0.25rem;
-      color: var(--charcoal);
-    }
-    .run-steps li p {
-      color: rgba(28, 25, 23, 0.75);
-      font-size: 0.95rem;
-      max-width: 28ch;
+      gap: 2.75rem;
+      margin-top: 2.25rem;
     }
     .run-num {
       display: block;
-      color: var(--teal);
+      color: #0D9488;
       font-weight: 700;
-      font-size: 1.35rem;
-      letter-spacing: 0.04em;
+      font-size: 64px;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+    .run-rule {
+      display: block;
+      width: 32px;
+      height: 2px;
+      margin: 0.85rem auto 0;
+      background: #B8956A;
+    }
+    .run-steps li h3 {
+      font-family: var(--sans);
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: 0;
+      margin: 0.9rem 0 0.45rem;
+      color: var(--charcoal);
+    }
+    .run-steps li p {
+      color: rgba(28, 25, 23, 0.8);
+      font-size: 1rem;
+      line-height: 1.45;
+      max-width: 26rem;
+      margin-left: auto;
+      margin-right: auto;
     }
     .restore-copy {
       margin-top: 1.15rem;
@@ -906,7 +926,11 @@
       background: rgba(13, 148, 136, 0.16);
       font-weight: 700;
     }
-    .bubble-lead { margin-bottom: 0.5rem; }
+    .bubble-lead { margin-bottom: 0.45rem; }
+    .proof-why {
+      margin: 0.55rem 0 0.15rem;
+      font-weight: 700;
+    }
     .proof {
       list-style: none;
       display: grid;
@@ -916,10 +940,11 @@
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 0.45rem;
-      align-items: baseline;
+      align-items: start;
       padding-top: 0.35rem;
       border-top: 1px solid rgba(28, 25, 23, 0.08);
     }
+    .proof li > span { min-width: 0; }
     .proof small {
       display: block;
       color: var(--muted);
@@ -930,63 +955,91 @@
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
     }
-    .old-list {
-      list-style: none;
+    .way-pair-grid {
       display: grid;
-      gap: 0.75rem;
-      margin-top: 1.5rem;
-      max-width: 40rem;
+      gap: 16px;
     }
-    .old-list li {
-      display: grid;
-      grid-template-columns: auto minmax(0, 1fr);
-      gap: 0.75rem;
-      align-items: center;
-      background: #FBF8F2;
+    .way-headline { margin: 0; }
+    .way-card {
+      background: #fff;
       border: 1px solid rgba(28, 25, 23, 0.1);
       border-radius: 0.9rem;
-      padding: 0.95rem 1.05rem;
-      color: var(--charcoal);
-      font-size: 1.02rem;
+      padding: 1.25rem 1.2rem 1.15rem;
     }
-    .old-list svg { color: var(--brass); }
-    .place-list {
+    .way-card h3 {
+      font-family: var(--sans);
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 0;
+      color: var(--charcoal);
+      margin: 0 0 0.9rem;
+    }
+    .way-eyebrow {
+      margin: 0 0 0.85rem;
+      color: #0F766E;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .way-vhona { border-top: 3px solid #0F766E; }
+    .way-lines {
       list-style: none;
-      margin-top: 1.5rem;
       display: grid;
       gap: 0.85rem;
-      max-width: 36rem;
     }
-    .place-list li {
+    .way-lines li {
       display: grid;
       grid-template-columns: auto minmax(0, 1fr);
       gap: 0.7rem;
       align-items: start;
-      color: var(--charcoal);
-      font-size: 1.02rem;
+      font-size: 1rem;
+      line-height: 1.4;
     }
-    .place-list svg { color: var(--teal); margin-top: 0.15rem; }
-    .restore-close {
-      margin-top: 1.35rem;
-      color: var(--brass);
-      font-weight: 700;
-      letter-spacing: 0.04em;
-    }
-    .restore-cta { margin-top: 1.15rem; }
+    .way-old .way-lines { color: rgba(28, 25, 23, 0.7); }
+    .way-old .way-mark { color: rgba(28, 25, 23, 0.45); }
+    .way-vhona .way-lines { color: var(--charcoal); }
+    .way-vhona .way-mark { color: #0F766E; }
+    .way-mark { font-weight: 700; line-height: 1.35; }
     @media (min-width: 560px) {
       .need-grid { grid-template-columns: 1fr 1fr; }
     }
     @media (min-width: 800px) {
       .restore-section { padding: 4.75rem 0; }
+      .run-block { text-align: left; }
+      .run-sub { margin-left: 0; margin-right: 0; }
       .run-steps {
         grid-template-columns: 1fr 1fr 1fr;
+        gap: 2rem;
+      }
+      .run-steps li { text-align: center; }
+      .run-steps li p { max-width: none; }
+      .run-num { font-size: 72px; }
+      .run-steps li h3 { font-size: 1.375rem; }
+      .way-pair-grid {
+        grid-template-columns: 1fr 1fr;
+        column-gap: 32px;
+        row-gap: 16px;
+        grid-template-rows: auto auto repeat(4, auto);
+        align-items: start;
+      }
+      .way-headline { grid-column: 2; grid-row: 1; align-self: end; }
+      .way-card {
+        display: grid;
+        grid-template-rows: subgrid;
+        grid-row: 2 / span 5;
+      }
+      .way-card h3,
+      .way-eyebrow { margin: 0; }
+      .way-old { grid-column: 1; }
+      .way-vhona { grid-column: 2; }
+      .way-lines {
+        display: grid;
+        grid-template-rows: subgrid;
+        grid-row: span 4;
         gap: 0;
       }
-      .run-steps li { padding-right: 1.25rem; }
-      .run-steps li + li {
-        border-left: 1px solid var(--brass);
-        padding-left: 1.5rem;
-      }
+      .way-lines li { padding-bottom: 0.65rem; }
     }
     @media (min-width: 960px) {
       .need-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; }
@@ -1261,24 +1314,28 @@
         </div>
       </section>
 
-      <section class="restore-section" id="up-and-running" aria-labelledby="running-title">
+      <section class="restore-section run-block" id="up-and-running" aria-labelledby="running-title">
         <div class="wrap">
-          <h2 id="running-title">Up and running</h2>
+          <h2 id="running-title">Up and running in three steps</h2>
+          <p class="run-sub">We set it up with you. Your team keeps the tools it already uses.</p>
           <ol class="run-steps">
             <li>
               <span class="run-num">01</span>
-              <h3>Connect</h3>
-              <p>Bring numbers from the tools you already use.</p>
+              <span class="run-rule" aria-hidden="true"></span>
+              <h3>Connect your books.</h3>
+              <p>Xero, Sage, SQL Server, or a CSV export if that's what you have today. More connectors are rolling out, so talk to us about your stack.</p>
             </li>
             <li>
               <span class="run-num">02</span>
-              <h3>Ask</h3>
-              <p>Ask for the trusted why.</p>
+              <span class="run-rule" aria-hidden="true"></span>
+              <h3>Ask your question.</h3>
+              <p>In plain words, like "Why is profit down this month?" or "Which costs are new?"</p>
             </li>
             <li>
               <span class="run-num">03</span>
-              <h3>Get an answer</h3>
-              <p>Get a receipted why you can check.</p>
+              <span class="run-rule" aria-hidden="true"></span>
+              <h3>Get an answer you can check.</h3>
+              <p>You get the figure, the reason, and the rows behind it, first on screen and then in Slack or WhatsApp. If the rows don't back it up, Vhona stops.</p>
             </li>
           </ol>
         </div>
@@ -1319,20 +1376,27 @@
                 </div>
                 <div class="phone-thread">
                   <div class="bubble in">
-                    <p class="bubble-lead">Profit is down R48&nbsp;200. These five rows were not on last month's books.</p>
+                    <p class="bubble-lead">Profit is down R48&nbsp;200. These receipts show where it went.</p>
+                    <p class="proof-why">New costs that were not on last month's books, R31&nbsp;500.</p>
                     <ul class="proof">
                       <li>
-                        <span>Steel and Co<small>Invoice 4412 · 4 March</small></span>
+                        <span>Steel and Co<small>Invoice 4412, 4 March</small></span>
                         <strong>R22&nbsp;600</strong>
-                      </li>
-                      <li>
-                        <span>fuel levy top up<small>11 March</small></span>
-                        <strong>R12&nbsp;400</strong>
                       </li>
                       <li>
                         <span>casual crew<small>week of 17 March</small></span>
                         <strong>R8&nbsp;900</strong>
                       </li>
+                    </ul>
+                    <p class="proof-why">A late invoice booked in this month, R12&nbsp;400.</p>
+                    <ul class="proof">
+                      <li>
+                        <span>fuel levy top up<small>Invoice 3381, 18 February, booked 6 March</small></span>
+                        <strong>R12&nbsp;400</strong>
+                      </li>
+                    </ul>
+                    <p class="proof-why">Bank fees spiked this month, R4&nbsp;300.</p>
+                    <ul class="proof">
                       <li>
                         <span>March service fee</span>
                         <strong>R2&nbsp;850</strong>
@@ -1351,50 +1415,27 @@
         </div>
       </section>
 
-      <section class="restore-section" id="old-way" aria-labelledby="old-way-title">
-        <div class="wrap">
-          <h2 id="old-way-title">The old way</h2>
-          <ul class="old-list">
-            <li>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>
-              <span>Exporting CSVs and pasting them into spreadsheets.</span>
-            </li>
-            <li>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>
-              <span>Month end reports nobody trusts.</span>
-            </li>
-            <li>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>
-              <span>Paying someone to build a dashboard.</span>
-            </li>
-            <li>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>
-              <span>Getting the insight after the moment has passed.</span>
-            </li>
-          </ul>
-        </div>
-      </section>
-
       <section class="restore-section" id="about" aria-labelledby="place-title">
-        <div class="wrap">
-          <p class="restore-eyebrow">The Vhona way</p>
-          <h2 id="place-title">One place that connects the books, the why, and the brief</h2>
-          <ul class="place-list">
-            <li>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.2 10.6 15l5.2-6"/></svg>
-              <span>The books — numbers from the tools you already use.</span>
-            </li>
-            <li>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.2 10.6 15l5.2-6"/></svg>
-              <span>The why — receipted, cited to the rows.</span>
-            </li>
-            <li>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.2 10.6 15l5.2-6"/></svg>
-              <span>The brief — a morning brief you can check.</span>
-            </li>
-          </ul>
-          <p class="restore-close">Trust the insight. See the proof.</p>
-          <a class="btn btn-teal restore-cta" href="#contact">Talk to us</a>
+        <div class="wrap way-pair-grid">
+          <article class="way-card way-old">
+            <h3>The old way</h3>
+            <ul class="way-lines">
+              <li><span class="way-mark" aria-hidden="true">✗</span><span>Exporting CSVs and pasting them into spreadsheets.</span></li>
+              <li><span class="way-mark" aria-hidden="true">✗</span><span>Month end reports nobody trusts.</span></li>
+              <li><span class="way-mark" aria-hidden="true">✗</span><span>Paying someone to build a dashboard.</span></li>
+              <li><span class="way-mark" aria-hidden="true">✗</span><span>Getting the insight after the moment has passed.</span></li>
+            </ul>
+          </article>
+          <h2 class="way-headline" id="place-title">One place that connects the books, the why, and the brief</h2>
+          <article class="way-card way-vhona">
+            <p class="way-eyebrow">The Vhona way</p>
+            <ul class="way-lines">
+              <li><span class="way-mark" aria-hidden="true">✓</span><span>Connect the books you already use, CSV when that is what you have today.</span></li>
+              <li><span class="way-mark" aria-hidden="true">✓</span><span>A figure with the rows behind it, or nothing.</span></li>
+              <li><span class="way-mark" aria-hidden="true">✓</span><span>Talk to us instead of a custom dashboard build.</span></li>
+              <li><span class="way-mark" aria-hidden="true">✓</span><span>The answer on screen, then Slack or WhatsApp.</span></li>
+            </ul>
+          </article>
         </div>
       </section>
     </div>
