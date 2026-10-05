@@ -62,14 +62,19 @@
     #forecastBody .sku-open svg { flex: none; }
     tr.is-low td { background: var(--cream-deep); }
     .conf { font-weight: 700; }
-    #forecastBody td.conf { white-space: normal; }
+    #forecastTable th[data-sort="conf"],
+    #forecastBody td.conf {
+      white-space: nowrap;
+      min-width: 12.5rem;
+    }
     #forecastBody td.conf small {
       display: block;
-      max-width: 9.5rem;
       margin-top: 0.15rem;
       font-size: 0.75rem;
       font-weight: 600;
+      line-height: 1.3;
       color: var(--muted);
+      white-space: nowrap;
     }
     .confidence-note {
       margin: 0.15rem 0 0.9rem;
