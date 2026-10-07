@@ -8,6 +8,7 @@
 - [Sample books](https://vhona-ai.pages.dev/books/)
 - [PulseChat](https://vhona-ai.pages.dev/pulsechat/): WhatsApp bot cost per resolved enquiry, sample only
 - [Demos](https://vhona-ai.pages.dev/demos/): samples only
+- [Who to call sample](https://vhona-ai.pages.dev/demos/who-to-call/): four sample customers who stopped, dropped or are paying late, with the invoices as proof
 
 ## Next step
 Talk to us: tnyawasha@gmail.com or 061 506 7323. No public pricing, no login, no API.
