@@ -210,6 +210,8 @@ public class AdminConsoleTests
             Assert.Empty(await db.CreditNotes.IgnoreQueryFilters().ToListAsync());
             Assert.Empty(await db.Invitations.IgnoreQueryFilters().ToListAsync());
             Assert.Empty(await db.CallThresholdSettings.IgnoreQueryFilters().ToListAsync());
+            Assert.Empty(await db.CallCustomerActions.IgnoreQueryFilters().ToListAsync());
+            Assert.Empty(await db.ReminderDrafts.IgnoreQueryFilters().ToListAsync());
             Assert.Equal(3, await db.Users.CountAsync());
             Assert.Contains(world.Storage.Deleted, path => path == world.StoragePath);
 
@@ -233,7 +235,8 @@ public class AdminConsoleTests
             {
                 "memberships", "importJobs", "columnMappingProfiles", "transactions", "whyAnswers", "whyCitations",
                 "morningBriefPreferences", "morningBriefs", "morningBriefCitations", "dataSources", "customers",
-                "invoices", "invoiceLines", "payments", "creditNotes", "invitations", "callThresholdSettings"
+                "invoices", "invoiceLines", "payments", "creditNotes", "invitations", "callThresholdSettings",
+                "callActions", "reminderDrafts"
             })
             {
                 Assert.True(root.TryGetProperty(table, out var rows), table);
@@ -621,6 +624,26 @@ public class AdminConsoleTests
             CreatedByUserId = admin.UserId,
             CreatedAt = now,
             ExpiresAt = now.AddDays(1)
+        });
+        db.CallCustomerActions.Add(new CallCustomerAction
+        {
+            Id = Guid.NewGuid(),
+            OrganizationId = studioId,
+            CustomerId = customerId,
+            Kind = CallActionKind.Called,
+            ActedByUserId = admin.UserId,
+            At = now,
+            Note = "Left a message"
+        });
+        db.ReminderDrafts.Add(new ReminderDraft
+        {
+            Id = Guid.NewGuid(),
+            OrganizationId = studioId,
+            CustomerId = customerId,
+            Body = "A reminder that was not sent.",
+            EditedByOwner = true,
+            UpdatedAt = now,
+            Status = ReminderDraftTemplate.NotSent
         });
         if (includeBusinessThresholds)
         {

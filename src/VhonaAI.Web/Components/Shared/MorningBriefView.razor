@@ -1,3 +1,8 @@
+@if (Landing.OptedIn && Landing.WhoToCall is { CustomerCount: > 0 })
+{
+    <p class="who-line"><a href="/who-to-call">@Landing.WhoToCall.Text</a></p>
+}
+
 @if (Landing.Verified && Landing.Snapshot is not null)
 {
     <section class="health-block">

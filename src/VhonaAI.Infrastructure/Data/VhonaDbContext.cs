@@ -43,6 +43,8 @@ public sealed class VhonaDbContext : DbContext
     public DbSet<CreditNote> CreditNotes => Set<CreditNote>();
     public DbSet<Invitation> Invitations => Set<Invitation>();
     public DbSet<CallThresholdSettings> CallThresholdSettings => Set<CallThresholdSettings>();
+    public DbSet<CallCustomerAction> CallCustomerActions => Set<CallCustomerAction>();
+    public DbSet<ReminderDraft> ReminderDrafts => Set<ReminderDraft>();
     public DbSet<AdminAuditEntry> AdminAuditEntries => Set<AdminAuditEntry>();
     public DbSet<PlatformCallDefaults> PlatformCallDefaults => Set<PlatformCallDefaults>();
 
@@ -78,6 +80,8 @@ public sealed class VhonaDbContext : DbContext
         ApplyTenantFilter<CreditNote>(modelBuilder);
         ApplyTenantFilter<Invitation>(modelBuilder);
         ApplyTenantFilter<CallThresholdSettings>(modelBuilder);
+        ApplyTenantFilter<CallCustomerAction>(modelBuilder);
+        ApplyTenantFilter<ReminderDraft>(modelBuilder);
         modelBuilder.Entity<WhyCitation>().HasQueryFilter(citation =>
             CurrentOrganizationId == null || citation.WhyAnswer.OrganizationId == CurrentOrganizationId);
         modelBuilder.Entity<MorningBriefCitation>().HasQueryFilter(citation =>

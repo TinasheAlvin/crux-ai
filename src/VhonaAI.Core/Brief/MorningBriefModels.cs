@@ -1,3 +1,4 @@
+using VhonaAI.Core.Calling;
 using VhonaAI.Core.Health;
 using VhonaAI.Core.Why;
 
@@ -62,6 +63,9 @@ public sealed class MorningBriefLanding
     public string Explanation { get; init; } = string.Empty;
     public HealthMetricKind? Metric { get; init; }
     public WhyAskResult? Receipt { get; init; }
+
+    /// <summary>Set when the owner is opted in and every who-to-call flag has the rows behind it.</summary>
+    public WhoToCallBriefLine? WhoToCall { get; set; }
 
     public static MorningBriefLanding NotOptedIn() => new() { OptedIn = false };
 

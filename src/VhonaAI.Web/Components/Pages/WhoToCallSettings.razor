@@ -1,0 +1,100 @@
+@page "/who-to-call/settings"
+@attribute [Authorize]
+@inject ICallSettingsAppService Settings
+@inject ICurrentUser CurrentUser
+
+<PageTitle>Who to call thresholds · Vhona AI</PageTitle>
+
+<section class="panel">
+    <header class="panel-header">
+        <p class="eyebrow">@CurrentUser.OrganizationName</p>
+        <h1>Who to call thresholds</h1>
+        <p class="lede">
+            These apply the next time you open who to call. Late is any open invoice past its due date.
+            Stopped and dropped also wait for the minimum number of invoices.
+        </p>
+        <p class="hint"><a href="/who-to-call">Back to who to call</a></p>
+    </header>
+
+    @if (!string.IsNullOrWhiteSpace(banner))
+    {
+        <p class="banner @(bannerIsError ? "banner-error" : null)" role="status">@banner</p>
+    }
+
+    @if (loaded)
+    {
+        @if (!CurrentUser.IsOwner)
+        {
+            <p class="hint">Owners can change these. You can read them.</p>
+        }
+        <form class="stack-form" @onsubmit="SaveAsync">
+            <label class="field-label" for="cycles">Missed billing cycles before Stopped</label>
+            <input id="cycles" class="form-control" type="number" min="1" max="24" @bind="cycles" disabled="@(!CurrentUser.IsOwner)" />
+
+            <label class="field-label" for="percent">Drop percent before Dropped</label>
+            <input id="percent" class="form-control" type="number" min="1" max="100" step="1" @bind="percent" disabled="@(!CurrentUser.IsOwner)" />
+
+            <label class="field-label" for="months">Months that drop has to last</label>
+            <input id="months" class="form-control" type="number" min="1" max="24" @bind="months" disabled="@(!CurrentUser.IsOwner)" />
+
+            <label class="field-label" for="history">Minimum invoices before Stopped or Dropped</label>
+            <input id="history" class="form-control" type="number" min="1" max="36" @bind="history" disabled="@(!CurrentUser.IsOwner)" />
+
+            @if (CurrentUser.IsOwner)
+            {
+                <button class="btn btn-primary" type="submit" disabled="@busy">Save thresholds</button>
+            }
+            <p class="hint">@(custom ? "Saved for this business." : "Using the platform defaults (2 cycles, 50%, 2 months, 3 invoices) until you save your own.")</p>
+        </form>
+    }
+</section>
+
+@code {
+    private bool loaded;
+    private bool custom;
+    private bool busy;
+    private string? banner;
+    private bool bannerIsError;
+    private int cycles = CallThresholdDefaults.StoppedMissedCycles;
+    private decimal percent = CallThresholdDefaults.DroppedPercent;
+    private int months = CallThresholdDefaults.DroppedMonths;
+    private int history = CallThresholdDefaults.MinimumInvoiceHistory;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var current = await Settings.GetAsync();
+        cycles = current.StoppedMissedCycles;
+        percent = current.DroppedPercent;
+        months = current.DroppedMonths;
+        history = current.MinimumInvoiceHistory;
+        custom = current.IsCustom;
+        loaded = true;
+    }
+
+    private async Task SaveAsync()
+    {
+        if (!CurrentUser.IsOwner)
+        {
+            return;
+        }
+
+        busy = true;
+        banner = null;
+        try
+        {
+            var saved = await Settings.UpdateAsync(new CallThresholdSettingsUpdate(cycles, percent, months, history));
+            custom = saved.IsCustom;
+            banner = "Thresholds saved. Who to call uses them the next time you open the list.";
+            bannerIsError = false;
+        }
+        catch (InvalidOperationException ex)
+        {
+            banner = ex.Message;
+            bannerIsError = true;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

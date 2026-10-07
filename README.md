@@ -4,7 +4,7 @@ CSV-first BI for South African service-business owners.
 
 V1 spine in this repo:
 
-`CSV upload / map → validate → persist RowIds → health KPIs (period compare) → receipted why → morning brief`
+`CSV upload / map → validate → persist RowIds → health KPIs (period compare) → receipted why → morning brief → who to call`
 
 Nango connectors, WhatsApp, email, and multi-story digests remain **out of scope**. Azure OpenAI is optional (intent classification only); the local demo uses a deterministic verifier and still **fails closed** without RowId citations. Morning brief generation is **on-demand at next visit** — Azure Functions are not required.
 
@@ -73,6 +73,7 @@ The first run creates `src/VhonaAI.Web/App_Data/vhonaai.db` and `src/VhonaAI.Web
 8. After a **cited** why, an opt-in sheet appears with one primary CTA: **Send me the morning brief**. Dismiss it once with **Not now** and it will not come back (it is not buried in settings).
 9. Open **Home** or **Brief** (next visit). You get **yesterday’s snapshot KPIs** plus **one** receipted explanation and a receipt strip. If nothing can be cited: **No verified brief today** and a path back to **Ask why** — never a fake or multi-story digest.
 10. Use **Remap columns** if the mapping was wrong. To see cash: **Sample with cash** (or `testdata/sample-transactions-with-cash.csv`). `Running Balance` maps to Balance; the cash card uses the latest usable balance in each month, and cash-why cites those Balance rows.
+11. Open **Who to call**. On an empty set of invoices, an owner can **Load sample books** (four made-up customers: stopped, dropped, and late). Each flag opens the invoice rows behind it. Late customers get a reminder draft marked **Not sent**. Copy it, or open WhatsApp or email — Vhona does not send. Owners set the thresholds on **Who to call → Thresholds**. After a morning-brief opt-in, the brief includes a who-to-call line when every flag has rows.
 
 ## How KPIs are computed
 

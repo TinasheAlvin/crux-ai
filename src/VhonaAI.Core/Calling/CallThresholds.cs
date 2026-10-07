@@ -2,7 +2,6 @@ namespace VhonaAI.Core.Calling;
 
 /// <summary>
 /// Pencilled defaults from 7 Oct 2026: 2 missed cycles, a 50% drop over 2 months, and at least 3 invoices.
-/// The who-to-call rules that read these values are a later phase.
 /// </summary>
 public static class CallThresholdDefaults
 {

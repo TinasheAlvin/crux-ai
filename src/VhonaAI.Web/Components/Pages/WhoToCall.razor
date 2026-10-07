@@ -1,0 +1,237 @@
+@page "/who-to-call"
+@attribute [Authorize]
+@inject IWhoToCallAppService Calls
+@inject ICurrentUser CurrentUser
+
+<PageTitle>Who to call · Vhona AI</PageTitle>
+
+@if (list is null)
+{
+    <p>Loading…</p>
+}
+else
+{
+    <section class="panel">
+        <header class="panel-header">
+            <p class="eyebrow">@CurrentUser.OrganizationName</p>
+            <h1>Who to call</h1>
+            <p class="lede">
+                Customers who stopped, dropped part of their usual billing, or have an invoice past its due date.
+                The rows are the proof. Vhona drafts a reminder, and you decide whether to send it.
+            </p>
+            <p class="hint">@list.SortExplanation</p>
+            <p class="hint">Days overdue are counted to @AsAtLabel(list.AsAt), the end of the imported books.</p>
+            @if (list.UsingSample)
+            {
+                <p class="hint">Sample books. Customer names are made up.</p>
+            }
+            <p class="hint"><a href="/who-to-call/settings">Thresholds</a></p>
+        </header>
+
+        @if (!string.IsNullOrWhiteSpace(banner))
+        {
+            <p class="banner @(bannerIsError ? "banner-error" : null)" role="status">@banner</p>
+        }
+
+        @if (list.Flags.Count == 0)
+        {
+            <p>No one is flagged from these books.</p>
+            @if (list.CanLoadSample)
+            {
+                <button class="btn btn-primary" type="button" disabled="@busy" @onclick="LoadSampleAsync">Load sample books</button>
+            }
+        }
+        else
+        {
+            <div class="who-list" aria-label="Customers flagged">
+                @foreach (var flag in list.Flags)
+                {
+                    var open = selectedId == flag.CustomerId;
+                    <button type="button" class="who-row @(open ? "is-open" : null)" aria-expanded="@open" @onclick="() => ToggleAsync(flag.CustomerId)">
+                        <span>
+                            <span class="who-name">@flag.CustomerName</span>
+                            <span class="who-why">@flag.Why</span>
+                            <span class="who-detail">@flag.Detail</span>
+                        </span>
+                        <span class="who-end">
+                            <span class="who-tag who-tag-@flag.Kind.ToString().ToLowerInvariant()">@flag.Kind</span>
+                            <span class="who-rows">@flag.RowCount @(flag.RowCount == 1 ? "row" : "rows")</span>
+                        </span>
+                    </button>
+                    @if (open && detail is not null && detail.Flag.CustomerId == flag.CustomerId)
+                    {
+                        <WhoToCallReceipt Detail="detail"
+                                          Busy="busy"
+                                          CanRecord="list.IsOwner"
+                                          SnoozeDate="snoozeDate"
+                                          SnoozeDateChanged="OnSnoozeDate"
+                                          OnAction="RecordAsync" />
+                        @if (detail.Flag.Kind == CallFlagKind.Late && !string.IsNullOrWhiteSpace(draftText))
+                        {
+                            <WhoToCallDraft Detail="detail"
+                                            Body="draftText"
+                                            BodyChanged="OnDraft"
+                                            Busy="busy"
+                                            Copied="copied"
+                                            OnSave="SaveDraftAsync"
+                                            OnCopied="MarkCopied" />
+                        }
+                    }
+                }
+            </div>
+        }
+    </section>
+}
+
+@code {
+    private WhoToCallList? list;
+    private WhoToCallFlagDetail? detail;
+    private Guid? selectedId;
+    private string draftText = string.Empty;
+    private string snoozeDate = string.Empty;
+    private string? banner;
+    private bool bannerIsError;
+    private bool busy;
+    private bool copied;
+
+    protected override async Task OnInitializedAsync() => await ReloadAsync();
+
+    private async Task ReloadAsync()
+    {
+        list = await Calls.GetListAsync();
+        if (selectedId is Guid id && list.Flags.All(flag => flag.CustomerId != id))
+        {
+            selectedId = null;
+            detail = null;
+            draftText = string.Empty;
+        }
+        else if (selectedId is Guid still)
+        {
+            await OpenAsync(still);
+        }
+    }
+
+    private async Task ToggleAsync(Guid customerId)
+    {
+        banner = null;
+        copied = false;
+        if (selectedId == customerId)
+        {
+            selectedId = null;
+            detail = null;
+            draftText = string.Empty;
+            return;
+        }
+
+        selectedId = customerId;
+        await OpenAsync(customerId);
+    }
+
+    private async Task OpenAsync(Guid customerId)
+    {
+        detail = await Calls.GetFlagAsync(customerId);
+        draftText = detail?.DraftBody ?? string.Empty;
+        if (detail is null)
+        {
+            selectedId = null;
+        }
+    }
+
+    private Task OnSnoozeDate(string value)
+    {
+        snoozeDate = value;
+        return Task.CompletedTask;
+    }
+
+    private Task OnDraft(string value)
+    {
+        draftText = value;
+        copied = false;
+        return Task.CompletedTask;
+    }
+
+    private void MarkCopied() => copied = true;
+
+    private async Task LoadSampleAsync()
+    {
+        await RunAsync(async () =>
+        {
+            await Calls.LoadSampleAsync();
+            banner = "Sample books are loaded.";
+            bannerIsError = false;
+            await ReloadAsync();
+        });
+    }
+
+    private async Task RecordAsync(CallActionKind kind)
+    {
+        if (selectedId is not Guid customerId)
+        {
+            return;
+        }
+
+        DateOnly? until = null;
+        if (kind == CallActionKind.Snoozed)
+        {
+            if (!DateOnly.TryParse(snoozeDate, out var parsed))
+            {
+                banner = "Choose the date to snooze until.";
+                bannerIsError = true;
+                return;
+            }
+
+            until = parsed;
+        }
+
+        await RunAsync(async () =>
+        {
+            await Calls.RecordActionAsync(customerId, kind, until, null);
+            banner = kind switch
+            {
+                CallActionKind.Called => "Marked as called.",
+                CallActionKind.Snoozed => "Snoozed.",
+                CallActionKind.Paid => "Marked as paid. They come back if the invoices change.",
+                _ => "Marked as not a concern. They come back when newer invoices arrive."
+            };
+            bannerIsError = false;
+            await ReloadAsync();
+        });
+    }
+
+    private async Task SaveDraftAsync()
+    {
+        if (selectedId is not Guid customerId)
+        {
+            return;
+        }
+
+        await RunAsync(async () =>
+        {
+            var saved = await Calls.SaveDraftAsync(customerId, draftText);
+            draftText = saved.Body;
+            banner = "Draft saved. Not sent.";
+            bannerIsError = false;
+            await OpenAsync(customerId);
+        });
+    }
+
+    private async Task RunAsync(Func<Task> action)
+    {
+        busy = true;
+        try
+        {
+            await action();
+        }
+        catch (InvalidOperationException ex)
+        {
+            banner = ex.Message;
+            bannerIsError = true;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private static string AsAtLabel(DateOnly date) => $"{RandAmounts.DayMonth(date)} {date.Year}";
+}

@@ -646,3 +646,117 @@ a, .btn-link {
     border-radius: 999px;
     padding: 0.45rem 0.9rem;
 }
+
+.who-line {
+    font-family: "Segoe UI", sans-serif;
+    margin: 0 0 1rem;
+}
+
+.who-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.who-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    text-align: left;
+    background: var(--white);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+}
+
+.who-row.is-open {
+    border-color: var(--teal);
+}
+
+.who-name, .who-why, .who-detail {
+    display: block;
+}
+
+.who-name {
+    font-family: "Segoe UI", sans-serif;
+    font-weight: 650;
+}
+
+.who-why {
+    margin-top: 0.15rem;
+}
+
+.who-detail, .who-rows {
+    color: var(--ink-soft);
+    font-family: "Segoe UI", sans-serif;
+    font-size: 0.92rem;
+}
+
+.who-end {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.35rem;
+    flex: none;
+}
+
+.who-tag {
+    font-family: "Segoe UI", sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.15rem 0.55rem;
+}
+
+.who-tag-late {
+    color: var(--danger);
+    background: var(--danger-bg);
+    border-color: transparent;
+}
+
+.who-tag-stopped {
+    color: var(--ink-soft);
+}
+
+.who-tag-dropped {
+    color: var(--teal-dark);
+}
+
+.who-receipt, .who-draft {
+    margin: 0.2rem 0 0.4rem;
+}
+
+.who-open td {
+    font-weight: 650;
+}
+
+.who-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin-top: 0.8rem;
+}
+
+.who-date {
+    max-width: 11rem;
+}
+
+.who-draft-body {
+    width: 100%;
+    font-family: "Segoe UI", sans-serif;
+    margin: 0.6rem 0;
+}
+
+.who-history {
+    font-family: "Segoe UI", sans-serif;
+    color: var(--ink-soft);
+}
+
+.table-scroll {
+    overflow-x: auto;
+}
