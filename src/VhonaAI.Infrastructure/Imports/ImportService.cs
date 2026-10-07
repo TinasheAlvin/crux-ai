@@ -135,9 +135,7 @@ public sealed class ImportService : IImportAppService
         IReadOnlyDictionary<string, string> mapping,
         CancellationToken cancellationToken = default)
     {
-        var errors = job.Kind == ImportKind.Invoices
-            ? InvoiceMappingValidator.Validate(mapping)
-            : MappingValidator.Validate(mapping);
+        var errors = ImportMapping.Validate(job.Kind, mapping);
         if (errors.Count > 0)
         {
             throw new InvalidOperationException(string.Join(" ", errors));

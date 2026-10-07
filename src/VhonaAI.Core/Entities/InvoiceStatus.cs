@@ -6,5 +6,6 @@ public enum InvoiceStatus
     Open = 1,
     Paid = 2,
     Void = 3,
-    Credited = 4
+    Credited = 4,
+    Overdue = 5
 }

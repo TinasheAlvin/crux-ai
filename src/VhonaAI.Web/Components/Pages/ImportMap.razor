@@ -123,7 +123,7 @@ else
 
         busy = true;
         var mapping = columns.ToDictionary(column => column.Header, column => column.TargetField, StringComparer.OrdinalIgnoreCase);
-        errors = MappingValidator.Validate(mapping).ToList();
+        errors = ImportMapping.Validate(job.Kind, mapping).ToList();
         if (errors.Count > 0)
         {
             busy = false;

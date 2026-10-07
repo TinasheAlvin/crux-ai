@@ -15,6 +15,8 @@ html, body {
     font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
     background: var(--paper);
     color: var(--ink);
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 h1, h2, .navbar-brand, .btn, .upload-button, .org-chip, .status-pill {
@@ -58,9 +60,16 @@ a, .btn-link {
     border-radius: 999px;
 }
 
+.page,
+main {
+    min-width: 0;
+    max-width: 100%;
+}
+
 .content {
     padding-top: 1.4rem;
     max-width: 1100px;
+    min-width: 0;
 }
 
 .eyebrow {
@@ -90,6 +99,8 @@ a, .btn-link {
     border-radius: 18px;
     padding: 1.75rem;
     box-shadow: 0 10px 30px rgba(16, 42, 67, 0.04);
+    min-width: 0;
+    max-width: 100%;
 }
 
 .hero-card {
@@ -137,6 +148,21 @@ a, .btn-link {
     padding: 0.75rem 1.2rem;
 }
 
+@media (max-width: 640px) {
+    .sample-btn {
+        margin-left: 0;
+        margin-right: 0.5rem;
+    }
+
+    .upload-button {
+        max-width: 100%;
+    }
+
+    .hero-card, .panel {
+        padding: 1.1rem;
+    }
+}
+
 .banner {
     margin-top: 1rem;
     padding: 0.75rem 1rem;
@@ -154,6 +180,11 @@ a, .btn-link {
     border-collapse: collapse;
     font-family: "Segoe UI", sans-serif;
     font-size: 0.92rem;
+}
+
+.data-table th,
+.data-table td {
+    overflow-wrap: break-word;
 }
 
 .data-table th {
@@ -201,10 +232,19 @@ a, .btn-link {
 
 .table-scroll {
     overflow-x: auto;
+    max-width: 100%;
+    min-width: 0;
+}
+
+.validate-table {
+    width: 100%;
+    table-layout: fixed;
 }
 
 .validate-table input.form-control {
-    min-width: 8rem;
+    min-width: 0;
+    width: 100%;
+    padding: 0.3rem 0.4rem;
 }
 
 .is-invalid-row {
@@ -219,6 +259,45 @@ a, .btn-link {
 
 .row-id {
     font-size: 0.78rem;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    white-space: normal;
+    max-width: 100%;
+}
+
+.recent-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.2rem 0.45rem;
+    max-width: 100%;
+}
+
+.recent-table {
+    width: 100%;
+}
+
+@media (max-width: 640px) {
+    .recent-table thead {
+        display: none;
+    }
+
+    .recent-table,
+    .recent-table tbody,
+    .recent-table tr,
+    .recent-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .recent-table tr {
+        padding: 0.35rem 0 0.7rem;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .recent-table td {
+        border-bottom: 0;
+        padding: 0.2rem 0;
+    }
 }
 
 .numeric {
@@ -484,6 +563,7 @@ a, .btn-link {
     border: 1px solid var(--line);
     border-radius: 999px;
     padding: 0.15rem 0.55rem;
+    max-width: 100%;
 }
 
 .receipt-strip {

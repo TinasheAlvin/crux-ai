@@ -91,6 +91,51 @@ public class InvoiceImportTests
         }
     }
 
+    [Theory]
+    [InlineData("csv")]
+    [InlineData("xlsx")]
+    public async Task Correctly_mapped_invoice_file_confirms_and_imports(string fileKind)
+    {
+        var (service, db, _) = await CreateAsync();
+        await using (db)
+        {
+            var job = fileKind == "xlsx"
+                ? await UploadWorkbookAsync(service)
+                : await UploadCsvJobAsync(service, """
+                    Customer,Invoice Number,Invoice Date,Amount,Status,Amount Due
+                    Naledi Khumalo,INV-2295,2026-01-13,12400.00,Overdue,12400.00
+                    """, "invoices.csv");
+
+            var mapping = service.GetMapping(job, await service.LoadTableAsync(job));
+            Assert.Equal(InvoiceFields.CustomerName, mapping["Customer"]);
+            Assert.Equal(InvoiceFields.InvoiceDate, mapping["Invoice Date"]);
+            Assert.DoesNotContain(TransactionFields.Date, mapping.Values);
+            Assert.DoesNotContain(TransactionFields.Description, mapping.Values);
+
+            var confirmErrors = ImportMapping.Validate(job.Kind, mapping);
+            Assert.Empty(confirmErrors);
+
+            await service.SaveMappingAsync(job, mapping);
+            var result = await service.PersistInvoicesAsync(job, includeOnlyValid: false);
+
+            Assert.Equal(1, result.InvoiceCount);
+            var invoice = await db.Invoices.SingleAsync();
+            Assert.Equal("INV-2295", invoice.Number);
+            Assert.Equal(InvoiceStatus.Overdue, invoice.Status);
+            Assert.Equal(12400.00m, invoice.AmountDue);
+        }
+    }
+
+    [Fact]
+    public void Overdue_status_is_kept_instead_of_collapsed_to_open()
+    {
+        Assert.True(InvoiceStatusParser.TryParse("Overdue", out var overdue));
+        Assert.Equal(InvoiceStatus.Overdue, overdue);
+        Assert.NotEqual(InvoiceStatus.Open, overdue);
+        Assert.True(InvoiceStatusParser.TryParse("Open", out var open));
+        Assert.Equal(InvoiceStatus.Open, open);
+    }
+
     [Fact]
     public async Task Excel_import_uses_the_same_mapping_flow()
     {
@@ -245,11 +290,41 @@ public class InvoiceImportTests
 
     private static async Task<ImportJob> UploadAsync(ImportService service, string csv, string fileName)
     {
-        await using var upload = new MemoryStream(Encoding.UTF8.GetBytes(csv));
-        var job = await service.CreateFromUploadAsync(upload, fileName, upload.Length, ImportKind.Invoices);
+        var job = await UploadCsvJobAsync(service, csv, fileName);
         var mapping = service.GetMapping(job, await service.LoadTableAsync(job));
         await service.SaveMappingAsync(job, mapping);
         return job;
+    }
+
+    private static async Task<ImportJob> UploadCsvJobAsync(ImportService service, string csv, string fileName)
+    {
+        await using var upload = new MemoryStream(Encoding.UTF8.GetBytes(csv));
+        return await service.CreateFromUploadAsync(upload, fileName, upload.Length, ImportKind.Invoices);
+    }
+
+    private static async Task<ImportJob> UploadWorkbookAsync(ImportService service)
+    {
+        await using var workbookStream = new MemoryStream();
+        using (var workbook = new XLWorkbook())
+        {
+            var sheet = workbook.AddWorksheet("Debtors");
+            sheet.Cell(1, 1).Value = "Customer";
+            sheet.Cell(1, 2).Value = "Invoice Number";
+            sheet.Cell(1, 3).Value = "Invoice Date";
+            sheet.Cell(1, 4).Value = "Amount";
+            sheet.Cell(1, 5).Value = "Status";
+            sheet.Cell(1, 6).Value = "Amount Due";
+            sheet.Cell(2, 1).Value = "Naledi Khumalo";
+            sheet.Cell(2, 2).Value = "INV-2295";
+            sheet.Cell(2, 3).Value = "2026-01-13";
+            sheet.Cell(2, 4).Value = "12400.00";
+            sheet.Cell(2, 5).Value = "Overdue";
+            sheet.Cell(2, 6).Value = "12400.00";
+            workbook.SaveAs(workbookStream);
+        }
+
+        workbookStream.Position = 0;
+        return await service.CreateFromUploadAsync(workbookStream, "invoices.xlsx", workbookStream.Length, ImportKind.Invoices);
     }
 
     private static async Task<(ImportService Service, VhonaDbContext Db, Guid OrgId)> CreateAsync()
