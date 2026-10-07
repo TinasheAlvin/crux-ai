@@ -124,7 +124,8 @@ else
             <h2>Recent imports</h2>
             <p>@transactionCount transaction@(transactionCount == 1 ? "" : "s") persisted for this organisation.</p>
         </header>
-        <table class="data-table">
+        <div class="table-scroll">
+        <table class="data-table recent-table">
             <thead>
                 <tr>
                     <th>File</th>
@@ -140,13 +141,11 @@ else
                         <td>@job.OriginalFileName</td>
                         <td><span class="status-pill">@job.Status</span></td>
                         <td>@(job.ImportedRowCount?.ToString() ?? "—")</td>
-                        <td>
+                        <td class="recent-links">
                             @if (job.Status == ImportStatus.Imported)
                             {
                                 <a href="/health">Health KPIs</a>
-                                <span> · </span>
                                 <a href="@($"/imports/{job.Id}")">RowIds</a>
-                                <span> · </span>
                                 <a href="@($"/imports/{job.Id}/map")">Remap</a>
                             }
                             else if (job.Status == ImportStatus.Mapped || job.Status == ImportStatus.Validated)
@@ -162,6 +161,7 @@ else
                 }
             </tbody>
         </table>
+        </div>
     </section>
 }
 

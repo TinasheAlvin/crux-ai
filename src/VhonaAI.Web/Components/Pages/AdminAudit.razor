@@ -25,7 +25,7 @@
             @foreach (var row in rows)
             {
                 <tr>
-                    <td>@row.At.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@JohannesburgTime.Format(row.At, "yyyy-MM-dd HH:mm")</td>
                     <td>@row.ActorEmail</td>
                     <td>@row.Action</td>
                     <td>@(row.OrganizationId?.ToString() ?? "—")</td>

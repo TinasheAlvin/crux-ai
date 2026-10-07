@@ -18,10 +18,13 @@ public static class InvoiceStatusParser
             case "draft":
                 status = InvoiceStatus.Draft;
                 return true;
+            case "overdue":
+            case "past due":
+                status = InvoiceStatus.Overdue;
+                return true;
             case "open":
             case "unpaid":
             case "outstanding":
-            case "overdue":
             case "partial":
             case "part paid":
             case "partially paid":

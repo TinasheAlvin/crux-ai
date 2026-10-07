@@ -24,7 +24,7 @@
             @foreach (var evt in events)
             {
                 <tr>
-                    <td>@evt.Timestamp.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@JohannesburgTime.Format(evt.Timestamp, "yyyy-MM-dd HH:mm")</td>
                     <td>@evt.Name</td>
                     <td><code>@evt.OrgId</code></td>
                     <td><code>@evt.UserId</code></td>

@@ -36,7 +36,7 @@
                     <td>@business.MemberCount</td>
                     <td>@business.InvoiceCount</td>
                     <td>@business.TransactionCount</td>
-                    <td>@(business.LastImportAt?.ToString("yyyy-MM-dd") ?? "—")</td>
+                    <td>@JohannesburgTime.Format(business.LastImportAt, "yyyy-MM-dd")</td>
                     <td>@(business.IsDisabled ? "Disabled" : "Active")</td>
                 </tr>
             }

@@ -79,7 +79,7 @@ public static class InvoiceRowValidator
         {
             if (!InvoiceStatusParser.TryParse(statusText, out var parsedStatus))
             {
-                errors[InvoiceFields.Status] = "Status must be draft, open, paid, void, or credited.";
+                errors[InvoiceFields.Status] = "Status must be draft, open, overdue, paid, void, or credited.";
             }
             else
             {

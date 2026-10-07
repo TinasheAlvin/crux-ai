@@ -14,7 +14,7 @@
     else
     {
         <header class="panel-header">
-            <p class="eyebrow">@(detail.IsDisabled ? "Disabled" : "Active") · created @detail.CreatedAt.ToString("yyyy-MM-dd")</p>
+            <p class="eyebrow">@(detail.IsDisabled ? "Disabled" : "Active") · created @JohannesburgTime.Format(detail.CreatedAt, "yyyy-MM-dd")</p>
             <h1>@detail.Name</h1>
             <p class="lede">
                 @detail.CustomerCount customers · @detail.InvoiceCount invoices · @detail.TransactionCount transactions
@@ -76,7 +76,7 @@
                     {
                         <tr>
                             <td>@invite.Email @(invite.IsRevoked ? "(revoked)" : "")</td>
-                            <td>@invite.ExpiresAt.ToString("yyyy-MM-dd")</td>
+                            <td>@JohannesburgTime.Format(invite.ExpiresAt, "yyyy-MM-dd")</td>
                             <td><code>/onboarding?token=@invite.Token</code></td>
                             <td>
                                 <button class="btn btn-link" type="button" @onclick="() => ResendAsync(invite.Id)">New link</button>
@@ -92,7 +92,7 @@
         <ul>
             @foreach (var source in detail.DataSources)
             {
-                <li>@source.Name · @source.Kind · @source.CreatedAt.ToString("yyyy-MM-dd")</li>
+                <li>@source.Name · @source.Kind · @JohannesburgTime.Format(source.CreatedAt, "yyyy-MM-dd")</li>
             }
         </ul>
 
