@@ -85,6 +85,7 @@
 }
 .wtc .who { font-weight: 700; font-size: 1.05rem; line-height: 1.25; }
 .wtc .why { color: rgba(28, 25, 23, 0.75); font-size: 0.95rem; line-height: 1.35; margin-top: 0.1rem; }
+.wtc .detail { color: var(--muted); font-size: 0.86rem; line-height: 1.35; margin-top: 0.2rem; }
 .wtc .tag {
   font-size: 0.78rem;
   font-weight: 700;
@@ -110,6 +111,15 @@
   gap: 1.25rem;
   background: #FCFAF6;
 }
+.wtc .expand.solo { grid-template-columns: minmax(0, 1fr); }
+.wtc .table-scroll { overflow-x: auto; max-width: 100%; }
+.wtc .inv.months { min-width: 36rem; width: 100%; }
+.wtc .inv.months th:not(:first-child),
+.wtc .inv.months td:not(:first-child) { text-align: right; white-space: nowrap; }
+.wtc .inv.months th:first-child,
+.wtc .inv.months td:first-child { text-align: left; }
+.wtc .inv tr.gone td { background: var(--cream); }
+.wtc .inv td.none { color: var(--muted); font-style: italic; font-weight: 400; }
 .wtc .card {
   background: var(--paper);
   border: 1px solid var(--line);
