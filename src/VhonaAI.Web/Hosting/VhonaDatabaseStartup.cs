@@ -20,14 +20,13 @@ public static class VhonaDatabaseStartup
         var db = scope.ServiceProvider.GetRequiredService<VhonaDbContext>();
         try
         {
-            await db.Database.EnsureCreatedAsync(cancellationToken);
-            await SqliteSchemaPatches.ApplyAsync(db, cancellationToken);
+            await VhonaDatabaseMigrator.ApplyAsync(db, cancellationToken);
         }
         catch (Exception ex) when (HostingConfiguration.IsAzureSql(configuration) && ex is not InvalidOperationException)
         {
             throw new InvalidOperationException(
-                "Could not initialize Azure SQL. Check ConnectionStrings:AzureSql, the AllowAzureServices firewall rule, " +
-                "and that the database exists. Schema is created on first startup with EF EnsureCreated.",
+                "Could not migrate Azure SQL. Check ConnectionStrings:AzureSql, the AllowAzureServices firewall rule, " +
+                "and that the database exists. EF migrations run on startup and keep existing rows.",
                 ex);
         }
     }

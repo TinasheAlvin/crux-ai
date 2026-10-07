@@ -608,3 +608,24 @@ a, .btn-link {
     color: var(--ink-soft);
     margin: 0 0 0.55rem;
 }
+
+.stack-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    max-width: 28rem;
+    margin: 0 0 1.4rem;
+}
+
+.field-label {
+    font-family: "Segoe UI", sans-serif;
+    font-size: 0.85rem;
+}
+
+.invite-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.75rem;
+}

@@ -1,6 +1,6 @@
 namespace VhonaAI.Core.Entities;
 
-public sealed class WhyAnswer
+public sealed class WhyAnswer : IOrganizationOwned
 {
     public Guid Id { get; set; }
     public Guid OrganizationId { get; set; }

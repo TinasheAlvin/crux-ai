@@ -20,6 +20,7 @@ public static class ImportRowValidator
         var referenceHeader = MappingValidator.HeaderFor(mapping, TransactionFields.Reference);
         var counterpartyHeader = MappingValidator.HeaderFor(mapping, TransactionFields.Counterparty);
         var balanceHeader = MappingValidator.HeaderFor(mapping, TransactionFields.Balance);
+        var bookedDateHeader = MappingValidator.HeaderFor(mapping, TransactionFields.BookedDate);
 
         var results = new List<ValidatedImportRow>(table.Rows.Count);
 
@@ -32,6 +33,7 @@ public static class ImportRowValidator
             var debitRaw = Resolve(row, debitHeader, TransactionFields.Debit, rowCorrections);
             var creditRaw = Resolve(row, creditHeader, TransactionFields.Credit, rowCorrections);
             var balanceRaw = Resolve(row, balanceHeader, TransactionFields.Balance, rowCorrections);
+            var bookedDateRaw = Resolve(row, bookedDateHeader, TransactionFields.BookedDate, rowCorrections);
 
             var errors = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             DateOnly? date = null;
@@ -85,6 +87,19 @@ public static class ImportRowValidator
                 errors[TransactionFields.Amount] = "Amount must be a number, e.g. -450.00 or R 1,250.00.";
             }
 
+            DateOnly? bookedDate = null;
+            if (!string.IsNullOrWhiteSpace(bookedDateRaw))
+            {
+                if (!ValueParsers.TryParseDate(bookedDateRaw, out var parsedBookedDate))
+                {
+                    errors[TransactionFields.BookedDate] = "Use a date such as 2026-03-16 or 16/03/2026.";
+                }
+                else
+                {
+                    bookedDate = parsedBookedDate;
+                }
+            }
+
             decimal? balance = null;
             if (!string.IsNullOrWhiteSpace(balanceRaw))
             {
@@ -110,7 +125,8 @@ public static class ImportRowValidator
                     Category = EmptyToNull(Resolve(row, categoryHeader, TransactionFields.Category, rowCorrections)),
                     Reference = EmptyToNull(Resolve(row, referenceHeader, TransactionFields.Reference, rowCorrections)),
                     Counterparty = EmptyToNull(Resolve(row, counterpartyHeader, TransactionFields.Counterparty, rowCorrections)),
-                    Balance = balance
+                    Balance = balance,
+                    BookedDate = bookedDate
                 };
             }
 
@@ -127,7 +143,8 @@ public static class ImportRowValidator
                     [TransactionFields.Category] = Resolve(row, categoryHeader, TransactionFields.Category, rowCorrections),
                     [TransactionFields.Reference] = Resolve(row, referenceHeader, TransactionFields.Reference, rowCorrections),
                     [TransactionFields.Counterparty] = Resolve(row, counterpartyHeader, TransactionFields.Counterparty, rowCorrections),
-                    [TransactionFields.Balance] = balanceRaw
+                    [TransactionFields.Balance] = balanceRaw,
+                    [TransactionFields.BookedDate] = bookedDateRaw
                 },
                 DisplayAmount = string.IsNullOrEmpty(amountHeader)
                     ? FirstNonEmpty(amountRaw, debitRaw, creditRaw)
@@ -198,4 +215,5 @@ public sealed class ParsedTransaction
     public string? Reference { get; init; }
     public string? Counterparty { get; init; }
     public decimal? Balance { get; init; }
+    public DateOnly? BookedDate { get; init; }
 }

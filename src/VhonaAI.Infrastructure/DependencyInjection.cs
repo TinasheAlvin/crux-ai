@@ -1,12 +1,20 @@
+using VhonaAI.Application.Brief;
+using VhonaAI.Application.Business;
+using VhonaAI.Application.Calling;
+using VhonaAI.Application.Health;
+using VhonaAI.Application.Imports;
+using VhonaAI.Application.Why;
 using VhonaAI.Core.Csv;
 using VhonaAI.Core.Storage;
 using VhonaAI.Core.Time;
 using VhonaAI.Core.Why;
 using VhonaAI.Infrastructure.Brief;
+using VhonaAI.Infrastructure.Calling;
 using VhonaAI.Infrastructure.Csv;
 using VhonaAI.Infrastructure.Data;
 using VhonaAI.Infrastructure.Health;
 using VhonaAI.Infrastructure.Hosting;
+using VhonaAI.Infrastructure.Identity;
 using VhonaAI.Infrastructure.Imports;
 using VhonaAI.Infrastructure.Storage;
 using VhonaAI.Infrastructure.Why;
@@ -52,7 +60,7 @@ public static class DependencyInjection
                     }
                 }
 
-                options.UseSqlite(sqlite);
+                options.UseVhonaSqlite(sqlite);
             });
         }
 
@@ -80,9 +88,17 @@ public static class DependencyInjection
         services.AddSingleton<IClock, SystemClock>();
         services.AddVhonaAnalytics(configuration);
         services.AddScoped<ImportService>();
+        services.AddScoped<IImportAppService>(sp => sp.GetRequiredService<ImportService>());
         services.AddScoped<HealthKpiService>();
+        services.AddScoped<IHealthKpiAppService>(sp => sp.GetRequiredService<HealthKpiService>());
         services.AddScoped<WhyService>();
+        services.AddScoped<IWhyAppService>(sp => sp.GetRequiredService<WhyService>());
         services.AddScoped<MorningBriefService>();
+        services.AddScoped<IMorningBriefAppService>(sp => sp.GetRequiredService<MorningBriefService>());
+        services.AddScoped<BusinessService>();
+        services.AddScoped<IBusinessAppService>(sp => sp.GetRequiredService<BusinessService>());
+        services.AddScoped<CallSettingsService>();
+        services.AddScoped<ICallSettingsAppService>(sp => sp.GetRequiredService<CallSettingsService>());
         services.AddScoped<OrgBootstrapper>();
 
         return services;

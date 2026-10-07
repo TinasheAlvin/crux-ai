@@ -1,9 +1,9 @@
 @page "/why"
 @page "/why/{MetricName}"
 @attribute [Authorize]
-@inject WhyService WhyAnswers
-@inject HealthKpiService HealthKpis
-@inject MorningBriefService Briefs
+@inject IWhyAppService WhyAnswers
+@inject IHealthKpiAppService HealthKpis
+@inject IMorningBriefAppService Briefs
 @inject ICurrentUser CurrentUser
 
 <PageTitle>Why · Vhona AI</PageTitle>

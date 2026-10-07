@@ -1,6 +1,6 @@
 namespace VhonaAI.Core.Entities;
 
-public sealed class Membership
+public sealed class Membership : IOrganizationOwned
 {
     public Guid Id { get; set; }
     public Guid OrganizationId { get; set; }

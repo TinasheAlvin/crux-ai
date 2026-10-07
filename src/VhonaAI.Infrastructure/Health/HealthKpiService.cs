@@ -1,4 +1,5 @@
 using System.Text.Json;
+using VhonaAI.Application.Health;
 using VhonaAI.Core.Health;
 using VhonaAI.Core.Identity;
 using VhonaAI.Core.Mapping;
@@ -7,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace VhonaAI.Infrastructure.Health;
 
-public sealed class HealthKpiService
+public sealed class HealthKpiService : IHealthKpiAppService
 {
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 

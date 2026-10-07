@@ -1,8 +1,8 @@
 ﻿@page "/"
 @attribute [Authorize]
-@inject ImportService Imports
-@inject HealthKpiService HealthKpis
-@inject MorningBriefService Briefs
+@inject IImportAppService Imports
+@inject IHealthKpiAppService HealthKpis
+@inject IMorningBriefAppService Briefs
 @inject NavigationManager Navigation
 @inject ICurrentUser CurrentUser
 @inject IWebHostEnvironment HostEnvironment
@@ -20,8 +20,12 @@
             <p>Mapping can be remapped at any time without losing persisted RowIds on previous imports.</p>
         </header>
         <label class="upload-button @(busy ? "is-disabled" : null)">
-            <InputFile OnChange="OnFileSelected" accept=".csv,text/csv" disabled="@busy" />
-            @(busy ? "Uploading…" : "Upload CSV")
+            <InputFile OnChange="OnTransactionsSelected" accept=".csv,.xlsx,text/csv" disabled="@busy" />
+            @(busy ? "Uploading…" : "Upload transactions")
+        </label>
+        <label class="upload-button @(busy ? "is-disabled" : null)">
+            <InputFile OnChange="OnInvoicesSelected" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" disabled="@busy" />
+            @(busy ? "Uploading…" : "Upload invoices")
         </label>
         <button type="button" class="btn btn-outline sample-btn" @onclick="() => UseSampleAsync(false)" disabled="@busy">
             Use sample CSV
@@ -49,8 +53,12 @@ else if (snapshot?.HasData == true)
             <p>Mapping can be remapped at any time without losing persisted RowIds on previous imports.</p>
         </header>
         <label class="upload-button @(busy ? "is-disabled" : null)">
-            <InputFile OnChange="OnFileSelected" accept=".csv,text/csv" disabled="@busy" />
-            @(busy ? "Uploading…" : "Upload CSV")
+            <InputFile OnChange="OnTransactionsSelected" accept=".csv,.xlsx,text/csv" disabled="@busy" />
+            @(busy ? "Uploading…" : "Upload transactions")
+        </label>
+        <label class="upload-button @(busy ? "is-disabled" : null)">
+            <InputFile OnChange="OnInvoicesSelected" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" disabled="@busy" />
+            @(busy ? "Uploading…" : "Upload invoices")
         </label>
         <button type="button" class="btn btn-outline sample-btn" @onclick="() => UseSampleAsync(false)" disabled="@busy">
             Use sample CSV
@@ -73,13 +81,17 @@ else
         <p class="eyebrow">@CurrentUser.OrganizationName</p>
         <h1>Start with a CSV — then ask why with a receipt</h1>
         <p class="lede">
-            Upload a bank or bookkeeping export. Map columns, persist RowIds, see health KPIs,
-            then tap a card to get a cited why. After a trusted why, opt in for a morning brief.
+            Upload a bank export or an invoice list (CSV or Excel). Map columns, persist RowIds,
+            see health KPIs, then tap a card to get a cited why. After a trusted why, opt in for a morning brief.
         </p>
 
         <label class="upload-button @(busy ? "is-disabled" : null)">
-            <InputFile OnChange="OnFileSelected" accept=".csv,text/csv" disabled="@busy" />
-            @(busy ? "Uploading…" : "Upload CSV")
+            <InputFile OnChange="OnTransactionsSelected" accept=".csv,.xlsx,text/csv" disabled="@busy" />
+            @(busy ? "Uploading…" : "Upload transactions")
+        </label>
+        <label class="upload-button @(busy ? "is-disabled" : null)">
+            <InputFile OnChange="OnInvoicesSelected" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" disabled="@busy" />
+            @(busy ? "Uploading…" : "Upload invoices")
         </label>
         <button type="button" class="btn btn-outline sample-btn" @onclick="() => UseSampleAsync(false)" disabled="@busy">
             Use sample CSV
@@ -175,7 +187,13 @@ else
         }
     }
 
-    private async Task OnFileSelected(InputFileChangeEventArgs args)
+    private Task OnTransactionsSelected(InputFileChangeEventArgs args) =>
+        UploadAsync(args, ImportKind.Transactions);
+
+    private Task OnInvoicesSelected(InputFileChangeEventArgs args) =>
+        UploadAsync(args, ImportKind.Invoices);
+
+    private async Task UploadAsync(InputFileChangeEventArgs args, ImportKind kind)
     {
         busy = true;
         error = null;
@@ -185,7 +203,7 @@ else
             await using var buffer = new MemoryStream();
             await upload.CopyToAsync(buffer);
             buffer.Position = 0;
-            var job = await Imports.CreateFromUploadAsync(buffer, args.File.Name, buffer.Length);
+            var job = await Imports.CreateFromUploadAsync(buffer, args.File.Name, buffer.Length, kind);
             Navigation.NavigateTo($"/imports/{job.Id}/map");
         }
         catch (Exception ex)

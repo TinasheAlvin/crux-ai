@@ -26,6 +26,17 @@ public static class EntraSignInClaims
         return new ExternalSignInIdentity(externalId, email, displayName);
     }
 
+    public static void ApplyUser(ClaimsIdentity identity, Guid userId, string email, string displayName)
+    {
+        ArgumentNullException.ThrowIfNull(identity);
+        Replace(identity, "vhona_user_id", userId.ToString());
+        Replace(identity, ClaimTypes.Email, email);
+        Replace(identity, ClaimTypes.Name, displayName);
+        Remove(identity, "org_id");
+        Remove(identity, "org_name");
+        Remove(identity, "org_role");
+    }
+
     public static void ApplyTenant(
         ClaimsIdentity identity,
         Guid userId,
@@ -93,6 +104,14 @@ public static class EntraSignInClaims
         }
 
         return trimmed.Contains('@') ? trimmed : null;
+    }
+
+    private static void Remove(ClaimsIdentity identity, string type)
+    {
+        foreach (var claim in identity.FindAll(type).ToList())
+        {
+            identity.RemoveClaim(claim);
+        }
     }
 
     private static void Replace(ClaimsIdentity identity, string type, string value)

@@ -1,7 +1,7 @@
 namespace VhonaAI.Core.Entities;
 
 /// <summary>Reusable org-level header mapping, applied on the next upload when headers match.</summary>
-public sealed class ColumnMappingProfile
+public sealed class ColumnMappingProfile : IOrganizationOwned
 {
     public Guid Id { get; set; }
     public Guid OrganizationId { get; set; }

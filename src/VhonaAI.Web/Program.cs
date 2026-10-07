@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Security.Claims;
 using VhonaAI.Core.Analytics;
 using VhonaAI.Core.Identity;
 using VhonaAI.Infrastructure;
@@ -6,6 +7,7 @@ using VhonaAI.Infrastructure.Hosting;
 using VhonaAI.Web.Components;
 using VhonaAI.Web.Hosting;
 using VhonaAI.Web.Identity;
+using Microsoft.AspNetCore.Authentication;
 
 var za = CultureInfo.GetCultureInfo("en-ZA");
 CultureInfo.DefaultThreadCurrentCulture = za;
@@ -25,6 +27,7 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<ICurrentUser, ClaimsCurrentUser>();
 builder.AddVhonaAuthentication();
 builder.Services.AddAuthorization();
+builder.Services.AddScoped<IClaimsTransformation, TenantClaimsTransformation>();
 builder.Services.AddVhonaInfrastructure(builder.Configuration);
 
 var app = builder.Build();
@@ -51,6 +54,18 @@ app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
+app.Use(async (context, next) =>
+{
+    if (context.User.Identity?.IsAuthenticated == true
+        && !Guid.TryParse(context.User.FindFirstValue("org_id"), out _)
+        && !AllowsMissingOrganization(context.Request.Path))
+    {
+        context.Response.Redirect("/onboarding");
+        return;
+    }
+
+    await next();
+});
 
 app.MapGet("/healthz", (IConfiguration configuration, IWebHostEnvironment environment) =>
 {
@@ -72,9 +87,16 @@ app.MapGet("/healthz", (IConfiguration configuration, IWebHostEnvironment enviro
 }).AllowAnonymous();
 
 app.MapVhonaAuthEndpoints();
-app.MapGet("/internal/partner-events", (IEventLog log) =>
+app.MapBusinessAuthEndpoints();
+app.MapGet("/internal/partner-events", (IEventLog log, ClaimsPrincipal user) =>
 {
-    var events = log.Read();
+    var isAdmin = user.HasClaim("internal_admin", "true");
+    Guid? organizationId = Guid.TryParse(user.FindFirstValue("org_id"), out var parsed) ? parsed : null;
+    if (!PartnerEventAccess.TryFilter(log.Read(), organizationId, isAdmin, out var events, out var denial))
+    {
+        return Results.Json(new { error = denial }, statusCode: StatusCodes.Status403Forbidden);
+    }
+
     return Results.Json(new
     {
         count = events.Count,
@@ -92,3 +114,23 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.Run();
+
+static bool AllowsMissingOrganization(PathString path)
+{
+    var value = path.Value ?? string.Empty;
+    if (value.StartsWith("/onboarding", StringComparison.OrdinalIgnoreCase)
+        || value.StartsWith("/join", StringComparison.OrdinalIgnoreCase)
+        || value.StartsWith("/auth", StringComparison.OrdinalIgnoreCase)
+        || value.StartsWith("/login", StringComparison.OrdinalIgnoreCase)
+        || value.StartsWith("/healthz", StringComparison.OrdinalIgnoreCase)
+        || value.StartsWith("/signin-oidc", StringComparison.OrdinalIgnoreCase)
+        || value.StartsWith("/signout-callback-oidc", StringComparison.OrdinalIgnoreCase)
+        || value.StartsWith("/_framework", StringComparison.OrdinalIgnoreCase)
+        || value.StartsWith("/_blazor", StringComparison.OrdinalIgnoreCase)
+        || value.StartsWith("/_content", StringComparison.OrdinalIgnoreCase))
+    {
+        return true;
+    }
+
+    return Path.HasExtension(value);
+}

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using VhonaAI.Application.Brief;
 using VhonaAI.Core.Analytics;
 using VhonaAI.Core.Brief;
 using VhonaAI.Core.Entities;
@@ -17,7 +18,7 @@ namespace VhonaAI.Infrastructure.Brief;
 /// On-demand morning brief generation. An Azure Function timer may call
 /// <see cref="EnsureTodaysBriefAsync"/>; local demo does not need Functions.
 /// </summary>
-public sealed class MorningBriefService
+public sealed class MorningBriefService : IMorningBriefAppService
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {

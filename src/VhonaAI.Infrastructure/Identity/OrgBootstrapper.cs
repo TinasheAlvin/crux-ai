@@ -1,4 +1,5 @@
 using VhonaAI.Core.Entities;
+using VhonaAI.Core.Identity;
 using VhonaAI.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -70,13 +71,83 @@ public sealed class OrgBootstrapper
             displayName = email;
         }
 
-        if (organizationName.Length == 0)
+        displayName = TrimTo(displayName, 200);
+        organizationName = TrimTo(organizationName, 200);
+
+        var user = await UpsertExternalUserAsync(externalId, email, displayName, cancellationToken);
+        var (organization, membership) = await EnsureOwnerMembershipAsync(user, organizationName, cancellationToken);
+        await _db.SaveChangesAsync(cancellationToken);
+        return (user, organization, membership);
+    }
+
+    private async Task<(Organization Organization, Membership Membership)> EnsureOwnerMembershipAsync(
+        AppUser user,
+        string organizationName,
+        CancellationToken cancellationToken)
+    {
+        var membership = await _db.Memberships
+            .IgnoreQueryFilters()
+            .Include(m => m.Organization)
+            .FirstOrDefaultAsync(m => m.UserId == user.Id, cancellationToken);
+
+        Organization organization;
+        if (membership is null)
         {
-            organizationName = "Harbour Street Studio";
+            var businessName = BusinessNameRules.Normalize(organizationName);
+            organization = new Organization
+            {
+                Id = Guid.NewGuid(),
+                Name = businessName,
+                CreatedAt = DateTime.UtcNow
+            };
+            membership = new Membership
+            {
+                Id = Guid.NewGuid(),
+                OrganizationId = organization.Id,
+                UserId = user.Id,
+                Role = MembershipRole.Owner,
+                CreatedAt = DateTime.UtcNow
+            };
+            _db.Organizations.Add(organization);
+            _db.Memberships.Add(membership);
+        }
+        else
+        {
+            organization = membership.Organization;
+        }
+
+        return (organization, membership);
+    }
+
+    /// <summary>
+    /// Creates or updates the person from an Entra sign-in. Does not create or rename a business.
+    /// </summary>
+    public async Task<AppUser> UpsertExternalUserAsync(
+        string externalId,
+        string email,
+        string displayName,
+        CancellationToken cancellationToken = default)
+    {
+        externalId = TrimTo((externalId ?? string.Empty).Trim(), 128);
+        email = TrimTo((email ?? string.Empty).Trim(), 320);
+        displayName = (displayName ?? string.Empty).Trim();
+        if (externalId.Length == 0)
+        {
+            throw new InvalidOperationException("Entra sign-in did not include an object id (oid).");
+        }
+
+        if (email.Length == 0 || !email.Contains('@'))
+        {
+            throw new InvalidOperationException(
+                "Entra sign-in did not include an email claim. Add the email optional claim on the app registration.");
+        }
+
+        if (displayName.Length == 0)
+        {
+            displayName = email;
         }
 
         displayName = TrimTo(displayName, 200);
-        organizationName = TrimTo(organizationName, 200);
 
         var user = await _db.Users.FirstOrDefaultAsync(u => u.ExternalId == externalId, cancellationToken);
         if (user is null)
@@ -113,48 +184,14 @@ public sealed class OrgBootstrapper
             user.DisplayName = displayName;
         }
 
-        var (organization, membership) = await EnsureOwnerMembershipAsync(user, organizationName, cancellationToken);
-        await _db.SaveChangesAsync(cancellationToken);
-        return (user, organization, membership);
+        return user;
     }
 
-    private async Task<(Organization Organization, Membership Membership)> EnsureOwnerMembershipAsync(
-        AppUser user,
-        string organizationName,
-        CancellationToken cancellationToken)
-    {
-        var membership = await _db.Memberships
-            .Include(m => m.Organization)
-            .FirstOrDefaultAsync(m => m.UserId == user.Id, cancellationToken);
-
-        Organization organization;
-        if (membership is null)
-        {
-            organization = new Organization
-            {
-                Id = Guid.NewGuid(),
-                Name = organizationName,
-                CreatedAt = DateTime.UtcNow
-            };
-            membership = new Membership
-            {
-                Id = Guid.NewGuid(),
-                OrganizationId = organization.Id,
-                UserId = user.Id,
-                Role = MembershipRole.Owner,
-                CreatedAt = DateTime.UtcNow
-            };
-            _db.Organizations.Add(organization);
-            _db.Memberships.Add(membership);
-        }
-        else
-        {
-            organization = membership.Organization;
-            organization.Name = organizationName;
-        }
-
-        return (organization, membership);
-    }
+    public Task<Membership?> FindMembershipAsync(Guid userId, CancellationToken cancellationToken = default) =>
+        _db.Memberships
+            .IgnoreQueryFilters()
+            .Include(membership => membership.Organization)
+            .FirstOrDefaultAsync(membership => membership.UserId == userId, cancellationToken);
 
     private static string TrimTo(string value, int max) =>
         value.Length <= max ? value : value[..max];

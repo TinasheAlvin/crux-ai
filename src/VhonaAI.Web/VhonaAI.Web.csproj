@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\VhonaAI.Core\VhonaAI.Core.csproj" />
+    <ProjectReference Include="..\VhonaAI.Application\VhonaAI.Application.csproj" />
     <ProjectReference Include="..\VhonaAI.Infrastructure\VhonaAI.Infrastructure.csproj" />
   </ItemGroup>
 

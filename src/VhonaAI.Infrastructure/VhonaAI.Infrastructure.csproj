@@ -2,10 +2,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\VhonaAI.Core\VhonaAI.Core.csproj" />
+    <ProjectReference Include="..\VhonaAI.Application\VhonaAI.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Azure.Storage.Blobs" Version="12.25.1" />
+    <PackageReference Include="ClosedXML" Version="0.104.2" />
     <PackageReference Include="CsvHelper" Version="33.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.21">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

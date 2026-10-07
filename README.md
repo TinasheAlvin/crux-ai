@@ -34,7 +34,8 @@ Hosted demo, when those settings are switched (see [Host on Azure](#host-on-azur
 ```
 src/VhonaAI.sln
 src/VhonaAI.Core/              Domain, mapping, validation, health KPI calculator, why verifier, brief composer, analytics contracts
-src/VhonaAI.Infrastructure/    EF Core, CSV reader, file storage, import + health + why + morning brief + event log
+src/VhonaAI.Application/       Service interfaces the Blazor UI calls (a later HTTP API and MCP server can reuse them)
+src/VhonaAI.Infrastructure/    EF Core, CSV and Excel readers, file storage, import + health + why + morning brief + event log
 src/VhonaAI.Web/               Blazor UI + demo auth + partner dump endpoint
 src/VhonaAI.Tests/
 testdata/sample-transactions.csv
@@ -55,9 +56,7 @@ dotnet run --project src/VhonaAI.Web --launch-profile http
 
 Open http://localhost:5028
 
-The first run creates `src/VhonaAI.Web/App_Data/vhonaai.db` and `src/VhonaAI.Web/App_Data/uploads/` (gitignored).
-
-If you already ran an earlier slice, delete `src/VhonaAI.Web/App_Data/vhonaai.db` so SQLite picks up Why / morning-brief tables (or let the startup patch create those tables).
+The first run creates `src/VhonaAI.Web/App_Data/vhonaai.db` and `src/VhonaAI.Web/App_Data/uploads/` (gitignored). Startup applies EF Core migrations. A database left by the old build-schema-on-first-start path is stamped with the baseline migration and kept; only later migrations run. Delete `vhonaai.db` if you want an empty local file.
 
 ### Demo path (CSV map → health KPIs → receipted why → morning brief)
 
@@ -132,7 +131,7 @@ c=collections.Counter(json.loads(l)['name'] for l in p.read_text().splitlines() 
 print('\n'.join(f'{n:4} {k}' for k,n in c.most_common()))"
 ```
 
-While signed in, `GET http://localhost:5028/internal/partner-events` returns the same events as JSON.
+While signed in, `GET http://localhost:5028/internal/partner-events` returns JSON for **that business only**. A signed-in person with no business gets 403. Emails listed in `Auth:InternalAdminEmails` see every business.
 
 If you set `Analytics:Sink` to `Sqlite`:
 
@@ -164,7 +163,8 @@ Committed files contain **placeholders only**. Do not put real connection string
 | `Storage:AzureBlob:ContainerName` | `csv-uploads` | `csv-uploads` |
 | `Storage:DataProtection:ContainerName` | `vhona-keys` | `vhona-keys` (auth keys, only when storage is Azure Blob) |
 | `Auth:Provider` | `Demo` | `EntraExternalId` for the timed path. `Demo` still works on the host if Entra is not filled in. |
-| `Auth:DefaultOrganizationName` | falls back to `DemoAuth:OrganizationName` | `Harbour Street Studio` |
+| `Auth:DefaultOrganizationName` | demo-owner fallback only | `Harbour Street Studio`. Entra sign-in does not use it. |
+| `Auth:InternalAdminEmails` | empty | comma-separated emails that may read every business's partner events |
 | `Auth:EntraExternalId:*` | placeholders | App Service settings. `ClientSecret` is a secret. |
 | `DemoAuth:*` | Harbour Street Studio owner | unused once Entra is the provider |
 | `AzureOpenAI:Endpoint` | placeholder / empty | user-secrets or App Service setting |
@@ -230,7 +230,8 @@ Flip providers without editing the template by changing App Service settings (th
 | `Auth__EntraExternalId__TenantId` | directory (tenant) id |
 | `Auth__EntraExternalId__ClientId` | app registration client id |
 | `Auth__EntraExternalId__ClientSecret` | client secret |
-| `Auth__DefaultOrganizationName` | `Harbour Street Studio` |
+| `Auth__DefaultOrganizationName` | demo-owner name only; Entra users name their own business |
+| `Auth__InternalAdminEmails` | optional; partner-event access across businesses |
 
 Empty, `YOUR_*`, and `<TODO-...>` values are rejected at startup when that provider is selected. A literal `@Microsoft.KeyVault(...)` value means the reference was not resolved: grant the app identity secret **get**, then restart.
 
@@ -325,19 +326,19 @@ Cold sample CSV → first trusted receipted why is meant to stay within five min
 6. **Client secret expiry.** A later demo fails at the IdP with a login error, not inside the CSV flow.
 7. **Extra profile attributes** on the user flow. Each extra screen is time. Keep the flow to existing-user sign-in.
 8. **In-circuit navigation to sign-in.** The Sign in control opts out of Blazor enhanced navigation. Replacing it with `NavigateTo` without a full page load leaves the circuit anonymous.
-9. **Cold start.** The first boot runs EF `EnsureCreated` against Azure SQL Basic. Basic does not pause. A serverless database can spend the whole five minutes waking up. B1 Always On keeps the process up after that first boot.
+9. **Cold start.** The first boot runs EF migrations against Azure SQL Basic. An existing database is stamped at the baseline and kept. Basic does not pause. A serverless database can spend the whole five minutes waking up. B1 Always On keeps the process up after that first boot.
 10. **Auth cookie lost on restart.** Data-protection keys are stored in the `vhona-keys` blob when storage is Azure Blob, so a restart does not drop the session in the middle of map → why.
 11. **ARR affinity off.** Blazor Server drops the circuit if the next request lands on another instance. The template turns client affinity and WebSockets on, and the plan is one worker.
 12. **`/healthz` still says `auth: Demo`.** Blob and SQL are live, but the timed path has not started. Set `Auth__Provider` to `EntraExternalId` and fill the Entra settings.
 
-`/healthz` does not touch the database. It reports the active providers and whether the clean sample CSV was published. The product Health page stays at `/health`. Partner events are unchanged: `finishes_upload`, `asks_why_session_one`, `rates_explanation_trustworthy`, `returns_for_brief_within_7_days`, `pay_or_waitlist_signal`, plus `map_abandon`, `receipt_open`, and `receipt_distrust`. On the host they append to `/home/vhona/partner-events.jsonl` (Kudu SSH). While signed in, `GET /internal/partner-events` returns the same JSON as locally.
+`/healthz` does not touch the database. It reports the active providers and whether the clean sample CSV was published. The product Health page stays at `/health`. Partner events are unchanged: `finishes_upload`, `asks_why_session_one`, `rates_explanation_trustworthy`, `returns_for_brief_within_7_days`, `pay_or_waitlist_signal`, plus `map_abandon`, `receipt_open`, and `receipt_distrust`. On the host they append to `/home/vhona/partner-events.jsonl` (Kudu SSH). While signed in, `GET /internal/partner-events` returns that business's events. `Auth:InternalAdminEmails` is the only path that returns every business.
 
 ### Manual smoke on the hosted URL
 
 `dotnet test src/VhonaAI.sln` is the automated check. This is the manual check after deploy. Use the clean sample. Time it from the sign-in click.
 
 1. `curl https://<webAppName>.azurewebsites.net/healthz` returns `status: ok`, `database: AzureSql`, `storage: AzureBlob`, `sampleCsv: true`, and `auth` equal to the provider you deployed.
-2. Sign in. Entra: one existing user, full-page Sign in, land on Home signed in as Harbour Street Studio. Demo: **Continue as demo owner**.
+2. Sign in. Entra: one existing user, full-page Sign in. The first visit asks for a business name; a later sign-in keeps that name. Demo: **Continue as demo owner** (Harbour Street Studio).
 3. **Clean sample** (or **Use sample CSV**). Confirm the guessed columns in one tap and persist. Fix any broken cells in place if you used the default sample. Do not restart.
 4. Health shows revenue, expenses, and profit for the latest month versus the previous month. Cash is hidden on the clean sample. It appears only for **Sample with cash**, and it is never a fake zero.
 5. Tap a KPI. The answer includes a receipt of exact RowIds. Open the receipt and see those rows.
@@ -345,7 +346,7 @@ Cold sample CSV → first trusted receipted why is meant to stay within five min
 7. In storage, the container `csv-uploads` has a blob under `{org}/{import}/`. That is the file the import reopens.
 8. Ask something the verifier cannot cite. The page says **Can't verify that yet.** There is no answer body and no streamed draft.
 9. After the cited why, choose **Send me the morning brief**. Sign out and sign in again (next visit). Home shows yesterday's snapshot plus one receipted explanation, or **No verified brief today** with a path back to **Ask why**.
-10. While signed in, `GET /internal/partner-events` includes the signals from the session (`finishes_upload`, and `receipt_open` if you opened the receipt).
+10. While signed in, `GET /internal/partner-events` includes the signals from this business (`finishes_upload`, and `receipt_open` if you opened the receipt). It does not include another business's events.
 
 Local `dotnet run --project src/VhonaAI.Web --launch-profile http` is unchanged: Demo, SQLite, and `App_Data/uploads`. User-secrets override those defaults on that machine only. Set the three providers back to `Demo`, `Sqlite`, and `Local` to return to the local path.
 
