@@ -3,6 +3,7 @@ using VhonaAI.Infrastructure;
 using VhonaAI.Web.Identity;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
 namespace VhonaAI.Web.Identity;
@@ -14,7 +15,8 @@ public static class DemoAuthEndpoints
         endpoints.MapPost("/auth/demo-login", async (
             HttpContext http,
             OrgBootstrapper bootstrapper,
-            IOptions<DemoAuthOptions> options) =>
+            IOptions<DemoAuthOptions> options,
+            [FromForm] string? returnUrl) =>
         {
             var demo = options.Value;
             var (user, organization, membership) = await bootstrapper.EnsureDemoTenantAsync(
@@ -43,7 +45,7 @@ public static class DemoAuthEndpoints
                     ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7)
                 });
 
-            return Results.Redirect("/");
+            return Results.Redirect(LocalReturnUrl.Normalize(returnUrl) ?? "/");
         }).AllowAnonymous();
 
         return endpoints;

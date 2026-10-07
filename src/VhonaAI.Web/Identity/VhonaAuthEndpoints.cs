@@ -12,8 +12,8 @@ public static class VhonaAuthEndpoints
         var configuration = endpoints.ServiceProvider.GetRequiredService<IConfiguration>();
         if (HostingConfiguration.IsEntra(configuration))
         {
-            endpoints.MapGet("/auth/signin", () => Results.Challenge(
-                    new AuthenticationProperties { RedirectUri = "/" },
+            endpoints.MapGet("/auth/signin", (string? returnUrl) => Results.Challenge(
+                    new AuthenticationProperties { RedirectUri = LocalReturnUrl.Normalize(returnUrl) ?? "/" },
                     [OpenIdConnectDefaults.AuthenticationScheme]))
                 .AllowAnonymous();
         }

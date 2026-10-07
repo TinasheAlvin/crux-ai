@@ -212,3 +212,27 @@ internal sealed class CallThresholdSettingsConfiguration : IEntityTypeConfigurat
             .OnDelete(DeleteBehavior.Cascade);
     }
 }
+
+internal sealed class AdminAuditEntryConfiguration : IEntityTypeConfiguration<AdminAuditEntry>
+{
+    public void Configure(EntityTypeBuilder<AdminAuditEntry> builder)
+    {
+        builder.ToTable("AdminAuditEntries");
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.ActorEmail).HasMaxLength(320).IsRequired();
+        builder.Property(x => x.Action).HasMaxLength(64).IsRequired();
+        builder.Property(x => x.Target).HasMaxLength(64);
+        builder.Property(x => x.Summary).HasMaxLength(2000).IsRequired();
+        builder.HasIndex(x => x.At);
+    }
+}
+
+internal sealed class PlatformCallDefaultsConfiguration : IEntityTypeConfiguration<PlatformCallDefaults>
+{
+    public void Configure(EntityTypeBuilder<PlatformCallDefaults> builder)
+    {
+        builder.ToTable("PlatformCallDefaults");
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.DroppedPercent).HasColumnType("decimal(5,2)");
+    }
+}

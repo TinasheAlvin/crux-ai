@@ -1,0 +1,87 @@
+@page "/admin/businesses/{BusinessId:guid}/imports/{ImportId:guid}"
+@layout AdminLayout
+@attribute [Authorize]
+@inject IAdminConsoleService Admin
+
+<PageTitle>Import · Vhona admin</PageTitle>
+
+<section class="panel">
+    @if (detail is null)
+    {
+        <p class="lede">@error</p>
+    }
+    else
+    {
+        <header class="panel-header">
+            <p class="eyebrow"><a href="@($"/admin/businesses/{detail.OrganizationId}")">@detail.OrganizationName</a></p>
+            <h1>@detail.FileName</h1>
+            <p class="lede">@detail.Status. Read only. @(detail.Truncated ? "Showing the first 200 rows." : "")</p>
+        </header>
+        @if (detail.Transactions.Count > 0)
+        {
+            <h2>Transactions</h2>
+            <table class="data-table">
+                <thead><tr><th>Row</th><th>Date</th><th>Booked</th><th>Description</th><th>Amount</th></tr></thead>
+                <tbody>
+                    @foreach (var row in detail.Transactions)
+                    {
+                        <tr>
+                            <td><code>@row.RowId</code></td>
+                            <td>@row.Date.ToString("yyyy-MM-dd")</td>
+                            <td>@(row.BookedDate?.ToString("yyyy-MM-dd") ?? "—")</td>
+                            <td>@row.Description</td>
+                            <td>@row.Amount</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        @if (detail.Invoices.Count > 0)
+        {
+            <h2>Invoices</h2>
+            <table class="data-table">
+                <thead><tr><th>Row</th><th>Number</th><th>Customer</th><th>Date</th><th>Amount</th><th>Due</th><th>Status</th></tr></thead>
+                <tbody>
+                    @foreach (var row in detail.Invoices)
+                    {
+                        <tr>
+                            <td><code>@row.RowId</code></td>
+                            <td>@row.Number</td>
+                            <td>@row.Customer</td>
+                            <td>@row.InvoiceDate.ToString("yyyy-MM-dd")</td>
+                            <td>@row.Amount</td>
+                            <td>@row.AmountDue</td>
+                            <td>@row.Status</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    }
+</section>
+
+@code {
+    [Parameter] public Guid BusinessId { get; set; }
+    [Parameter] public Guid ImportId { get; set; }
+
+    private AdminImportDetail? detail;
+    private string? error;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            detail = await Admin.GetImportAsync(ImportId);
+            if (detail.OrganizationId != BusinessId)
+            {
+                detail = null;
+                error = "Import not found.";
+            }
+        }
+        catch (InvalidOperationException ex)
+        {
+            detail = null;
+            error = ex.Message;
+        }
+    }
+}

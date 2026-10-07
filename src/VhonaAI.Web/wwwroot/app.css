@@ -629,3 +629,20 @@ a, .btn-link {
     gap: 1rem;
     margin-top: 0.75rem;
 }
+
+.admin-shell .navbar-brand {
+    font-size: 1rem;
+}
+
+.admin-stats {
+    font-family: "Segoe UI", sans-serif;
+    padding-left: 1.1rem;
+}
+
+.btn-danger {
+    background: var(--danger);
+    border: 1px solid var(--danger);
+    color: #fff;
+    border-radius: 999px;
+    padding: 0.45rem 0.9rem;
+}

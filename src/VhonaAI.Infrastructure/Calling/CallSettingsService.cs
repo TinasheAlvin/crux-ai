@@ -26,7 +26,7 @@ public sealed class CallSettingsService : ICallSettingsAppService
             .FirstOrDefaultAsync(item => item.OrganizationId == _currentUser.OrganizationId, cancellationToken);
         if (stored is null)
         {
-            return Defaults();
+            return await DefaultsAsync(cancellationToken);
         }
 
         return new CallThresholdSettingsDto(
@@ -97,11 +97,24 @@ public sealed class CallSettingsService : ICallSettingsAppService
         }
     }
 
-    private static CallThresholdSettingsDto Defaults() =>
-        new(
-            CallThresholdDefaults.StoppedMissedCycles,
-            CallThresholdDefaults.DroppedPercent,
-            CallThresholdDefaults.DroppedMonths,
-            CallThresholdDefaults.MinimumInvoiceHistory,
+    private async Task<CallThresholdSettingsDto> DefaultsAsync(CancellationToken cancellationToken)
+    {
+        var platform = await _db.PlatformCallDefaults.AsNoTracking().FirstOrDefaultAsync(cancellationToken);
+        if (platform is null)
+        {
+            return new CallThresholdSettingsDto(
+                CallThresholdDefaults.StoppedMissedCycles,
+                CallThresholdDefaults.DroppedPercent,
+                CallThresholdDefaults.DroppedMonths,
+                CallThresholdDefaults.MinimumInvoiceHistory,
+                IsCustom: false);
+        }
+
+        return new CallThresholdSettingsDto(
+            platform.StoppedMissedCycles,
+            platform.DroppedPercent,
+            platform.DroppedMonths,
+            platform.MinimumInvoiceHistory,
             IsCustom: false);
+    }
 }

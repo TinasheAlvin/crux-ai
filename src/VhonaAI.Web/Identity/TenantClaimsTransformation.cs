@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using VhonaAI.Core.Admin;
 using VhonaAI.Infrastructure;
 using VhonaAI.Infrastructure.Data;
 using VhonaAI.Infrastructure.Identity;
@@ -65,11 +66,14 @@ public sealed class TenantClaimsTransformation : IClaimsTransformation
                 membership.Role.ToString());
         }
 
-        if (InternalAdmins.IsAdmin(_configuration, identity.FindFirst(ClaimTypes.Email)?.Value))
+        var objectId = identity.FindFirst("oid")?.Value
+            ?? identity.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value;
+        var stampedEmail = identity.FindFirst(ClaimTypes.Email)?.Value;
+        if (VhonaAdmins.IsMatch(_configuration, email, objectId) || VhonaAdmins.IsMatch(_configuration, stampedEmail, objectId))
         {
-            if (!identity.HasClaim("internal_admin", "true"))
+            if (!identity.HasClaim(AdminRouteGuard.ClaimType, AdminRouteGuard.ClaimValue))
             {
-                identity.AddClaim(new Claim("internal_admin", "true"));
+                identity.AddClaim(new Claim(AdminRouteGuard.ClaimType, AdminRouteGuard.ClaimValue));
             }
         }
 

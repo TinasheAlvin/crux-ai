@@ -1,0 +1,251 @@
+@page "/admin/businesses/{Id:guid}"
+@layout AdminLayout
+@attribute [Authorize]
+@inject IAdminConsoleService Admin
+@inject NavigationManager Navigation
+
+<PageTitle>Business · Vhona admin</PageTitle>
+
+<section class="panel">
+    @if (detail is null)
+    {
+        <p class="lede">@banner</p>
+    }
+    else
+    {
+        <header class="panel-header">
+            <p class="eyebrow">@(detail.IsDisabled ? "Disabled" : "Active") · created @detail.CreatedAt.ToString("yyyy-MM-dd")</p>
+            <h1>@detail.Name</h1>
+            <p class="lede">
+                @detail.CustomerCount customers · @detail.InvoiceCount invoices · @detail.TransactionCount transactions
+            </p>
+        </header>
+        @if (!string.IsNullOrWhiteSpace(banner))
+        {
+            <p class="banner @(bannerIsError ? "banner-error" : null)" role="status">@banner</p>
+        }
+
+        <form class="stack-form" @onsubmit="RenameAsync">
+            <label class="field-label" for="rename">Rename</label>
+            <input id="rename" class="form-control" @bind="newName" maxlength="200" />
+            <button class="btn btn-outline" type="submit" disabled="@busy">Save name</button>
+        </form>
+
+        <p>
+            <button class="btn btn-outline" type="button" disabled="@busy" @onclick="ToggleDisabledAsync">
+                @(detail.IsDisabled ? "Re-enable" : "Disable")
+            </button>
+            <a class="btn btn-outline" href="@($"/admin/businesses/{detail.Id}/export")">Export data</a>
+        </p>
+
+        <h2>Members</h2>
+        <table class="data-table">
+            <thead>
+                <tr><th>Name</th><th>Email</th><th>Role</th><th></th></tr>
+            </thead>
+            <tbody>
+                @foreach (var member in detail.Members)
+                {
+                    <tr>
+                        <td><a href="@($"/admin/users/{member.UserId}")">@member.DisplayName</a> @(member.UserDisabled ? "(disabled)" : "")</td>
+                        <td>@member.Email</td>
+                        <td>
+                            <select @onchange="e => ChangeRoleAsync(member.MembershipId, e)">
+                                <option selected="@(member.Role == "Owner")">Owner</option>
+                                <option selected="@(member.Role == "Member")">Member</option>
+                            </select>
+                        </td>
+                        <td><button class="btn btn-link" type="button" @onclick="() => RemoveAsync(member.MembershipId)">Remove</button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <h2>Invites</h2>
+        <p class="hint">Resend issues a new link. Vhona does not email it.</p>
+        @if (detail.Invites.Count == 0)
+        {
+            <p class="lede">No open invites.</p>
+        }
+        else
+        {
+            <table class="data-table">
+                <thead><tr><th>Email</th><th>Expires</th><th>Link</th><th></th></tr></thead>
+                <tbody>
+                    @foreach (var invite in detail.Invites)
+                    {
+                        <tr>
+                            <td>@invite.Email @(invite.IsRevoked ? "(revoked)" : "")</td>
+                            <td>@invite.ExpiresAt.ToString("yyyy-MM-dd")</td>
+                            <td><code>/onboarding?token=@invite.Token</code></td>
+                            <td>
+                                <button class="btn btn-link" type="button" @onclick="() => ResendAsync(invite.Id)">New link</button>
+                                <button class="btn btn-link" type="button" @onclick="() => RevokeAsync(invite.Id)">Revoke</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        <h2>Sources</h2>
+        <ul>
+            @foreach (var source in detail.DataSources)
+            {
+                <li>@source.Name · @source.Kind · @source.CreatedAt.ToString("yyyy-MM-dd")</li>
+            }
+        </ul>
+
+        <h2>Imports</h2>
+        <table class="data-table">
+            <thead><tr><th>File</th><th>Kind</th><th>Status</th><th>Rows</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var import in detail.Imports)
+                {
+                    <tr>
+                        <td><a href="@($"/admin/businesses/{detail.Id}/imports/{import.Id}")">@import.FileName</a></td>
+                        <td>@import.Kind</td>
+                        <td>@import.Status</td>
+                        <td>@import.ImportedRowCount</td>
+                        <td><button class="btn btn-link" type="button" @onclick="() => DeleteImportAsync(import.Id)">Delete</button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <h2>Who-to-call thresholds</h2>
+        <p class="hint">@(detail.Thresholds.IsCustom ? "Saved for this business." : "Using the global default.")</p>
+        <form class="stack-form" @onsubmit="SaveThresholdsAsync">
+            <label class="field-label">Missed cycles</label>
+            <input class="form-control" type="number" @bind="cycles" />
+            <label class="field-label">Drop percent</label>
+            <input class="form-control" type="number" step="0.01" @bind="percent" />
+            <label class="field-label">Months</label>
+            <input class="form-control" type="number" @bind="months" />
+            <label class="field-label">Minimum invoices</label>
+            <input class="form-control" type="number" @bind="history" />
+            <button class="btn btn-outline" type="submit" disabled="@busy">Save thresholds</button>
+        </form>
+
+        <h2>Delete this business</h2>
+        <p class="lede">This removes the business and its books, imports, invites, and memberships. Type the business name to confirm. User accounts stay, so the person can name a new business.</p>
+        <form class="stack-form" @onsubmit="DeleteAsync">
+            <label class="field-label" for="confirm-name">Type @detail.Name</label>
+            <input id="confirm-name" class="form-control" @bind="typedName" />
+            <button class="btn btn-danger" type="submit" disabled="@busy">Delete business</button>
+        </form>
+    }
+</section>
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private AdminBusinessDetail? detail;
+    private string newName = string.Empty;
+    private string typedName = string.Empty;
+    private int cycles;
+    private decimal percent;
+    private int months;
+    private int history;
+    private bool busy;
+    private string? banner;
+    private bool bannerIsError;
+
+    protected override async Task OnParametersSetAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        try
+        {
+            detail = await Admin.GetBusinessAsync(Id);
+            newName = detail.Name;
+            cycles = detail.Thresholds.StoppedMissedCycles;
+            percent = detail.Thresholds.DroppedPercent;
+            months = detail.Thresholds.DroppedMonths;
+            history = detail.Thresholds.MinimumInvoiceHistory;
+        }
+        catch (InvalidOperationException ex)
+        {
+            detail = null;
+            banner = ex.Message;
+            bannerIsError = true;
+        }
+    }
+
+    private async Task RenameAsync() => await Run(async () =>
+    {
+        await Admin.RenameBusinessAsync(Id, newName);
+        banner = "Name saved.";
+        await LoadAsync();
+    });
+
+    private async Task ToggleDisabledAsync() => await Run(async () =>
+    {
+        await Admin.SetBusinessDisabledAsync(Id, disabled: detail is not null && !detail.IsDisabled);
+        await LoadAsync();
+    });
+
+    private async Task ChangeRoleAsync(Guid membershipId, ChangeEventArgs args) => await Run(async () =>
+    {
+        await Admin.SetUserRoleAsync(membershipId, args.Value?.ToString() ?? "");
+        await LoadAsync();
+    });
+
+    private async Task RemoveAsync(Guid membershipId) => await Run(async () =>
+    {
+        await Admin.RemoveMemberAsync(membershipId);
+        await LoadAsync();
+    });
+
+    private async Task ResendAsync(Guid invitationId) => await Run(async () =>
+    {
+        var issued = await Admin.ResendInviteAsync(invitationId);
+        banner = $"New link for {issued.Email}. Copy it from the table. Vhona does not email it.";
+        await LoadAsync();
+    });
+
+    private async Task RevokeAsync(Guid invitationId) => await Run(async () =>
+    {
+        await Admin.RevokeInviteAsync(invitationId);
+        await LoadAsync();
+    });
+
+    private async Task DeleteImportAsync(Guid importId) => await Run(async () =>
+    {
+        await Admin.DeleteImportAsync(importId);
+        await LoadAsync();
+    });
+
+    private async Task SaveThresholdsAsync() => await Run(async () =>
+    {
+        await Admin.UpdateThresholdsAsync(Id, new CallThresholdSettingsUpdate(cycles, percent, months, history));
+        banner = "Thresholds saved for this business.";
+        await LoadAsync();
+    });
+
+    private async Task DeleteAsync() => await Run(async () =>
+    {
+        await Admin.DeleteBusinessAsync(Id, typedName);
+        Navigation.NavigateTo("/admin/businesses");
+    });
+
+    private async Task Run(Func<Task> action)
+    {
+        busy = true;
+        banner = null;
+        bannerIsError = false;
+        try
+        {
+            await action();
+        }
+        catch (InvalidOperationException ex)
+        {
+            banner = ex.Message;
+            bannerIsError = true;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

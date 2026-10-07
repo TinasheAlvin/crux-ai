@@ -131,7 +131,7 @@ c=collections.Counter(json.loads(l)['name'] for l in p.read_text().splitlines() 
 print('\n'.join(f'{n:4} {k}' for k,n in c.most_common()))"
 ```
 
-While signed in, `GET http://localhost:5028/internal/partner-events` returns JSON for **that business only**. A signed-in person with no business gets 403. Emails listed in `Auth:InternalAdminEmails` see every business.
+While signed in, `GET http://localhost:5028/internal/partner-events` returns JSON for **that business only**. A signed-in person with no business gets 403. The cross-business list is the admin console at `/admin/events`, and only a configured Vhona admin can open it.
 
 If you set `Analytics:Sink` to `Sqlite`:
 
@@ -164,7 +164,9 @@ Committed files contain **placeholders only**. Do not put real connection string
 | `Storage:DataProtection:ContainerName` | `vhona-keys` | `vhona-keys` (auth keys, only when storage is Azure Blob) |
 | `Auth:Provider` | `Demo` | `EntraExternalId` for the timed path. `Demo` still works on the host if Entra is not filled in. |
 | `Auth:DefaultOrganizationName` | demo-owner fallback only | `Harbour Street Studio`. Entra sign-in does not use it. |
-| `Auth:InternalAdminEmails` | empty | comma-separated emails that may read every business's partner events |
+| `Auth:VhonaAdminEmails` | empty | comma-separated emails that may open `/admin`. Not a business role. |
+| `Auth:VhonaAdminObjectIds` | empty | comma-separated Entra object ids for the same console |
+| `Auth:InternalAdminEmails` | empty | still accepted as an email alias for `Auth:VhonaAdminEmails` |
 | `Auth:EntraExternalId:*` | placeholders | App Service settings. `ClientSecret` is a secret. |
 | `DemoAuth:*` | Harbour Street Studio owner | unused once Entra is the provider |
 | `AzureOpenAI:Endpoint` | placeholder / empty | user-secrets or App Service setting |
@@ -231,7 +233,9 @@ Flip providers without editing the template by changing App Service settings (th
 | `Auth__EntraExternalId__ClientId` | app registration client id |
 | `Auth__EntraExternalId__ClientSecret` | client secret |
 | `Auth__DefaultOrganizationName` | demo-owner name only; Entra users name their own business |
-| `Auth__InternalAdminEmails` | optional; partner-event access across businesses |
+| `Auth__VhonaAdminEmails` | optional; comma-separated emails for `/admin`. Pass it on each deploy that should keep the list, or set it on the App Service (a Key Vault reference works). |
+| `Auth__VhonaAdminObjectIds` | optional; comma-separated Entra object ids for `/admin` |
+| `Auth__InternalAdminEmails` | optional email alias for the same admin list |
 
 Empty, `YOUR_*`, and `<TODO-...>` values are rejected at startup when that provider is selected. A literal `@Microsoft.KeyVault(...)` value means the reference was not resolved: grant the app identity secret **get**, then restart.
 
@@ -331,7 +335,19 @@ Cold sample CSV → first trusted receipted why is meant to stay within five min
 11. **ARR affinity off.** Blazor Server drops the circuit if the next request lands on another instance. The template turns client affinity and WebSockets on, and the plan is one worker.
 12. **`/healthz` still says `auth: Demo`.** Blob and SQL are live, but the timed path has not started. Set `Auth__Provider` to `EntraExternalId` and fill the Entra settings.
 
-`/healthz` does not touch the database. It reports the active providers and whether the clean sample CSV was published. The product Health page stays at `/health`. Partner events are unchanged: `finishes_upload`, `asks_why_session_one`, `rates_explanation_trustworthy`, `returns_for_brief_within_7_days`, `pay_or_waitlist_signal`, plus `map_abandon`, `receipt_open`, and `receipt_distrust`. On the host they append to `/home/vhona/partner-events.jsonl` (Kudu SSH). While signed in, `GET /internal/partner-events` returns that business's events. `Auth:InternalAdminEmails` is the only path that returns every business.
+`/healthz` does not touch the database. It reports the active providers and whether the clean sample CSV was published. The product Health page stays at `/health`. Partner events are unchanged: `finishes_upload`, `asks_why_session_one`, `rates_explanation_trustworthy`, `returns_for_brief_within_7_days`, `pay_or_waitlist_signal`, plus `map_abandon`, `receipt_open`, and `receipt_distrust`. On the host they append to `/home/vhona/partner-events.jsonl` (Kudu SSH). While signed in, `GET /internal/partner-events` returns that business's events. Every business's events are on `/admin/events` for a Vhona admin.
+
+### Admin console
+
+`/admin` is a separate area for the founder. The same Entra (or demo) sign-in is used. Who is an admin comes from `Auth:VhonaAdminEmails` and `Auth:VhonaAdminObjectIds`. A business owner cannot grant it. Anyone else who is signed in gets 404 on `/admin`. A visitor who is not signed in is sent to `/login` and returned to `/admin` after sign-in.
+
+Locally, set one of those keys in `appsettings`, user-secrets, or the environment, then restart. The demo owner `owner@harbourstreet.local` is a convenient local value:
+
+```bash
+dotnet user-secrets set "Auth:VhonaAdminEmails" "owner@harbourstreet.local" --project src/VhonaAI.Web
+```
+
+Sign in with **Continue as demo owner**, then open `/admin`. On Azure, set `Auth__VhonaAdminEmails` and/or `Auth__VhonaAdminObjectIds` on the App Service. Either value may be a Key Vault reference (`@Microsoft.KeyVault(...)`). `infra/main.bicep` has matching parameters; leave them empty to omit the settings from that deploy, and pass them again on a later deploy that should keep the list. There is no impersonation, and the console does not email customers. Resend invite copies a new link. Deleting a business removes its data after the operator types the business name. The person's user account stays, and the audit row stays.
 
 ### Manual smoke on the hosted URL
 

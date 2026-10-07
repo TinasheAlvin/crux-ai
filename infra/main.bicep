@@ -25,7 +25,7 @@ param sqlAdminLogin string = 'vhonaadmin'
 @minLength(12)
 param sqlAdminPassword string
 
-@description('Azure SQL database name. Must be empty on first boot; the app creates tables with EF EnsureCreated.')
+@description('Azure SQL database name. The app applies EF migrations on startup, including an existing database that was created before migrations.')
 param sqlDatabaseName string = 'vhonaai'
 
 @description('App Service plan SKU. B1 is the lean Linux size with Always On. Staging slots force at least S1.')
@@ -75,6 +75,12 @@ param entraClientSecret string = ''
 
 @description('Organisation created for the first Entra sign-in.')
 param defaultOrganizationName string = 'Harbour Street Studio'
+
+@description('Comma-separated emails allowed to open the Vhona admin console. Leave empty to omit the setting. Do not commit a real address. A Key Vault reference is accepted.')
+param vhonaAdminEmails string = ''
+
+@description('Comma-separated Entra object ids allowed to open the Vhona admin console. Leave empty to omit the setting. A Key Vault reference is accepted.')
+param vhonaAdminObjectIds string = ''
 
 var suffix = uniqueString(resourceGroup().id)
 var compactPrefix = toLower(replace(namePrefix, '-', ''))
@@ -130,7 +136,13 @@ var insightsSettings = enableAppInsights ? {
   APPLICATIONINSIGHTS_CONNECTION_STRING: insightsConnection
   ApplicationInsights__ConnectionString: insightsConnection
 } : {}
-var appSettings = union(union(baseSettings, entraSettings), insightsSettings)
+var adminEmailSettings = empty(vhonaAdminEmails) ? {} : {
+  Auth__VhonaAdminEmails: vhonaAdminEmails
+}
+var adminObjectIdSettings = empty(vhonaAdminObjectIds) ? {} : {
+  Auth__VhonaAdminObjectIds: vhonaAdminObjectIds
+}
+var appSettings = union(union(union(union(baseSettings, entraSettings), insightsSettings), adminEmailSettings), adminObjectIdSettings)
 
 resource plan 'Microsoft.Web/serverfarms@2023-12-01' = {
   name: planName

@@ -16,7 +16,8 @@ public class DatabaseMigrationTests
         await db.Database.MigrateAsync();
 
         var applied = (await db.Database.GetAppliedMigrationsAsync()).ToList();
-        Assert.Equal(2, applied.Count);
+        Assert.Equal(3, applied.Count);
+        Assert.Contains(applied, name => name.EndsWith("_AdminConsole", StringComparison.Ordinal));
         Assert.Equal(0, await db.Organizations.CountAsync());
         Assert.Equal(0, await db.Customers.CountAsync());
         Assert.Equal(0, await db.Invoices.CountAsync());
@@ -26,6 +27,8 @@ public class DatabaseMigrationTests
         Assert.Equal(0, await db.DataSources.CountAsync());
         Assert.Equal(0, await db.Invitations.CountAsync());
         Assert.Equal(0, await db.CallThresholdSettings.CountAsync());
+        Assert.Equal(0, await db.AdminAuditEntries.CountAsync());
+        Assert.Equal(0, await db.PlatformCallDefaults.CountAsync());
     }
 
     [Fact]
@@ -36,17 +39,15 @@ public class DatabaseMigrationTests
         await using (var db = new VhonaDbContext(options))
         {
             var migrations = db.Database.GetMigrations().ToList();
-            Assert.Equal(2, migrations.Count);
+            Assert.Equal(3, migrations.Count);
             await db.GetService<IMigrator>().MigrateAsync(migrations[0]);
 
             orgId = Guid.NewGuid();
-            db.Organizations.Add(new Organization
-            {
-                Id = orgId,
-                Name = "Kept Studio",
-                CreatedAt = DateTime.UtcNow
-            });
-            await db.SaveChangesAsync();
+            var createdAt = DateTime.UtcNow;
+            await db.Database.ExecuteSqlInterpolatedAsync($"""
+                INSERT INTO "Organizations" ("Id", "Name", "CreatedAt")
+                VALUES ({orgId}, {"Kept Studio"}, {createdAt});
+                """);
             await db.Database.ExecuteSqlRawAsync("DROP TABLE \"__EFMigrationsHistory\";");
         }
 
@@ -114,6 +115,9 @@ public class DatabaseMigrationTests
         Assert.Contains("CREATE TABLE [DataSources]", script);
         Assert.Contains("CREATE TABLE [Invitations]", script);
         Assert.Contains("CREATE TABLE [CallThresholdSettings]", script);
+        Assert.Contains("CREATE TABLE [AdminAuditEntries]", script);
+        Assert.Contains("CREATE TABLE [PlatformCallDefaults]", script);
+        Assert.Contains("[DisabledAt]", script);
         Assert.Contains("[BookedDate]", script);
         Assert.Contains("[Kind]", script);
     }

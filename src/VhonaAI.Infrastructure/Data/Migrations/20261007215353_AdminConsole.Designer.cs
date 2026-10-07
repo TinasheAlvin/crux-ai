@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VhonaAI.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using VhonaAI.Infrastructure.Data;
 namespace VhonaAI.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(VhonaDbContext))]
-    partial class VhonaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261007215353_AdminConsole")]
+    partial class AdminConsole
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

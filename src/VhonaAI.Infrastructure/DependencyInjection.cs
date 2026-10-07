@@ -1,3 +1,4 @@
+using VhonaAI.Application.Admin;
 using VhonaAI.Application.Brief;
 using VhonaAI.Application.Business;
 using VhonaAI.Application.Calling;
@@ -8,6 +9,7 @@ using VhonaAI.Core.Csv;
 using VhonaAI.Core.Storage;
 using VhonaAI.Core.Time;
 using VhonaAI.Core.Why;
+using VhonaAI.Infrastructure.Admin;
 using VhonaAI.Infrastructure.Brief;
 using VhonaAI.Infrastructure.Calling;
 using VhonaAI.Infrastructure.Csv;
@@ -100,6 +102,8 @@ public static class DependencyInjection
         services.AddScoped<CallSettingsService>();
         services.AddScoped<ICallSettingsAppService>(sp => sp.GetRequiredService<CallSettingsService>());
         services.AddScoped<OrgBootstrapper>();
+        services.AddScoped<AdminConsoleService>();
+        services.AddScoped<IAdminConsoleService>(sp => sp.GetRequiredService<AdminConsoleService>());
 
         return services;
     }

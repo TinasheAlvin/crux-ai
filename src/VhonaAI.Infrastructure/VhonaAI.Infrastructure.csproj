@@ -1,6 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <InternalsVisibleTo Include="VhonaAI.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\VhonaAI.Core\VhonaAI.Core.csproj" />
     <ProjectReference Include="..\VhonaAI.Application\VhonaAI.Application.csproj" />
   </ItemGroup>

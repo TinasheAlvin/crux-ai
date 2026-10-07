@@ -43,6 +43,8 @@ public sealed class VhonaDbContext : DbContext
     public DbSet<CreditNote> CreditNotes => Set<CreditNote>();
     public DbSet<Invitation> Invitations => Set<Invitation>();
     public DbSet<CallThresholdSettings> CallThresholdSettings => Set<CallThresholdSettings>();
+    public DbSet<AdminAuditEntry> AdminAuditEntries => Set<AdminAuditEntry>();
+    public DbSet<PlatformCallDefaults> PlatformCallDefaults => Set<PlatformCallDefaults>();
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
@@ -91,6 +93,17 @@ public sealed class VhonaDbContext : DbContext
 
     private void EnforceTenant()
     {
+        var actor = AdminDataAccess.ActorUserId;
+        if (actor is not null)
+        {
+            if (_currentUser is not { IsAuthenticated: true } || _currentUser.UserId != actor)
+            {
+                throw new InvalidOperationException("Admin data access does not match the signed-in person.");
+            }
+
+            return;
+        }
+
         var tenant = CurrentOrganizationId;
         if (tenant is null)
         {
@@ -124,6 +137,7 @@ internal sealed class OrganizationConfiguration : IEntityTypeConfiguration<Organ
         builder.ToTable("Organizations");
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Name).HasMaxLength(200).IsRequired();
+        builder.Property(x => x.DisabledAt);
     }
 }
 
@@ -136,6 +150,7 @@ internal sealed class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
         builder.Property(x => x.ExternalId).HasMaxLength(128).IsRequired();
         builder.Property(x => x.Email).HasMaxLength(320).IsRequired();
         builder.Property(x => x.DisplayName).HasMaxLength(200).IsRequired();
+        builder.Property(x => x.DisabledAt);
         builder.HasIndex(x => x.Email).IsUnique();
         builder.HasIndex(x => x.ExternalId).IsUnique();
     }
