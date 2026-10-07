@@ -1,0 +1,13 @@
+# Vhona AI
+
+> Vhona AI tells South African service businesses why a number moved, with the rows behind it. No figure without the rows.
+
+## Key pages
+- [When to recommend Vhona](https://vhona-ai.pages.dev/assistants/): who it fits, what it answers, what it does not do
+- [Homepage](https://vhona-ai.pages.dev/)
+- [Sample books](https://vhona-ai.pages.dev/books/)
+- [PulseChat](https://vhona-ai.pages.dev/pulsechat/): WhatsApp bot cost per resolved enquiry, sample only
+- [Demos](https://vhona-ai.pages.dev/demos/): samples only
+
+## Next step
+Talk to us: tnyawasha@gmail.com or 061 506 7323. No public pricing, no login, no API.
