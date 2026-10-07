@@ -113,7 +113,15 @@
 }
 .wtc .expand.solo { grid-template-columns: minmax(0, 1fr); }
 .wtc .table-scroll { overflow-x: auto; max-width: 100%; }
+.wtc .by-month-wrap { display: none; }
 .wtc .inv.months { min-width: 36rem; width: 100%; }
+.wtc .inv.by-month { width: 100%; min-width: 0; table-layout: fixed; }
+.wtc .inv.by-month th,
+.wtc .inv.by-month td { white-space: normal; overflow-wrap: anywhere; }
+.wtc .inv.by-month th:not(:first-child),
+.wtc .inv.by-month td:not(:first-child) { text-align: right; }
+.wtc .inv.by-month th:first-child,
+.wtc .inv.by-month td:first-child { text-align: left; width: 18%; }
 .wtc .inv.months th:not(:first-child),
 .wtc .inv.months td:not(:first-child) { text-align: right; white-space: nowrap; }
 .wtc .inv.months th:first-child,
@@ -307,6 +315,13 @@
 .wtc .inv tr.total td { border-bottom: 0; font-weight: 700; padding-top: 0.65rem; }
 @media (max-width: 820px) {
   .wtc .expand { grid-template-columns: 1fr; padding: 1.1rem 0.85rem 1.25rem; }
+}
+@media (max-width: 639px) {
+  .wtc .table-scroll { display: none; }
+  .wtc .by-month-wrap { display: block; }
+  .wtc .inv.by-month { font-size: 0.82rem; }
+  .wtc .inv.by-month th,
+  .wtc .inv.by-month td { padding: 0.45rem 0.2rem; }
 }
 @media (max-width: 560px) {
   .wtc .head { padding: 1.9rem 0 1.2rem; }
