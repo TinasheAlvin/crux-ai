@@ -18,6 +18,12 @@
   background: var(--cream);
 }
 .wtc .head { padding: 2.6rem 0 1.6rem; }
+.wtc .sample-data {
+  margin: 0 0 0.55rem;
+  color: #1C1917;
+  font-size: 1rem;
+  font-weight: 700;
+}
 .wtc .eyebrow {
   font-size: 0.78rem;
   font-weight: 700;
@@ -207,8 +213,16 @@
   gap: 0.5rem;
   line-height: 1.1;
 }
-.wtc .btn.primary { background: var(--teal); color: #fff; border: 1px solid var(--teal); flex: 1 1 12rem; }
-.wtc .btn.ghost { background: var(--paper); color: var(--charcoal); border: 1px solid rgba(28, 25, 23, 0.22); }
+.wtc .btn.primary { flex: 1 1 12rem; }
+.wtc .actions .btn,
+.wtc .actions .btn.primary,
+.wtc .actions .btn.ghost {
+  background: #fff;
+  color: #57534E;
+  border: 1px solid rgba(28, 25, 23, 0.22);
+  cursor: default;
+}
+.wtc .actions .btn svg { color: inherit; }
 .wtc .btn svg { width: 1.05rem; height: 1.05rem; }
 .wtc .never {
   margin-top: 0.8rem;
