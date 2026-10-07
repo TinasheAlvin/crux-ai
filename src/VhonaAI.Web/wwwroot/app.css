@@ -184,7 +184,7 @@ main {
 
 .data-table th,
 .data-table td {
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
 }
 
 .data-table th {
@@ -273,8 +273,31 @@ main {
 }
 
 .recent-table {
-    table-layout: fixed;
     width: 100%;
+}
+
+@media (max-width: 640px) {
+    .recent-table thead {
+        display: none;
+    }
+
+    .recent-table,
+    .recent-table tbody,
+    .recent-table tr,
+    .recent-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .recent-table tr {
+        padding: 0.35rem 0 0.7rem;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .recent-table td {
+        border-bottom: 0;
+        padding: 0.2rem 0;
+    }
 }
 
 .numeric {
