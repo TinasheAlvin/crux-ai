@@ -27,6 +27,11 @@ public sealed class ClaimsCurrentUser : ICurrentUser
 
     public string OrganizationName => Require("org_name");
 
+    public string Role => User.FindFirstValue("org_role") ?? string.Empty;
+
+    public bool HasOrganization =>
+        Guid.TryParse(User.FindFirstValue("org_id"), out var organizationId) && organizationId != Guid.Empty;
+
     private string Require(string type) =>
         User.FindFirstValue(type) ?? string.Empty;
 

@@ -1,0 +1,43 @@
+@page "/admin/audit"
+@layout AdminLayout
+@attribute [Authorize]
+@inject IAdminConsoleService Admin
+
+<PageTitle>Audit · Vhona admin</PageTitle>
+
+<section class="panel">
+    <header class="panel-header">
+        <p class="eyebrow">Operator</p>
+        <h1>Audit log</h1>
+        <p class="lede">Who looked at a business's data, and who changed it.</p>
+    </header>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>When</th>
+                <th>Who</th>
+                <th>Action</th>
+                <th>Business</th>
+                <th>What</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in rows)
+            {
+                <tr>
+                    <td>@JohannesburgTime.Format(row.At, "yyyy-MM-dd HH:mm")</td>
+                    <td>@row.ActorEmail</td>
+                    <td>@row.Action</td>
+                    <td>@(row.OrganizationId?.ToString() ?? "—")</td>
+                    <td>@row.Summary</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>
+
+@code {
+    private IReadOnlyList<AdminAuditRow> rows = [];
+
+    protected override async Task OnInitializedAsync() => rows = await Admin.ListAuditAsync();
+}

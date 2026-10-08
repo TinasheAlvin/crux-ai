@@ -1,4 +1,6 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@inject VhonaAI.Core.Identity.IVhonaAdmin Admin
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">
             <span class="brand-mark brand-mark-sm">V</span>
@@ -31,6 +33,19 @@
                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Brief
             </NavLink>
         </div>
-        <p class="nav-footnote px-4">CSV map · health · why · morning brief</p>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="team">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Team
+            </NavLink>
+        </div>
+        @if (Admin.IsAdmin)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="admin">
+                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Admin
+                </NavLink>
+            </div>
+        }
+        <p class="nav-footnote px-4">CSV map · invoices · health · why · brief</p>
     </nav>
 </div>

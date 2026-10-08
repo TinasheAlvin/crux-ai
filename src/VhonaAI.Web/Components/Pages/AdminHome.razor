@@ -1,0 +1,33 @@
+@page "/admin"
+@layout AdminLayout
+@attribute [Authorize]
+@inject IAdminConsoleService Admin
+
+<PageTitle>Admin · Vhona AI</PageTitle>
+
+<section class="panel">
+    <header class="panel-header">
+        <p class="eyebrow">Operator</p>
+        <h1>Admin console</h1>
+        <p class="lede">
+            Manage businesses, users, and their data. Vhona does not send messages to customers, and this console cannot sign in as someone else.
+        </p>
+    </header>
+    @if (overview is not null)
+    {
+        <ul class="admin-stats">
+            <li><strong>@overview.BusinessCount</strong> businesses (@overview.DisabledBusinessCount disabled)</li>
+            <li><strong>@overview.UserCount</strong> users</li>
+            <li><strong>@overview.PendingInviteCount</strong> pending invites</li>
+        </ul>
+    }
+</section>
+
+@code {
+    private AdminOverview? overview;
+
+    protected override async Task OnInitializedAsync()
+    {
+        overview = await Admin.GetOverviewAsync();
+    }
+}

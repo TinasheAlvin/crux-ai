@@ -1,0 +1,180 @@
+@page "/team"
+@attribute [Authorize]
+@inject IBusinessAppService Businesses
+@inject ICurrentUser CurrentUser
+@inject NavigationManager Navigation
+
+<PageTitle>Team · Vhona AI</PageTitle>
+
+<section class="panel">
+    <header class="panel-header">
+        <p class="eyebrow">@CurrentUser.OrganizationName</p>
+        <h1>Team</h1>
+        <p class="lede">
+            Owners can rename the business and invite members. Members can use the books. They cannot invite people or change who-to-call thresholds.
+        </p>
+    </header>
+
+    @if (!string.IsNullOrWhiteSpace(banner))
+    {
+        <p class="banner @(bannerIsError ? "banner-error" : null)" role="status">@banner</p>
+    }
+
+    @if (CurrentUser.IsOwner)
+    {
+        <form class="stack-form" @onsubmit="RenameAsync">
+            <label class="field-label" for="rename">Business name</label>
+            <input id="rename" class="form-control" @bind="businessName" maxlength="200" />
+            <button class="btn btn-primary" type="submit" disabled="@busy">Save name</button>
+        </form>
+
+        <form class="stack-form" @onsubmit="InviteAsync">
+            <label class="field-label" for="invite-email">Invite a member</label>
+            <input id="invite-email" class="form-control" @bind="inviteEmail" placeholder="name@company.co.za" />
+            <button class="btn btn-outline" type="submit" disabled="@busy">Create invite</button>
+            <p class="hint">Vhona does not email this. Copy the link and send it yourself. It expires in 14 days.</p>
+        </form>
+    }
+
+    @if (members.Count > 0)
+    {
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var member in members)
+                {
+                    <tr>
+                        <td>@member.DisplayName</td>
+                        <td>@member.Email</td>
+                        <td>@member.Role</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    @if (CurrentUser.IsOwner && invites.Count > 0)
+    {
+        <h2>Pending invites</h2>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Link</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var invite in invites)
+                {
+                    <tr>
+                        <td>@invite.Email</td>
+                        <td><code>@InviteLink(invite.Token)</code></td>
+                        <td><button class="btn btn-link" type="button" @onclick="() => RevokeAsync(invite.Id)">Revoke</button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</section>
+
+@code {
+    private IReadOnlyList<BusinessMember> members = [];
+    private IReadOnlyList<PendingInvitation> invites = [];
+    private string businessName = "";
+    private string inviteEmail = "";
+    private string? banner;
+    private bool bannerIsError;
+    private bool busy;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!CurrentUser.HasOrganization)
+        {
+            Navigation.NavigateTo("/onboarding");
+            return;
+        }
+
+        businessName = CurrentUser.OrganizationName;
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        members = await Businesses.ListMembersAsync();
+        invites = CurrentUser.IsOwner
+            ? await Businesses.ListPendingInvitesAsync()
+            : [];
+    }
+
+    private async Task RenameAsync()
+    {
+        busy = true;
+        banner = null;
+        try
+        {
+            await Businesses.RenameAsync(businessName);
+            Navigation.NavigateTo("/team", forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+            banner = ex.Message;
+            bannerIsError = true;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task InviteAsync()
+    {
+        busy = true;
+        banner = null;
+        try
+        {
+            var issued = await Businesses.InviteMemberAsync(inviteEmail);
+            inviteEmail = "";
+            banner = $"Invite ready for {issued.Email}. Copy the link below.";
+            bannerIsError = false;
+            await ReloadAsync();
+        }
+        catch (Exception ex)
+        {
+            banner = ex.Message;
+            bannerIsError = true;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task RevokeAsync(Guid invitationId)
+    {
+        busy = true;
+        banner = null;
+        try
+        {
+            await Businesses.RevokeInviteAsync(invitationId);
+            await ReloadAsync();
+        }
+        catch (Exception ex)
+        {
+            banner = ex.Message;
+            bannerIsError = true;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private string InviteLink(string token) => Navigation.ToAbsoluteUri($"/onboarding?token={Uri.EscapeDataString(token)}").ToString();
+}

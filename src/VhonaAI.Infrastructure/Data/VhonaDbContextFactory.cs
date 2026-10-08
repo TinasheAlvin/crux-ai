@@ -7,8 +7,9 @@ public sealed class VhonaDbContextFactory : IDesignTimeDbContextFactory<VhonaDbC
 {
     public VhonaDbContext CreateDbContext(string[] args)
     {
+        // Design-time migrations target Azure SQL. The same migration set is applied to SQLite locally.
         var options = new DbContextOptionsBuilder<VhonaDbContext>()
-            .UseSqlite("Data Source=vhonaai.db")
+            .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=vhonaai-design;Trusted_Connection=True;TrustServerCertificate=True")
             .Options;
 
         return new VhonaDbContext(options);

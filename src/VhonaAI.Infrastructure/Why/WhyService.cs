@@ -1,3 +1,4 @@
+using VhonaAI.Application.Why;
 using VhonaAI.Core.Analytics;
 using VhonaAI.Core.Entities;
 using VhonaAI.Core.Health;
@@ -9,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace VhonaAI.Infrastructure.Why;
 
-public sealed class WhyService
+public sealed class WhyService : IWhyAppService
 {
     private readonly VhonaDbContext _db;
     private readonly ICurrentUser _currentUser;

@@ -1,0 +1,42 @@
+@inherits LayoutComponentBase
+@inject IVhonaAdmin Admin
+@inject ICurrentUser CurrentUser
+
+<div class="page admin-shell">
+    <div class="sidebar">
+        <div class="top-row ps-3 navbar navbar-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="admin">Vhona admin</a>
+            </div>
+        </div>
+        <nav class="flex-column nav-scrollable">
+            <div class="nav-item px-3"><NavLink class="nav-link" href="admin" Match="NavLinkMatch.All">Overview</NavLink></div>
+            <div class="nav-item px-3"><NavLink class="nav-link" href="admin/businesses">Businesses</NavLink></div>
+            <div class="nav-item px-3"><NavLink class="nav-link" href="admin/users">Users</NavLink></div>
+            <div class="nav-item px-3"><NavLink class="nav-link" href="admin/settings">Defaults</NavLink></div>
+            <div class="nav-item px-3"><NavLink class="nav-link" href="admin/events">Partner events</NavLink></div>
+            <div class="nav-item px-3"><NavLink class="nav-link" href="admin/audit">Audit</NavLink></div>
+            <div class="nav-item px-3"><NavLink class="nav-link" href="/">Back to the app</NavLink></div>
+        </nav>
+    </div>
+    <main>
+        <div class="top-row px-4">
+            <span class="org-chip">Platform</span>
+            <span class="user-chip">@CurrentUser.DisplayName</span>
+            <form method="post" action="/auth/logout">
+                <AntiforgeryToken />
+                <button type="submit" class="btn btn-link sign-out">Sign out</button>
+            </form>
+        </div>
+        <article class="content px-4">
+            @if (!Admin.IsAdmin)
+            {
+                <p class="lede">Not found.</p>
+            }
+            else
+            {
+                @Body
+            }
+        </article>
+    </main>
+</div>

@@ -1,7 +1,7 @@
 @page "/imports/{ImportJobId:guid}/map"
 @attribute [Authorize]
 @implements IDisposable
-@inject ImportService Imports
+@inject IImportAppService Imports
 @inject NavigationManager Navigation
 @inject IAnalytics Analytics
 
@@ -20,7 +20,9 @@ else
             <p class="eyebrow">@job.OriginalFileName</p>
             <h1>Confirm column mapping</h1>
             <p class="lede">
-                Headers were auto-guessed from common bank and bookkeeping exports.
+                @(job.Kind == ImportKind.Invoices
+                    ? "Headers were auto-guessed from invoice and debtors exports."
+                    : "Headers were auto-guessed from common bank and bookkeeping exports.")
                 Override anything that looks wrong — the mapping is saved for this organisation.
             </p>
         </header>
@@ -38,7 +40,7 @@ else
         <table class="data-table map-table">
             <thead>
                 <tr>
-                    <th>CSV column</th>
+                        <th>Column</th>
                     <th>Sample values</th>
                     <th>Maps to</th>
                 </tr>
@@ -51,7 +53,7 @@ else
                         <td class="muted">@column.Samples</td>
                         <td>
                             <InputSelect @bind-Value="column.TargetField" class="form-select">
-                                @foreach (var field in TransactionFields.All)
+                                @foreach (var field in FieldOptions)
                                 {
                                     <option value="@field">@field</option>
                                 }
@@ -75,6 +77,8 @@ else
     [Parameter] public Guid ImportJobId { get; set; }
 
     private ImportJob? job;
+    private IReadOnlyList<string> FieldOptions =>
+        job?.Kind == ImportKind.Invoices ? InvoiceFields.All : TransactionFields.All;
     private List<ColumnChoice> columns = [];
     private List<string> errors = [];
     private bool busy;
@@ -119,7 +123,7 @@ else
 
         busy = true;
         var mapping = columns.ToDictionary(column => column.Header, column => column.TargetField, StringComparer.OrdinalIgnoreCase);
-        errors = MappingValidator.Validate(mapping).ToList();
+        errors = ImportMapping.Validate(job.Kind, mapping).ToList();
         if (errors.Count > 0)
         {
             busy = false;

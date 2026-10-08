@@ -1,4 +1,5 @@
 using System.Text.Json;
+using VhonaAI.Application.Imports;
 using VhonaAI.Core.Analytics;
 using VhonaAI.Core.Csv;
 using VhonaAI.Core.Entities;
@@ -12,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace VhonaAI.Infrastructure.Imports;
 
-public sealed class ImportService
+public sealed class ImportService : IImportAppService
 {
     public const long MaxUploadBytes = 10 * 1024 * 1024;
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
@@ -41,6 +42,7 @@ public sealed class ImportService
         Stream content,
         string originalFileName,
         long byteSize,
+        ImportKind kind = ImportKind.Transactions,
         CancellationToken cancellationToken = default)
     {
         EnsureAuthenticated();
@@ -54,6 +56,7 @@ public sealed class ImportService
             OriginalFileName = Path.GetFileName(originalFileName),
             ByteSize = byteSize,
             Status = ImportStatus.Uploaded,
+            Kind = kind,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -65,17 +68,15 @@ public sealed class ImportService
             job.OriginalFileName,
             cancellationToken);
 
-        // Confirm the file is a readable CSV before we keep the job.
+        // Confirm the file can be read before we keep the job.
         await using (var stored = await _storage.OpenReadAsync(job.StoragePath, cancellationToken))
         {
-            _ = await _csvReader.ReadAsync(stored, cancellationToken);
+            _ = await ReadTableAsync(stored, job.OriginalFileName, cancellationToken);
         }
 
-        var savedProfile = await GetDefaultProfileAsync(job.OrganizationId, cancellationToken);
+        var savedProfile = await GetProfileAsync(job, cancellationToken);
         var table = await LoadTableAsync(job, cancellationToken);
-        var guessed = ColumnGuesser.Guess(table.Headers);
-        var savedMapping = DeserializeMapping(savedProfile?.MappingJson);
-        var mapping = ColumnGuesser.MergeSaved(table.Headers, guessed, savedMapping);
+        var mapping = GetMapping(job, table, DeserializeMapping(savedProfile?.MappingJson));
         job.MappingJson = JsonSerializer.Serialize(mapping);
 
         _db.ImportJobs.Add(job);
@@ -97,18 +98,29 @@ public sealed class ImportService
     public async Task<CsvTable> LoadTableAsync(ImportJob job, CancellationToken cancellationToken = default)
     {
         await using var stream = await _storage.OpenReadAsync(job.StoragePath, cancellationToken);
-        return await _csvReader.ReadAsync(stream, cancellationToken);
+        return await ReadTableAsync(stream, job.OriginalFileName, cancellationToken);
     }
 
-    public IReadOnlyDictionary<string, string> GetMapping(ImportJob job, CsvTable table)
+    public IReadOnlyDictionary<string, string> GetMapping(ImportJob job, CsvTable table) =>
+        GetMapping(job, table, DeserializeMapping(job.MappingJson));
+
+    private IReadOnlyDictionary<string, string> GetMapping(
+        ImportJob job,
+        CsvTable table,
+        IReadOnlyDictionary<string, string> stored)
     {
-        var stored = DeserializeMapping(job.MappingJson);
-        if (stored.Count > 0)
+        if (job.Kind == ImportKind.Invoices)
         {
-            return ColumnGuesser.MergeSaved(table.Headers, ColumnGuesser.Guess(table.Headers), stored);
+            var guessed = InvoiceColumnGuesser.Guess(table.Headers);
+            return stored.Count > 0
+                ? ColumnGuesser.MergeSaved(table.Headers, guessed, stored, InvoiceFields.All)
+                : guessed;
         }
 
-        return ColumnGuesser.Guess(table.Headers);
+        var transactionGuess = ColumnGuesser.Guess(table.Headers);
+        return stored.Count > 0
+            ? ColumnGuesser.MergeSaved(table.Headers, transactionGuess, stored)
+            : transactionGuess;
     }
 
     public IReadOnlyList<string> SampleValues(CsvTable table, string header, int take = 3) =>
@@ -123,7 +135,7 @@ public sealed class ImportService
         IReadOnlyDictionary<string, string> mapping,
         CancellationToken cancellationToken = default)
     {
-        var errors = MappingValidator.Validate(mapping);
+        var errors = ImportMapping.Validate(job.Kind, mapping);
         if (errors.Count > 0)
         {
             throw new InvalidOperationException(string.Join(" ", errors));
@@ -133,14 +145,15 @@ public sealed class ImportService
         job.Status = ImportStatus.Mapped;
         job.UpdatedAt = DateTime.UtcNow;
 
-        var profile = await GetDefaultProfileAsync(job.OrganizationId, cancellationToken);
+        var profileName = ProfileName(job.Kind);
+        var profile = await GetProfileAsync(job, cancellationToken);
         if (profile is null)
         {
             profile = new ColumnMappingProfile
             {
                 Id = Guid.NewGuid(),
                 OrganizationId = job.OrganizationId,
-                Name = "Default",
+                Name = profileName,
                 UpdatedAt = DateTime.UtcNow
             };
             _db.ColumnMappingProfiles.Add(profile);
@@ -156,10 +169,30 @@ public sealed class ImportService
         ImportJob job,
         CancellationToken cancellationToken = default)
     {
+        if (job.Kind == ImportKind.Invoices)
+        {
+            throw new InvalidOperationException("This file is an invoice import. Validate it as invoices.");
+        }
+
         var table = await LoadTableAsync(job, cancellationToken);
         var mapping = GetMapping(job, table);
         var corrections = DeserializeCorrections(job.CorrectionsJson);
         return ImportRowValidator.Validate(table, mapping, corrections);
+    }
+
+    public async Task<IReadOnlyList<ValidatedInvoiceRow>> ValidateInvoicesAsync(
+        ImportJob job,
+        CancellationToken cancellationToken = default)
+    {
+        if (job.Kind != ImportKind.Invoices)
+        {
+            throw new InvalidOperationException("This file is a transaction import.");
+        }
+
+        var table = await LoadTableAsync(job, cancellationToken);
+        var mapping = GetMapping(job, table);
+        var corrections = DeserializeCorrections(job.CorrectionsJson);
+        return InvoiceRowValidator.Validate(table, mapping, corrections);
     }
 
     public async Task SaveCorrectionsAsync(
@@ -178,6 +211,11 @@ public sealed class ImportService
         bool includeOnlyValid,
         CancellationToken cancellationToken = default)
     {
+        if (job.Kind == ImportKind.Invoices)
+        {
+            throw new InvalidOperationException("This file is an invoice import.");
+        }
+
         var rows = await ValidateAsync(job, cancellationToken);
         var valid = rows.Where(row => row.IsValid).ToList();
         var invalidCount = rows.Count - valid.Count;
@@ -194,6 +232,13 @@ public sealed class ImportService
         }
 
         var now = DateTime.UtcNow;
+        var excel = job.OriginalFileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase);
+        var source = await ImportSourceFactory.GetOrCreateAsync(
+            _db,
+            job,
+            excel ? DataSourceKind.TransactionExcel : DataSourceKind.TransactionCsv,
+            excel ? "xlsx" : "csv",
+            cancellationToken);
         var existing = await _db.Transactions
             .Where(t => t.ImportJobId == job.Id)
             .ToDictionaryAsync(t => t.RowId, cancellationToken);
@@ -224,6 +269,8 @@ public sealed class ImportService
             transaction.Reference = parsed.Reference;
             transaction.Counterparty = parsed.Counterparty;
             transaction.Balance = parsed.Balance;
+            transaction.BookedDate = parsed.BookedDate;
+            transaction.DataSourceId = source.Id;
             transaction.ImportedAt = now;
             persisted.Add(transaction);
         }
@@ -238,6 +285,17 @@ public sealed class ImportService
         await _db.SaveChangesAsync(cancellationToken);
         _analytics.TrackFinishesUpload(job.Id, persisted.Count);
         return persisted.OrderBy(t => t.SourceRowNumber).ToList();
+    }
+
+    public async Task<InvoiceImportResult> PersistInvoicesAsync(
+        ImportJob job,
+        bool includeOnlyValid,
+        CancellationToken cancellationToken = default)
+    {
+        var rows = await ValidateInvoicesAsync(job, cancellationToken);
+        var result = await new InvoiceImportPersister(_db).PersistAsync(job, rows, includeOnlyValid, cancellationToken);
+        _analytics.TrackFinishesUpload(job.Id, result.InvoiceCount + result.PaymentCount + result.CreditNoteCount);
+        return result;
     }
 
     public async Task<IReadOnlyList<ImportJob>> ListRecentAsync(int take = 10, CancellationToken cancellationToken = default)
@@ -268,11 +326,38 @@ public sealed class ImportService
             .CountAsync(t => t.OrganizationId == _currentUser.OrganizationId, cancellationToken);
     }
 
-    private async Task<ColumnMappingProfile?> GetDefaultProfileAsync(
-        Guid organizationId,
-        CancellationToken cancellationToken) =>
-        await _db.ColumnMappingProfiles
-            .FirstOrDefaultAsync(p => p.OrganizationId == organizationId && p.Name == "Default", cancellationToken);
+    public async Task<IReadOnlyList<Invoice>> ListInvoicesAsync(
+        Guid importJobId,
+        CancellationToken cancellationToken = default)
+    {
+        EnsureAuthenticated();
+        return await _db.Invoices
+            .Include(invoice => invoice.Customer)
+            .Where(invoice => invoice.OrganizationId == _currentUser.OrganizationId && invoice.ImportJobId == importJobId)
+            .OrderBy(invoice => invoice.SourceRowNumber)
+            .ToListAsync(cancellationToken);
+    }
+
+    private async Task<ColumnMappingProfile?> GetProfileAsync(ImportJob job, CancellationToken cancellationToken) =>
+        await _db.ColumnMappingProfiles.FirstOrDefaultAsync(
+            profile => profile.OrganizationId == job.OrganizationId && profile.Name == ProfileName(job.Kind),
+            cancellationToken);
+
+    private static string ProfileName(ImportKind kind) =>
+        kind == ImportKind.Invoices ? "Invoices" : "Default";
+
+    private async Task<CsvTable> ReadTableAsync(Stream stream, string fileName, CancellationToken cancellationToken)
+    {
+        if (fileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
+        {
+            await using var buffer = new MemoryStream();
+            await stream.CopyToAsync(buffer, cancellationToken);
+            buffer.Position = 0;
+            return ExcelSheetReader.Read(buffer);
+        }
+
+        return await _csvReader.ReadAsync(stream, cancellationToken);
+    }
 
     private static IReadOnlyDictionary<string, string> DeserializeMapping(string? json)
     {
@@ -309,13 +394,14 @@ public sealed class ImportService
 
         if (byteSize > MaxUploadBytes)
         {
-            throw new InvalidOperationException("CSV files larger than 10 MB are not supported in this slice.");
+            throw new InvalidOperationException("Files larger than 10 MB are not supported in this slice.");
         }
 
         var extension = Path.GetExtension(originalFileName);
-        if (!string.Equals(extension, ".csv", StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(extension, ".csv", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(extension, ".xlsx", StringComparison.OrdinalIgnoreCase))
         {
-            throw new InvalidOperationException("Upload a .csv file.");
+            throw new InvalidOperationException("Upload a .csv or .xlsx file.");
         }
     }
 

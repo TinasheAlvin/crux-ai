@@ -10,10 +10,10 @@
     @if (UseEntra)
     {
         <p class="lede">
-            Sign in with Microsoft Entra External ID. The first successful sign-in creates an organisation
-            and owner membership, then opens the CSV path.
+            Sign in with Microsoft Entra External ID. The first time, you name your own business.
+            Signing in again does not rename it.
         </p>
-        <a class="btn btn-primary btn-lg" href="/auth/signin" data-enhance-nav="false">Sign in</a>
+        <a class="btn btn-primary btn-lg" href="@SignInHref" data-enhance-nav="false">Sign in</a>
         <p class="hint">
             Use a user that already exists in the tenant. A sign-up flow that waits on email verification
             will not fit the five-minute demo.
@@ -28,6 +28,10 @@
 
         <form method="post" action="/auth/demo-login">
             <AntiforgeryToken />
+            @if (!string.IsNullOrWhiteSpace(SafeReturn))
+            {
+                <input type="hidden" name="returnUrl" value="@SafeReturn" />
+            }
             <button type="submit" class="btn btn-primary btn-lg">Continue as demo owner</button>
         </form>
 
@@ -48,4 +52,18 @@
 
     [SupplyParameterFromQuery(Name = "error")]
     public string? Error { get; set; }
+
+    [SupplyParameterFromQuery(Name = "returnUrl")]
+    public string? ReturnUrl { get; set; }
+
+    private string? SafeReturn =>
+        !string.IsNullOrWhiteSpace(ReturnUrl)
+        && ReturnUrl.StartsWith('/')
+        && !ReturnUrl.StartsWith("//")
+        && !ReturnUrl.Contains('\\')
+            ? ReturnUrl
+            : null;
+
+    private string SignInHref =>
+        SafeReturn is null ? "/auth/signin" : "/auth/signin?returnUrl=" + Uri.EscapeDataString(SafeReturn);
 }

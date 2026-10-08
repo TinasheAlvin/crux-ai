@@ -1,6 +1,6 @@
 namespace VhonaAI.Core.Entities;
 
-public sealed class MorningBrief
+public sealed class MorningBrief : IOrganizationOwned
 {
     public Guid Id { get; set; }
     public Guid OrganizationId { get; set; }

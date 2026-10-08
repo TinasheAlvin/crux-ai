@@ -1,9 +1,9 @@
 @page "/why"
 @page "/why/{MetricName}"
 @attribute [Authorize]
-@inject WhyService WhyAnswers
-@inject HealthKpiService HealthKpis
-@inject MorningBriefService Briefs
+@inject IWhyAppService WhyAnswers
+@inject IHealthKpiAppService HealthKpis
+@inject IMorningBriefAppService Briefs
 @inject ICurrentUser CurrentUser
 
 <PageTitle>Why · Vhona AI</PageTitle>
@@ -93,7 +93,7 @@ else
                     @foreach (var item in recent)
                     {
                         <tr>
-                            <td>@item.CreatedAt.ToString("dd MMM HH:mm")</td>
+                            <td>@JohannesburgTime.Format(item.CreatedAt, "dd MMM HH:mm")</td>
                             <td>@Truncate(item.Question)</td>
                             <td>
                                 <span class="status-pill @(item.Verified ? null : "is-unverified")">

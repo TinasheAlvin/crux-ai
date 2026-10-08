@@ -1,0 +1,132 @@
+@page "/admin/users/{Id:guid}"
+@layout AdminLayout
+@attribute [Authorize]
+@inject IAdminConsoleService Admin
+
+<PageTitle>User · Vhona admin</PageTitle>
+
+<section class="panel">
+    @if (detail is null)
+    {
+        <p class="lede">@banner</p>
+    }
+    else
+    {
+        <header class="panel-header">
+            <p class="eyebrow">@(detail.IsDisabled ? "Disabled" : "Active")</p>
+            <h1>@detail.DisplayName</h1>
+            <p class="lede">@detail.Email</p>
+        </header>
+        @if (!string.IsNullOrWhiteSpace(banner))
+        {
+            <p class="banner @(bannerIsError ? "banner-error" : null)" role="status">@banner</p>
+        }
+        <p>
+            <button class="btn btn-outline" type="button" disabled="@busy" @onclick="ToggleAsync">
+                @(detail.IsDisabled ? "Re-enable sign-in" : "Disable sign-in")
+            </button>
+        </p>
+        <h2>Memberships</h2>
+        <table class="data-table">
+            <thead><tr><th>Business</th><th>Role</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var membership in detail.Memberships)
+                {
+                    <tr>
+                        <td><a href="@($"/admin/businesses/{membership.OrganizationId}")">@membership.OrganizationName</a></td>
+                        <td>
+                            <select @onchange="e => ChangeRoleAsync(membership.MembershipId, e)">
+                                <option selected="@(membership.Role == "Owner")">Owner</option>
+                                <option selected="@(membership.Role == "Member")">Member</option>
+                            </select>
+                        </td>
+                        <td><button class="btn btn-link" type="button" @onclick="() => RemoveAsync(membership.MembershipId)">Remove</button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <h2>Open invites</h2>
+        @foreach (var invite in detail.Invites)
+        {
+            <p>@invite.OrganizationName · @invite.Email · @(invite.IsRevoked ? "revoked" : "pending")
+                <button class="btn btn-link" type="button" @onclick="() => ResendAsync(invite.Id)">New link</button>
+                <button class="btn btn-link" type="button" @onclick="() => RevokeAsync(invite.Id)">Revoke</button>
+            </p>
+        }
+    }
+</section>
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private AdminUserDetail? detail;
+    private bool busy;
+    private string? banner;
+    private bool bannerIsError;
+
+    protected override async Task OnParametersSetAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        try
+        {
+            detail = await Admin.GetUserAsync(Id);
+        }
+        catch (InvalidOperationException ex)
+        {
+            detail = null;
+            banner = ex.Message;
+            bannerIsError = true;
+        }
+    }
+
+    private async Task ToggleAsync() => await Run(async () =>
+    {
+        await Admin.SetUserDisabledAsync(Id, disabled: detail is not null && !detail.IsDisabled);
+        await LoadAsync();
+    });
+
+    private async Task ChangeRoleAsync(Guid membershipId, ChangeEventArgs args) => await Run(async () =>
+    {
+        await Admin.SetUserRoleAsync(membershipId, args.Value?.ToString() ?? "");
+        await LoadAsync();
+    });
+
+    private async Task RemoveAsync(Guid membershipId) => await Run(async () =>
+    {
+        await Admin.RemoveMemberAsync(membershipId);
+        await LoadAsync();
+    });
+
+    private async Task ResendAsync(Guid invitationId) => await Run(async () =>
+    {
+        var issued = await Admin.ResendInviteAsync(invitationId);
+        banner = $"New link for {issued.Email}. Vhona does not email it.";
+        await LoadAsync();
+    });
+
+    private async Task RevokeAsync(Guid invitationId) => await Run(async () =>
+    {
+        await Admin.RevokeInviteAsync(invitationId);
+        await LoadAsync();
+    });
+
+    private async Task Run(Func<Task> action)
+    {
+        busy = true;
+        banner = null;
+        try
+        {
+            await action();
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or UnauthorizedAccessException)
+        {
+            banner = ex.Message;
+            bannerIsError = true;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

@@ -1,0 +1,71 @@
+@page "/admin/settings"
+@layout AdminLayout
+@attribute [Authorize]
+@inject IAdminConsoleService Admin
+
+<PageTitle>Defaults · Vhona admin</PageTitle>
+
+<section class="panel">
+    <header class="panel-header">
+        <p class="eyebrow">Operator</p>
+        <h1>Global who-to-call defaults</h1>
+        <p class="lede">
+            Used when a business has not saved its own thresholds. A business owner still cannot change these. The detection rules are not in this version.
+        </p>
+    </header>
+    @if (!string.IsNullOrWhiteSpace(banner))
+    {
+        <p class="banner @(bannerIsError ? "banner-error" : null)" role="status">@banner</p>
+    }
+    <form class="stack-form" @onsubmit="SaveAsync">
+        <label class="field-label" for="cycles">Missed cycles for stopped</label>
+        <input id="cycles" class="form-control" type="number" @bind="cycles" />
+        <label class="field-label" for="percent">Drop percent</label>
+        <input id="percent" class="form-control" type="number" step="0.01" @bind="percent" />
+        <label class="field-label" for="months">Drop months</label>
+        <input id="months" class="form-control" type="number" @bind="months" />
+        <label class="field-label" for="history">Minimum invoice history</label>
+        <input id="history" class="form-control" type="number" @bind="history" />
+        <button class="btn btn-primary" type="submit" disabled="@busy">Save defaults</button>
+    </form>
+</section>
+
+@code {
+    private int cycles = 2;
+    private decimal percent = 50;
+    private int months = 2;
+    private int history = 3;
+    private bool busy;
+    private string? banner;
+    private bool bannerIsError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var current = await Admin.GetGlobalDefaultsAsync();
+        cycles = current.StoppedMissedCycles;
+        percent = current.DroppedPercent;
+        months = current.DroppedMonths;
+        history = current.MinimumInvoiceHistory;
+    }
+
+    private async Task SaveAsync()
+    {
+        busy = true;
+        banner = null;
+        try
+        {
+            await Admin.UpdateGlobalDefaultsAsync(new CallThresholdSettingsUpdate(cycles, percent, months, history));
+            banner = "Saved. Businesses without their own row will use these values.";
+            bannerIsError = false;
+        }
+        catch (InvalidOperationException ex)
+        {
+            banner = ex.Message;
+            bannerIsError = true;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

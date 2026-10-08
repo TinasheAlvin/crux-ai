@@ -73,6 +73,18 @@ public sealed class AzureBlobFileStorage : IFileStorage
         }
     }
 
+    public async Task DeleteAsync(string storagePath, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(storagePath))
+        {
+            return;
+        }
+
+        BlobUploadPath.EnsureSafe(storagePath);
+        await EnsureContainerAsync(cancellationToken);
+        await _container.GetBlobClient(storagePath).DeleteIfExistsAsync(cancellationToken: cancellationToken);
+    }
+
     private async Task EnsureContainerAsync(CancellationToken cancellationToken)
     {
         if (_containerReady)

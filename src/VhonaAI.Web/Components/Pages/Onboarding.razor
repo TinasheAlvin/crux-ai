@@ -1,0 +1,68 @@
+@page "/onboarding"
+@layout EmptyLayout
+@attribute [Authorize]
+@inject IBusinessAppService Businesses
+@inject ICurrentUser CurrentUser
+@inject NavigationManager Navigation
+
+<PageTitle>Name your business · Vhona AI</PageTitle>
+
+<section class="auth-card">
+    <h1>Name your business</h1>
+    <p class="lede">
+        Vhona keeps each business separate. This name is yours — signing in again will not change it.
+    </p>
+
+    @if (CurrentUser.HasOrganization)
+    {
+        <p class="lede">You are already in @CurrentUser.OrganizationName.</p>
+        <a class="btn btn-primary" href="/">Go to home</a>
+    }
+    else
+    {
+        <form method="post" action="/auth/create-business">
+            <AntiforgeryToken />
+            <label class="field-label" for="business-name">Business name</label>
+            <input id="business-name" name="name" class="form-control" maxlength="200" required />
+            <button type="submit" class="btn btn-primary btn-lg">Create business</button>
+        </form>
+
+        @if (invites.Count > 0)
+        {
+            <h2>Or join a business</h2>
+            <p class="lede">These invites match @CurrentUser.Email. Accepting makes you a member, not an owner.</p>
+            @foreach (var invite in invites)
+            {
+                <form method="post" action="/auth/accept-invite" class="invite-row">
+                    <AntiforgeryToken />
+                    <input type="hidden" name="token" value="@invite.Token" />
+                    <p>@invite.OrganizationName</p>
+                    <button type="submit" class="btn btn-outline">Join</button>
+                </form>
+            }
+        }
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Error))
+    {
+        <p class="banner banner-error" role="alert">@Error</p>
+    }
+</section>
+
+@code {
+    private IReadOnlyList<PendingInvitation> invites = [];
+
+    [SupplyParameterFromQuery(Name = "error")]
+    public string? Error { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (CurrentUser.HasOrganization)
+        {
+            Navigation.NavigateTo("/");
+            return;
+        }
+
+        invites = await Businesses.ListInvitesForCurrentEmailAsync();
+    }
+}

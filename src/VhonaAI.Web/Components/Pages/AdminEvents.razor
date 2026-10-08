@@ -1,0 +1,41 @@
+@page "/admin/events"
+@layout AdminLayout
+@attribute [Authorize]
+@inject IAdminConsoleService Admin
+
+<PageTitle>Partner events · Vhona admin</PageTitle>
+
+<section class="panel">
+    <header class="panel-header">
+        <p class="eyebrow">Operator</p>
+        <h1>Partner events</h1>
+        <p class="lede">Every business. A signed-in owner still only sees their own events at /internal/partner-events.</p>
+    </header>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>When</th>
+                <th>Event</th>
+                <th>Business</th>
+                <th>User</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var evt in events)
+            {
+                <tr>
+                    <td>@JohannesburgTime.Format(evt.Timestamp, "yyyy-MM-dd HH:mm")</td>
+                    <td>@evt.Name</td>
+                    <td><code>@evt.OrgId</code></td>
+                    <td><code>@evt.UserId</code></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>
+
+@code {
+    private IReadOnlyList<AdminPartnerEventRow> events = [];
+
+    protected override async Task OnInitializedAsync() => events = await Admin.ListPartnerEventsAsync();
+}

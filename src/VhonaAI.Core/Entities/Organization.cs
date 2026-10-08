@@ -6,6 +6,9 @@ public sealed class Organization
     public string Name { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
 
+    /// <summary>Set when a Vhona admin disables the business. Null means it can be used.</summary>
+    public DateTime? DisabledAt { get; set; }
+
     public ICollection<Membership> Memberships { get; set; } = new List<Membership>();
     public ICollection<ImportJob> ImportJobs { get; set; } = new List<ImportJob>();
     public ICollection<ColumnMappingProfile> MappingProfiles { get; set; } = new List<ColumnMappingProfile>();

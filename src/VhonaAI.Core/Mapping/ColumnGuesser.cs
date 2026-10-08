@@ -4,6 +4,9 @@ public static class ColumnGuesser
 {
     private static readonly (string Field, string[] Aliases)[] Catalog =
     [
+        (TransactionFields.BookedDate, [
+            "booked date", "booked", "date booked", "posting date", "posted on"
+        ]),
         (TransactionFields.Date, [
             "date", "txn date", "txn_date", "transaction date", "trans date",
             "posted", "posted date", "value date", "datum", "trandate"
@@ -56,14 +59,15 @@ public static class ColumnGuesser
     public static IReadOnlyDictionary<string, string> MergeSaved(
         IEnumerable<string> headers,
         IReadOnlyDictionary<string, string> guessed,
-        IReadOnlyDictionary<string, string>? saved)
+        IReadOnlyDictionary<string, string>? saved,
+        IReadOnlyCollection<string>? allowedFields = null)
     {
         var merged = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         foreach (var header in headers)
         {
             if (saved is not null
                 && saved.TryGetValue(header, out var savedField)
-                && TransactionFields.All.Contains(savedField, StringComparer.OrdinalIgnoreCase))
+                && (allowedFields ?? TransactionFields.All).Contains(savedField, StringComparer.OrdinalIgnoreCase))
             {
                 merged[header] = savedField;
             }

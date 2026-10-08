@@ -1,0 +1,54 @@
+@page "/admin/businesses"
+@layout AdminLayout
+@attribute [Authorize]
+@inject IAdminConsoleService Admin
+
+<PageTitle>Businesses · Vhona admin</PageTitle>
+
+<section class="panel">
+    <header class="panel-header">
+        <p class="eyebrow">Operator</p>
+        <h1>Businesses</h1>
+    </header>
+    <form class="stack-form" @onsubmit="SearchAsync">
+        <label class="field-label" for="business-query">Search by name</label>
+        <input id="business-query" class="form-control" @bind="query" />
+        <button class="btn btn-primary" type="submit">Search</button>
+    </form>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Owner</th>
+                <th>Members</th>
+                <th>Invoices</th>
+                <th>Transactions</th>
+                <th>Last import</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var business in businesses)
+            {
+                <tr>
+                    <td><a href="@($"/admin/businesses/{business.Id}")">@business.Name</a></td>
+                    <td>@business.OwnerEmail</td>
+                    <td>@business.MemberCount</td>
+                    <td>@business.InvoiceCount</td>
+                    <td>@business.TransactionCount</td>
+                    <td>@JohannesburgTime.Format(business.LastImportAt, "yyyy-MM-dd")</td>
+                    <td>@(business.IsDisabled ? "Disabled" : "Active")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>
+
+@code {
+    private string query = string.Empty;
+    private IReadOnlyList<AdminBusinessSummary> businesses = [];
+
+    protected override async Task OnInitializedAsync() => await SearchAsync();
+
+    private async Task SearchAsync() => businesses = await Admin.SearchBusinessesAsync(query);
+}

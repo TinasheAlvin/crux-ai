@@ -30,7 +30,7 @@ else if (Preference.OptedIn && ShowConfirmation)
     [Parameter] public EventCallback<MorningBriefPreferenceState> PreferenceChanged { get; set; }
     [Parameter] public bool ShowConfirmation { get; set; }
 
-    [Inject] public MorningBriefService Briefs { get; set; } = default!;
+    [Inject] public IMorningBriefAppService Briefs { get; set; } = default!;
 
     private bool busy;
 

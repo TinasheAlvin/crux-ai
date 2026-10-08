@@ -1,6 +1,6 @@
 namespace VhonaAI.Core.Entities;
 
-public sealed class ImportJob
+public sealed class ImportJob : IOrganizationOwned
 {
     public Guid Id { get; set; }
     public Guid OrganizationId { get; set; }
@@ -11,6 +11,9 @@ public sealed class ImportJob
     public long ByteSize { get; set; }
 
     public ImportStatus Status { get; set; } = ImportStatus.Uploaded;
+
+    /// <summary>Transactions keeps the original bank-style import. Invoices is the debtors file.</summary>
+    public ImportKind Kind { get; set; } = ImportKind.Transactions;
 
     /// <summary>JSON object: source header → target field name.</summary>
     public string? MappingJson { get; set; }
@@ -36,4 +39,10 @@ public enum ImportStatus
     Validated = 2,
     Imported = 3,
     Failed = 4
+}
+
+public enum ImportKind
+{
+    Transactions = 0,
+    Invoices = 1
 }

@@ -97,22 +97,30 @@ public static class VhonaAuthentication
         }
 
         var bootstrapper = context.HttpContext.RequestServices.GetRequiredService<OrgBootstrapper>();
-        var configuration = context.HttpContext.RequestServices.GetRequiredService<IConfiguration>();
         var displayName = string.IsNullOrWhiteSpace(signIn.DisplayName) ? signIn.Email : signIn.DisplayName;
-        var (user, organization, membership) = await bootstrapper.EnsureExternalUserAsync(
+        var user = await bootstrapper.UpsertExternalUserAsync(
             signIn.ExternalId,
             signIn.Email,
             displayName,
-            HostingConfiguration.DefaultOrganizationName(configuration),
             context.HttpContext.RequestAborted);
+        await context.HttpContext.RequestServices
+            .GetRequiredService<VhonaAI.Infrastructure.Data.VhonaDbContext>()
+            .SaveChangesAsync(context.HttpContext.RequestAborted);
+
+        var membership = await bootstrapper.FindMembershipAsync(user.Id, context.HttpContext.RequestAborted);
+        if (membership is null)
+        {
+            EntraSignInClaims.ApplyUser(identity, user.Id, user.Email, user.DisplayName);
+            return;
+        }
 
         EntraSignInClaims.ApplyTenant(
             identity,
             user.Id,
             user.Email,
             user.DisplayName,
-            organization.Id,
-            organization.Name,
+            membership.OrganizationId,
+            membership.Organization.Name,
             membership.Role.ToString());
     }
 }

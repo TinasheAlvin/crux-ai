@@ -2,10 +2,15 @@
     position: relative;
     display: flex;
     flex-direction: column;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: clip;
 }
 
 main {
     flex: 1;
+    min-width: 0;
+    max-width: 100%;
 }
 
 .sidebar {
@@ -39,10 +44,17 @@ main {
 @media (max-width: 640.98px) {
     .top-row {
         justify-content: space-between;
+        height: auto;
+        min-height: 3.5rem;
+        flex-wrap: wrap;
+        gap: 0.35rem 0.75rem;
+        padding-top: 0.45rem;
+        padding-bottom: 0.45rem;
     }
 
     .top-row ::deep a, .top-row ::deep .btn-link {
         margin-left: 0;
+        white-space: normal;
     }
 }
 

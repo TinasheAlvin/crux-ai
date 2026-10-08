@@ -1,0 +1,48 @@
+@page "/admin/users"
+@layout AdminLayout
+@attribute [Authorize]
+@inject IAdminConsoleService Admin
+
+<PageTitle>Users · Vhona admin</PageTitle>
+
+<section class="panel">
+    <header class="panel-header">
+        <p class="eyebrow">Operator</p>
+        <h1>Users</h1>
+    </header>
+    <form class="stack-form" @onsubmit="SearchAsync">
+        <label class="field-label" for="user-query">Search by name or email</label>
+        <input id="user-query" class="form-control" @bind="query" />
+        <button class="btn btn-primary" type="submit">Search</button>
+    </form>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Businesses</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in users)
+            {
+                <tr>
+                    <td><a href="@($"/admin/users/{user.Id}")">@user.DisplayName</a></td>
+                    <td>@user.Email</td>
+                    <td>@(string.IsNullOrWhiteSpace(user.Businesses) ? "—" : user.Businesses)</td>
+                    <td>@(user.IsDisabled ? "Disabled" : "Active")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>
+
+@code {
+    private string query = string.Empty;
+    private IReadOnlyList<AdminUserSummary> users = [];
+
+    protected override async Task OnInitializedAsync() => await SearchAsync();
+
+    private async Task SearchAsync() => users = await Admin.SearchUsersAsync(query);
+}
