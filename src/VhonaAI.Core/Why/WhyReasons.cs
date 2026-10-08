@@ -8,7 +8,8 @@ namespace VhonaAI.Core.Why;
 
 /// <summary>
 /// Splits a verified month on month change into the largest named movements.
-/// Names come only from counterparty, category, or description on the saved rows.
+/// Names come from the counterparty or category on the saved rows.
+/// The description is used only when both of those are blank.
 /// </summary>
 public static class WhyReasons
 {
@@ -184,17 +185,22 @@ public static class WhyReasons
         IReadOnlyList<Transaction> currentRows,
         IReadOnlyList<Transaction> previousRows)
     {
-        (string Name, Func<Transaction, string?> Key)[] dimensions =
+        (Func<Transaction, string?> Key, bool Required)[] dimensions =
         [
-            ("counterparty", row => row.Counterparty),
-            ("category", row => row.Category),
-            ("description", row => row.Description)
+            (row => row.Counterparty, false),
+            (row => row.Category, false),
+            (row => row.Description, true)
         ];
 
         List<Bucket>? best = null;
         var bestScore = decimal.MinValue;
         foreach (var dimension in dimensions)
         {
+            if (dimension.Required && best is not null)
+            {
+                break;
+            }
+
             var buckets = Group(metric, currentRows, previousRows, dimension.Key);
             if (buckets is null)
             {

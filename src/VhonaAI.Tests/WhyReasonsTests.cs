@@ -34,6 +34,28 @@ public class WhyReasonsTests
     }
 
     [Fact]
+    public void A_customer_name_beats_a_finer_description()
+    {
+        var transactions = new List<Transaction>
+        {
+            Row("feb-a", new DateOnly(2026, 2, 4), 100m, "LD250, 10 units, generated", "Sales", "Eastern Cape"),
+            Row("mar-a", new DateOnly(2026, 3, 4), 400m, "LD250, 40 units", "Sales", "Eastern Cape"),
+            Row("feb-b", new DateOnly(2026, 2, 5), 50m, "SC140, 5 units, generated", "Sales", "Namibia"),
+            Row("mar-b", new DateOnly(2026, 3, 5), 80m, "SC140, 8 units", "Sales", "Namibia")
+        };
+        var snapshot = HealthKpiCalculator.Compute(transactions, cashFieldMapped: false);
+        var result = WhyVerifier.Verify(snapshot.Revenue!.WhyPrompt, transactions, snapshot);
+
+        Assert.True(result.Verified);
+        Assert.Equal(
+            ["Eastern Cape is up R300.", "Namibia is up R30."],
+            result.Reasons.Select(reason => reason.Title).ToArray());
+        Assert.DoesNotContain("generated", result.Answer, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("units", result.Answer, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal(snapshot.Revenue.Delta, result.Reasons.Sum(reason => reason.Amount));
+    }
+
+    [Fact]
     public void A_small_remainder_is_one_everything_else_line_with_its_rows()
     {
         var transactions = new List<Transaction>
