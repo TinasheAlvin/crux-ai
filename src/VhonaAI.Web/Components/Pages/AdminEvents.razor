@@ -35,7 +35,23 @@
 </section>
 
 @code {
+    private readonly AdminViewGuard views = new();
     private IReadOnlyList<AdminPartnerEventRow> events = [];
 
-    protected override async Task OnInitializedAsync() => events = await Admin.ListPartnerEventsAsync();
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        views.MarkInteractive();
+        if (!views.TryRecord("events"))
+        {
+            return;
+        }
+
+        events = await Admin.ListPartnerEventsAsync();
+        StateHasChanged();
+    }
 }

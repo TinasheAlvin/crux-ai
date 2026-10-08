@@ -20,7 +20,10 @@ else
                 The rows are the proof. Vhona drafts a reminder, and you decide whether to send it.
             </p>
             <p class="hint">@list.SortExplanation</p>
-            <p class="hint">Days overdue are counted to @AsAtLabel(list.AsAt), the end of the imported books.</p>
+            @if (list.HasInvoices)
+            {
+                <p class="hint">Days overdue are counted to @AsAtLabel(list.AsAt), the end of the imported books.</p>
+            }
             @if (list.UsingSample)
             {
                 <p class="hint">Sample books. Customer names are made up.</p>
@@ -35,7 +38,7 @@ else
 
         @if (list.Flags.Count == 0)
         {
-            <p>No one is flagged from these books.</p>
+            <p>@(list.HasInvoices ? "No one is flagged from these books." : "No invoices are loaded yet.")</p>
             @if (list.CanLoadSample)
             {
                 <button class="btn btn-primary" type="button" disabled="@busy" @onclick="LoadSampleAsync">Load sample books</button>
@@ -63,13 +66,13 @@ else
                         <WhoToCallReceipt Detail="detail"
                                           Busy="busy"
                                           CanRecord="list.IsOwner"
-                                          SnoozeDate="snoozeDate"
+                                          SnoozeDate="@snoozeDate"
                                           SnoozeDateChanged="OnSnoozeDate"
                                           OnAction="RecordAsync" />
                         @if (detail.Flag.Kind == CallFlagKind.Late && !string.IsNullOrWhiteSpace(draftText))
                         {
                             <WhoToCallDraft Detail="detail"
-                                            Body="draftText"
+                                            Body="@draftText"
                                             BodyChanged="OnDraft"
                                             Busy="busy"
                                             Copied="copied"

@@ -31,6 +31,7 @@
 </section>
 
 @code {
+    private readonly AdminViewGuard views = new();
     private int cycles = 2;
     private decimal percent = 50;
     private int months = 2;
@@ -39,13 +40,25 @@
     private string? banner;
     private bool bannerIsError;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        views.MarkInteractive();
+        if (!views.TryRecord("defaults"))
+        {
+            return;
+        }
+
         var current = await Admin.GetGlobalDefaultsAsync();
         cycles = current.StoppedMissedCycles;
         percent = current.DroppedPercent;
         months = current.DroppedMonths;
         history = current.MinimumInvoiceHistory;
+        StateHasChanged();
     }
 
     private async Task SaveAsync()

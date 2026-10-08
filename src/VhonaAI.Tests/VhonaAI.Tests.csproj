@@ -15,6 +15,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.21" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="bunit" Version="1.39.5" />
     <PackageReference Include="xunit" Version="2.5.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
   </ItemGroup>
@@ -26,6 +27,7 @@
   <ItemGroup>
     <ProjectReference Include="..\VhonaAI.Core\VhonaAI.Core.csproj" />
     <ProjectReference Include="..\VhonaAI.Infrastructure\VhonaAI.Infrastructure.csproj" />
+    <ProjectReference Include="..\VhonaAI.Web\VhonaAI.Web.csproj" />
   </ItemGroup>
 
 </Project>

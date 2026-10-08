@@ -31,6 +31,7 @@ public sealed class WhoToCallList
     public bool CanLoadSample { get; init; }
     public bool UsingSample { get; init; }
     public bool IsOwner { get; init; }
+    public bool HasInvoices { get; init; }
     public IReadOnlyList<WhoToCallFlag> Flags { get; init; } = [];
 }
 

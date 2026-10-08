@@ -196,8 +196,8 @@ public static class WhoToCallRules
 
     private static LateInvoiceRow ToLateRow(WhoToCallInvoice invoice, DateOnly asAt)
     {
-        var overdue = IsUnpaid(invoice.Status)
-                      && invoice.AmountDue > 0
+        var unpaid = IsUnpaid(invoice.Status) && invoice.AmountDue > 0;
+        var overdue = unpaid
                       && invoice.DueDate is DateOnly due
                       && due < asAt
             ? asAt.DayNumber - due.DayNumber
@@ -211,6 +211,7 @@ public static class WhoToCallRules
             Amount = invoice.Amount,
             AmountDue = IsUnpaid(invoice.Status) ? invoice.AmountDue : invoice.Amount,
             IsOpen = overdue is not null,
+            NotDueYet = unpaid && overdue is null,
             DaysOverdue = overdue,
             PaidDate = invoice.PaidDate
         };

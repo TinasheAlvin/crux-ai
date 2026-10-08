@@ -45,10 +45,26 @@
 </section>
 
 @code {
+    private readonly AdminViewGuard views = new();
     private string query = string.Empty;
     private IReadOnlyList<AdminBusinessSummary> businesses = [];
 
-    protected override async Task OnInitializedAsync() => await SearchAsync();
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        views.MarkInteractive();
+        if (!views.TryRecord("businesses"))
+        {
+            return;
+        }
+
+        await SearchAsync();
+        StateHasChanged();
+    }
 
     private async Task SearchAsync() => businesses = await Admin.SearchBusinessesAsync(query);
 }

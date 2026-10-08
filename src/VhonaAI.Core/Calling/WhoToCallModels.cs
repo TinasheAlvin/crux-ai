@@ -117,6 +117,7 @@ public sealed class LateInvoiceRow
     public decimal Amount { get; init; }
     public decimal AmountDue { get; init; }
     public bool IsOpen { get; init; }
+    public bool NotDueYet { get; init; }
     public int? DaysOverdue { get; init; }
     public DateOnly? PaidDate { get; init; }
 }

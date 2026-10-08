@@ -30,12 +30,17 @@ public class WhoToCallServiceTests
         await using (db)
         {
             var service = Service(db, user, clock);
+            var empty = await service.GetListAsync();
+            Assert.False(empty.HasInvoices);
+            Assert.Empty(empty.Flags);
+
             await service.LoadSampleAsync();
             var again = await Assert.ThrowsAsync<InvalidOperationException>(() => service.LoadSampleAsync());
             Assert.Contains("no invoices", again.Message, StringComparison.OrdinalIgnoreCase);
 
             var list = await service.GetListAsync();
             Assert.Equal(new DateOnly(2026, 3, 31), list.AsAt);
+            Assert.True(list.HasInvoices);
             Assert.True(list.UsingSample);
             Assert.False(list.CanLoadSample);
             Assert.Equal(

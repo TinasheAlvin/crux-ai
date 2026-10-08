@@ -147,11 +147,37 @@
     private decimal percent;
     private int months;
     private int history;
+    private readonly AdminViewGuard views = new();
     private bool busy;
     private string? banner;
     private bool bannerIsError;
 
-    protected override async Task OnParametersSetAsync() => await LoadAsync();
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!views.TryRecord(Id.ToString()))
+        {
+            return;
+        }
+
+        await LoadAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        views.MarkInteractive();
+        if (!views.TryRecord(Id.ToString()))
+        {
+            return;
+        }
+
+        await LoadAsync();
+        StateHasChanged();
+    }
 
     private async Task LoadAsync()
     {

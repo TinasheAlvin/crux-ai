@@ -64,10 +64,38 @@
     [Parameter] public Guid BusinessId { get; set; }
     [Parameter] public Guid ImportId { get; set; }
 
+    private readonly AdminViewGuard views = new();
     private AdminImportDetail? detail;
     private string? error;
 
     protected override async Task OnParametersSetAsync()
+    {
+        if (!views.TryRecord(ImportId.ToString()))
+        {
+            return;
+        }
+
+        await LoadAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        views.MarkInteractive();
+        if (!views.TryRecord(ImportId.ToString()))
+        {
+            return;
+        }
+
+        await LoadAsync();
+        StateHasChanged();
+    }
+
+    private async Task LoadAsync()
     {
         try
         {
