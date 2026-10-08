@@ -1,7 +1,9 @@
 using System.Text.Json;
 using VhonaAI.Application.Brief;
+using VhonaAI.Application.Calling;
 using VhonaAI.Core.Analytics;
 using VhonaAI.Core.Brief;
+using VhonaAI.Core.Calling;
 using VhonaAI.Core.Entities;
 using VhonaAI.Core.Health;
 using VhonaAI.Core.Identity;
@@ -32,6 +34,7 @@ public sealed class MorningBriefService : IMorningBriefAppService
     private readonly WhyService _why;
     private readonly IClock _clock;
     private readonly IAnalytics _analytics;
+    private readonly IWhoToCallAppService? _calls;
 
     public MorningBriefService(
         VhonaDbContext db,
@@ -39,7 +42,8 @@ public sealed class MorningBriefService : IMorningBriefAppService
         HealthKpiService health,
         WhyService why,
         IClock clock,
-        IAnalytics? analytics = null)
+        IAnalytics? analytics = null,
+        IWhoToCallAppService? calls = null)
     {
         _db = db;
         _currentUser = currentUser;
@@ -47,6 +51,7 @@ public sealed class MorningBriefService : IMorningBriefAppService
         _why = why;
         _clock = clock;
         _analytics = analytics ?? NullAnalytics.Instance;
+        _calls = calls;
     }
 
     public async Task<MorningBriefPreferenceState> GetPreferenceAsync(CancellationToken cancellationToken = default)
@@ -151,10 +156,32 @@ public sealed class MorningBriefService : IMorningBriefAppService
 
         if (existing is not null)
         {
-            return await ToLandingAsync(existing, cancellationToken);
+            return await WithWhoToCallAsync(await ToLandingAsync(existing, cancellationToken), cancellationToken);
         }
 
-        return await GenerateAndPersistAsync(today, cancellationToken);
+        return await WithWhoToCallAsync(await GenerateAndPersistAsync(today, cancellationToken), cancellationToken);
+    }
+
+    private async Task<MorningBriefLanding> WithWhoToCallAsync(
+        MorningBriefLanding landing,
+        CancellationToken cancellationToken)
+    {
+        if (_calls is null || !landing.OptedIn)
+        {
+            return landing;
+        }
+
+        var list = await _calls.GetListAsync(cancellationToken);
+        if (list.Flags.Count == 0 || list.Flags.Any(flag => flag.RowCount == 0))
+        {
+            return landing;
+        }
+
+        var count = list.Flags.Count;
+        landing.WhoToCall = new WhoToCallBriefLine(
+            count,
+            count == 1 ? "1 customer to call" : $"{count} customers to call");
+        return landing;
     }
 
     private async Task<MorningBriefLanding> GenerateAndPersistAsync(

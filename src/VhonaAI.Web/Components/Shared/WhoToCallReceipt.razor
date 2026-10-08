@@ -1,0 +1,167 @@
+<article class="panel who-receipt" aria-label="Receipt for @Detail.Flag.CustomerName">
+    <p class="eyebrow">Receipt</p>
+    <h2>@Detail.Flag.CustomerName</h2>
+    @if (!string.IsNullOrWhiteSpace(Detail.Flag.Late?.Terms))
+    {
+        <p class="hint">@Detail.Flag.Late!.Terms</p>
+    }
+    @if (!string.IsNullOrWhiteSpace(Detail.Flag.ContactPerson))
+    {
+        <p class="hint">Contact: @Detail.Flag.ContactPerson</p>
+    }
+    <p>@(Detail.Flag.Late?.Intro ?? Detail.Flag.Detail)</p>
+
+    @if (Detail.Flag.Late is { } late)
+    {
+        <div class="table-scroll">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Invoice</th>
+                        <th>Issued</th>
+                        <th>Due</th>
+                        <th>Amount</th>
+                        <th>Overdue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in late.Invoices)
+                    {
+                        <tr class="@(row.IsOpen ? "who-open" : null)">
+                            <td>@row.Number</td>
+                            <td>@RandAmounts.DayShortMonth(row.Issued)</td>
+                            <td>@(row.Due is DateOnly due ? RandAmounts.DayShortMonth(due) : "")</td>
+                            <td>@RandAmounts.Format(row.IsOpen ? row.AmountDue : row.Amount)</td>
+                            <td>
+                                @if (row.IsOpen && row.DaysOverdue is int days)
+                                {
+                                    @(days == 1 ? "1 day" : $"{days} days")
+                                }
+                                else if (row.PaidDate is DateOnly paid)
+                                {
+                                    <span>Paid @RandAmounts.DayShortMonth(paid)</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    <tr>
+                        <td>Open</td>
+                        <td></td>
+                        <td></td>
+                        <td>@RandAmounts.Format(Detail.Flag.OpenTotal)</td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    }
+    else if (Detail.Flag.Stopped is { } stopped)
+    {
+        <p class="hint">@stopped.Cadence. @stopped.MissedCycles missed cycles. Last invoice @RandAmounts.DayMonth(stopped.LastInvoiceDate).</p>
+        <div class="table-scroll">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Invoice</th>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in stopped.Invoices)
+                    {
+                        <tr>
+                            <td>@row.Number</td>
+                            <td>@RandAmounts.DayMonth(row.InvoiceDate)</td>
+                            <td>@row.Description</td>
+                            <td>@RandAmounts.Format(row.Amount)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else if (Detail.Flag.Dropped is { } dropped)
+    {
+        <div class="table-scroll">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Line item</th>
+                        @foreach (var month in dropped.Months)
+                        {
+                            <th>@RandAmounts.MonthName(month.Month)[..3]</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var line in dropped.Lines)
+                    {
+                        <tr>
+                            <td>@line.Description</td>
+                            @foreach (var amount in line.MonthAmounts)
+                            {
+                                <td>@(amount is decimal value ? RandAmounts.Format(value) : "none")</td>
+                            }
+                        </tr>
+                    }
+                    <tr>
+                        <td>Total</td>
+                        @foreach (var total in dropped.Totals)
+                        {
+                            <td>@RandAmounts.Format(total)</td>
+                        }
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <p class="hint">Days overdue are counted to @RandAmounts.DayMonth(Detail.AsAt) @Detail.AsAt.Year. @Detail.ReceiptFooter</p>
+
+    @if (CanRecord)
+    {
+        <div class="who-actions">
+            <button class="btn btn-outline" type="button" disabled="@Busy" @onclick="() => OnAction.InvokeAsync(CallActionKind.Called)">Called</button>
+            <label class="field-label" for="snooze-until">Snooze until</label>
+            <input id="snooze-until" type="date" class="form-control who-date" value="@SnoozeDate" @onchange="OnDate" />
+            <button class="btn btn-outline" type="button" disabled="@Busy" @onclick="() => OnAction.InvokeAsync(CallActionKind.Snoozed)">Snoozed</button>
+            <button class="btn btn-outline" type="button" disabled="@Busy" @onclick="() => OnAction.InvokeAsync(CallActionKind.Paid)">Paid</button>
+            <button class="btn btn-outline" type="button" disabled="@Busy" @onclick="() => OnAction.InvokeAsync(CallActionKind.NotAConcern)">Not a concern</button>
+        </div>
+    }
+
+    @if (Detail.History.Count > 0)
+    {
+        <h3>History</h3>
+        <ul class="who-history">
+            @foreach (var item in Detail.History)
+            {
+                <li>@HistoryLabel(item) · @item.ActorName</li>
+            }
+        </ul>
+    }
+</article>
+
+@code {
+    [Parameter, EditorRequired] public WhoToCallFlagDetail Detail { get; set; } = null!;
+    [Parameter] public bool Busy { get; set; }
+    [Parameter] public string SnoozeDate { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string> SnoozeDateChanged { get; set; }
+    [Parameter] public EventCallback<CallActionKind> OnAction { get; set; }
+    [Parameter] public bool CanRecord { get; set; }
+
+    private Task OnDate(ChangeEventArgs args) => SnoozeDateChanged.InvokeAsync(args.Value?.ToString() ?? string.Empty);
+
+    private static string HistoryLabel(CallActionDto item) => item.Kind switch
+    {
+        CallActionKind.Called => "Called",
+        CallActionKind.Snoozed => item.SnoozeUntil is DateOnly until
+            ? $"Snoozed until {RandAmounts.DayMonth(until)} {until.Year}"
+            : "Snoozed",
+        CallActionKind.Paid => "Marked paid",
+        CallActionKind.NotAConcern => "Not a concern",
+        _ => item.Kind.ToString()
+    };
+}

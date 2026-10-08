@@ -236,3 +236,44 @@ internal sealed class PlatformCallDefaultsConfiguration : IEntityTypeConfigurati
         builder.Property(x => x.DroppedPercent).HasColumnType("decimal(5,2)");
     }
 }
+
+internal sealed class CallCustomerActionConfiguration : IEntityTypeConfiguration<CallCustomerAction>
+{
+    public void Configure(EntityTypeBuilder<CallCustomerAction> builder)
+    {
+        builder.ToTable("CallCustomerActions");
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.Kind).HasConversion<string>().HasMaxLength(32);
+        builder.Property(x => x.Note).HasMaxLength(500);
+        builder.Property(x => x.EvidenceKey).HasMaxLength(2000);
+        builder.HasIndex(x => new { x.OrganizationId, x.CustomerId, x.At });
+        builder.HasOne<Organization>()
+            .WithMany()
+            .HasForeignKey(x => x.OrganizationId)
+            .OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne(x => x.Customer)
+            .WithMany()
+            .HasForeignKey(x => x.CustomerId)
+            .OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+internal sealed class ReminderDraftConfiguration : IEntityTypeConfiguration<ReminderDraft>
+{
+    public void Configure(EntityTypeBuilder<ReminderDraft> builder)
+    {
+        builder.ToTable("ReminderDrafts");
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.Body).HasMaxLength(4000).IsRequired();
+        builder.Property(x => x.Status).HasMaxLength(32).IsRequired();
+        builder.HasIndex(x => new { x.OrganizationId, x.CustomerId }).IsUnique();
+        builder.HasOne<Organization>()
+            .WithMany()
+            .HasForeignKey(x => x.OrganizationId)
+            .OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne(x => x.Customer)
+            .WithMany()
+            .HasForeignKey(x => x.CustomerId)
+            .OnDelete(DeleteBehavior.Restrict);
+    }
+}

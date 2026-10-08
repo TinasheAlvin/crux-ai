@@ -208,7 +208,9 @@ public sealed class AdminConsoleService : IAdminConsoleService
             payments = await _db.Payments.IgnoreQueryFilters().AsNoTracking().Where(item => item.OrganizationId == organizationId).ToListAsync(cancellationToken),
             creditNotes = await _db.CreditNotes.IgnoreQueryFilters().AsNoTracking().Where(item => item.OrganizationId == organizationId).ToListAsync(cancellationToken),
             invitations = await _db.Invitations.IgnoreQueryFilters().AsNoTracking().Where(item => item.OrganizationId == organizationId).ToListAsync(cancellationToken),
-            callThresholdSettings = await _db.CallThresholdSettings.IgnoreQueryFilters().AsNoTracking().Where(item => item.OrganizationId == organizationId).ToListAsync(cancellationToken)
+            callThresholdSettings = await _db.CallThresholdSettings.IgnoreQueryFilters().AsNoTracking().Where(item => item.OrganizationId == organizationId).ToListAsync(cancellationToken),
+            callActions = await _db.CallCustomerActions.IgnoreQueryFilters().AsNoTracking().Where(item => item.OrganizationId == organizationId).ToListAsync(cancellationToken),
+            reminderDrafts = await _db.ReminderDrafts.IgnoreQueryFilters().AsNoTracking().Where(item => item.OrganizationId == organizationId).ToListAsync(cancellationToken)
         };
 
         await AuditAsync("business.export", organizationId, organizationId.ToString(), $"Exported {organization.Name}.", cancellationToken);
@@ -535,6 +537,8 @@ public sealed class AdminConsoleService : IAdminConsoleService
         await _db.MorningBriefPreferences.IgnoreQueryFilters().Where(item => item.OrganizationId == organizationId).ExecuteDeleteAsync(cancellationToken);
         await _db.WhyCitations.IgnoreQueryFilters().Where(item => whyIds.Contains(item.WhyAnswerId)).ExecuteDeleteAsync(cancellationToken);
         await _db.WhyAnswers.IgnoreQueryFilters().Where(item => item.OrganizationId == organizationId).ExecuteDeleteAsync(cancellationToken);
+        await _db.ReminderDrafts.IgnoreQueryFilters().Where(item => item.OrganizationId == organizationId).ExecuteDeleteAsync(cancellationToken);
+        await _db.CallCustomerActions.IgnoreQueryFilters().Where(item => item.OrganizationId == organizationId).ExecuteDeleteAsync(cancellationToken);
         await _db.CreditNotes.IgnoreQueryFilters().Where(item => item.OrganizationId == organizationId).ExecuteDeleteAsync(cancellationToken);
         await _db.Payments.IgnoreQueryFilters().Where(item => item.OrganizationId == organizationId).ExecuteDeleteAsync(cancellationToken);
         await _db.InvoiceLines.IgnoreQueryFilters().Where(item => item.OrganizationId == organizationId).ExecuteDeleteAsync(cancellationToken);

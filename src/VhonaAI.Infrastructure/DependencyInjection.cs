@@ -101,6 +101,8 @@ public static class DependencyInjection
         services.AddScoped<IBusinessAppService>(sp => sp.GetRequiredService<BusinessService>());
         services.AddScoped<CallSettingsService>();
         services.AddScoped<ICallSettingsAppService>(sp => sp.GetRequiredService<CallSettingsService>());
+        services.AddScoped<WhoToCallService>();
+        services.AddScoped<IWhoToCallAppService>(sp => sp.GetRequiredService<WhoToCallService>());
         services.AddScoped<OrgBootstrapper>();
         services.AddScoped<AdminConsoleService>();
         services.AddScoped<IAdminConsoleService>(sp => sp.GetRequiredService<AdminConsoleService>());

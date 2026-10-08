@@ -1,0 +1,73 @@
+@inject IJSRuntime Js
+
+<article class="panel who-draft" aria-label="Reminder draft">
+    <p class="eyebrow">Reminder</p>
+    <h2>Draft for @(string.IsNullOrWhiteSpace(Detail.Flag.ContactPerson) ? Detail.Flag.CustomerName : Detail.Flag.ContactPerson)</h2>
+    <p class="hint">
+        To @(Detail.Flag.ContactPerson ?? Detail.Flag.CustomerName)@if (!string.IsNullOrWhiteSpace(Detail.Flag.CustomerName))
+        {
+            <text>, @Detail.Flag.CustomerName</text>
+        }
+    </p>
+    <p><span class="who-tag">@Detail.DraftStatus</span></p>
+    @if (Detail.CanEdit)
+    {
+        <textarea class="form-control who-draft-body" rows="12" value="@Body" @oninput="OnInput"></textarea>
+        <div class="who-actions">
+            <button class="btn btn-outline" type="button" disabled="@Busy" @onclick="OnSave">Save draft</button>
+            <button class="btn btn-outline" type="button" @onclick="CopyAsync">@(Copied ? "Copied" : "Copy")</button>
+            @if (WhatsApp is not null)
+            {
+                <a class="btn btn-primary" href="@WhatsApp" target="_blank" rel="noopener noreferrer">Open in WhatsApp</a>
+            }
+            @if (Email is not null)
+            {
+                <a class="btn btn-outline" href="@Email">Open in email</a>
+            }
+        </div>
+    }
+    else
+    {
+        <pre class="why-answer-body">@Body</pre>
+        <div class="who-actions">
+            <button class="btn btn-outline" type="button" @onclick="CopyAsync">@(Copied ? "Copied" : "Copy")</button>
+            @if (WhatsApp is not null)
+            {
+                <a class="btn btn-primary" href="@WhatsApp" target="_blank" rel="noopener noreferrer">Open in WhatsApp</a>
+            }
+            @if (Email is not null)
+            {
+                <a class="btn btn-outline" href="@Email">Open in email</a>
+            }
+        </div>
+    }
+    <p class="hint">Vhona does not send this. Copy it, or open WhatsApp or email and send it yourself.</p>
+</article>
+
+@code {
+    [Parameter, EditorRequired] public WhoToCallFlagDetail Detail { get; set; } = null!;
+    [Parameter] public string Body { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string> BodyChanged { get; set; }
+    [Parameter] public bool Busy { get; set; }
+    [Parameter] public bool Copied { get; set; }
+    [Parameter] public EventCallback OnSave { get; set; }
+    [Parameter] public EventCallback OnCopied { get; set; }
+
+    private string? WhatsApp => string.IsNullOrWhiteSpace(Body) ? null : ReminderHandoff.WhatsAppLink(Detail.Flag.Phone, Body);
+    private string? Email => string.IsNullOrWhiteSpace(Body)
+        ? null
+        : ReminderHandoff.EmailLink(Detail.Flag.Email, "Open invoices from " + Detail.BusinessName, Body);
+
+    private Task OnInput(ChangeEventArgs args) => BodyChanged.InvokeAsync(args.Value?.ToString() ?? string.Empty);
+
+    private async Task CopyAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Body))
+        {
+            return;
+        }
+
+        await Js.InvokeVoidAsync("vhonaCopyText", Body);
+        await OnCopied.InvokeAsync();
+    }
+}
