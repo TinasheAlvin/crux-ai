@@ -13,19 +13,18 @@ else if (!landing.OptedIn)
 {
     <section class="hero-card">
         <p class="eyebrow">@CurrentUser.OrganizationName</p>
-        <h1>Morning brief is opt-in</h1>
+        <h1>The morning brief waits until you ask</h1>
         <p class="lede">
-            Ask a question first. After a trusted (cited) why, Vhona offers one primary CTA:
-            @MorningBriefMessages.Cta. Dismiss it once and it will not come back.
+            Ask a question first. After a trusted why, Vhona offers one next step:
+            send me the morning brief. Dismiss it once and it will not come back.
         </p>
-        <a class="btn btn-primary" href="/why">@MorningBriefMessages.AskWhy</a>
+        <a class="btn btn-primary" href="/why">Ask why</a>
     </section>
 }
 else
 {
     <p class="eyebrow">@CurrentUser.OrganizationName</p>
     <MorningBriefView Landing="landing" />
-    <PartnerWaitlistStrip Surface="brief" />
 }
 
 @code {

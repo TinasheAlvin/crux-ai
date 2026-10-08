@@ -10,15 +10,15 @@
 
 @if (snapshot is null)
 {
-    <p>@WhyMessages.Checking</p>
+    <p>Checking the saved rows…</p>
 }
 else if (!snapshot.HasData)
 {
     <section class="hero-card">
         <p class="eyebrow">@CurrentUser.OrganizationName</p>
         <h1>No transactions to verify yet</h1>
-        <p class="lede">Upload and persist a CSV first. Why answers are computed from RowIds — never guessed.</p>
-        <a class="btn btn-primary" href="/">Upload CSV</a>
+        <p class="lede">Upload a file first. Answers come from the rows you saved. Vhona will not guess.</p>
+        <a class="btn btn-primary" href="/">Upload a file</a>
     </section>
 }
 else
@@ -77,8 +77,8 @@ else
     {
         <section class="panel">
             <header class="panel-header">
-                <h2>Logged Q&amp;A</h2>
-                <p class="lede">Each question is stored with its answer, organisation, timestamps, and citation RowIds.</p>
+                <h2>Saved questions</h2>
+                <p class="lede">Each question is stored with its answer, the business, the time, and the rows it cites.</p>
             </header>
             <table class="data-table">
                 <thead>

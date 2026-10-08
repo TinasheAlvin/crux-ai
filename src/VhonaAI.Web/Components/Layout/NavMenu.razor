@@ -1,12 +1,8 @@
 ﻿@inject VhonaAI.Core.Identity.IVhonaAdmin Admin
 
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">
-            <span class="brand-mark brand-mark-sm">V</span>
-            Vhona AI
-        </a>
-    </div>
+<div class="sidebar-brand">
+    <a class="wordmark" href="">VHONA-ai</a>
+    <span class="brass-rule" aria-hidden="true"></span>
 </div>
 
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
@@ -15,42 +11,41 @@
     <nav class="flex-column">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                <span class="nav-icon nav-icon-home" aria-hidden="true"></span> Home
             </NavLink>
         </div>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="health">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Health
+                <span class="nav-icon nav-icon-health" aria-hidden="true"></span> Health
             </NavLink>
         </div>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="why">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Why
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="who-to-call">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Who to call
+                <span class="nav-icon nav-icon-why" aria-hidden="true"></span> Why
             </NavLink>
         </div>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="brief">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Brief
+                <span class="nav-icon nav-icon-brief" aria-hidden="true"></span> Brief
             </NavLink>
         </div>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="team">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Team
+                <span class="nav-icon nav-icon-team" aria-hidden="true"></span> Team
             </NavLink>
         </div>
         @if (Admin.IsAdmin)
         {
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="admin">
-                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Admin
+                    <span class="nav-icon nav-icon-admin" aria-hidden="true"></span> Admin
                 </NavLink>
             </div>
         }
-        <p class="nav-footnote px-4">CSV map · invoices · who to call · brief</p>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="who-to-call">
+                <span class="nav-icon nav-icon-call" aria-hidden="true"></span> Who to call
+            </NavLink>
+        </div>
     </nav>
 </div>

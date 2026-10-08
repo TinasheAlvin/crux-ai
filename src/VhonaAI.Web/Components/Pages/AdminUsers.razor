@@ -30,7 +30,7 @@
                 <tr>
                     <td><a href="@($"/admin/users/{user.Id}")">@user.DisplayName</a></td>
                     <td>@user.Email</td>
-                    <td>@(string.IsNullOrWhiteSpace(user.Businesses) ? "—" : user.Businesses)</td>
+                    <td>@(string.IsNullOrWhiteSpace(user.Businesses) ? "none" : user.Businesses)</td>
                     <td>@(user.IsDisabled ? "Disabled" : "Active")</td>
                 </tr>
             }

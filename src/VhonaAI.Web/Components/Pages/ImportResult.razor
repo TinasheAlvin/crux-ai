@@ -16,11 +16,11 @@ else
         <header class="panel-header">
             <p class="eyebrow">@job.OriginalFileName</p>
             <h1>@(job.Kind == ImportKind.Invoices
-                ? $"{invoices.Count} invoice{(invoices.Count == 1 ? "" : "s")} persisted"
-                : $"{transactions.Count} transaction{(transactions.Count == 1 ? "" : "s")} persisted")</h1>
+                ? $"{invoices.Count} invoice{(invoices.Count == 1 ? "" : "s")} saved"
+                : $"{transactions.Count} transaction{(transactions.Count == 1 ? "" : "s")} saved")</h1>
             <p class="lede">
-                Each imported line has a stable <code>RowId</code>.
-                Re-running persist on this import upserts by RowId.
+                Each imported line keeps a stable row number.
+                Saving this import again updates those same rows.
             </p>
             @if (!string.IsNullOrWhiteSpace(job.ErrorSummary))
             {
@@ -41,7 +41,7 @@ else
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>RowId</th>
+                            <th>Row</th>
                             <th>#</th>
                             <th>Customer</th>
                             <th>Invoice</th>
@@ -63,12 +63,12 @@ else
                                 <td>@invoice.Customer?.Name</td>
                                 <td>@invoice.Number</td>
                                 <td>@invoice.InvoiceDate.ToString("dd MMM yyyy")</td>
-                                <td>@(invoice.BookedDate?.ToString("dd MMM yyyy") ?? "—")</td>
-                                <td>@(invoice.DueDate?.ToString("dd MMM yyyy") ?? "—")</td>
-                                <td class="numeric">@invoice.Amount.ToString("C")</td>
-                                <td class="numeric">@invoice.AmountDue.ToString("C")</td>
+                                <td>@(invoice.BookedDate?.ToString("dd MMM yyyy") ?? "none")</td>
+                                <td>@(invoice.DueDate?.ToString("dd MMM yyyy") ?? "none")</td>
+                                <td class="numeric">@RandAmounts.Format(invoice.Amount)</td>
+                                <td class="numeric">@RandAmounts.Format(invoice.AmountDue)</td>
                                 <td>@invoice.Status</td>
-                                <td>@(invoice.PaidDate?.ToString("dd MMM yyyy") ?? "—")</td>
+                                <td>@(invoice.PaidDate?.ToString("dd MMM yyyy") ?? "none")</td>
                             </tr>
                         }
                     </tbody>
@@ -81,7 +81,7 @@ else
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>RowId</th>
+                        <th>Row</th>
                         <th>#</th>
                         <th>Date</th>
                         <th>Description</th>
@@ -99,7 +99,7 @@ else
                             <td>@txn.SourceRowNumber</td>
                             <td>@txn.Date.ToString("dd MMM yyyy")</td>
                             <td>@txn.Description</td>
-                            <td class="numeric">@txn.Amount.ToString("C")</td>
+                            <td class="numeric">@RandAmounts.Format(txn.Amount)</td>
                             <td>@txn.Category</td>
                             <td>@txn.Reference</td>
                             <td>@txn.Counterparty</td>
