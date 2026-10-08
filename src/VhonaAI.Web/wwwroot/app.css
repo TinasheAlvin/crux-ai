@@ -914,13 +914,29 @@ main {
 }
 
 .wordmark {
-    font-family: var(--serif);
-    font-weight: 640;
-    font-size: 1.45rem;
-    color: var(--charcoal);
+    display: inline-flex;
+    align-items: center;
+    line-height: 0;
     text-decoration: none;
-    letter-spacing: -0.03em;
-    line-height: 1;
+}
+
+.wordmark img {
+    display: block;
+    width: 140px;
+    height: auto;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+@media (max-width: 640.98px) {
+    .sidebar-brand {
+        padding-right: 4.75rem;
+        min-height: 3.4rem;
+    }
+
+    .wordmark img {
+        width: 112px;
+    }
 }
 
 .brass-rule {
