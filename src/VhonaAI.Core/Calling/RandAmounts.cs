@@ -18,6 +18,36 @@ public static class RandAmounts
 
     public static string About(decimal amount) => "about " + Format(amount);
 
+    /// <summary>
+    /// Card figures stay in cents only when every amount on the card has cents.
+    /// Otherwise they round to a whole rand, still with a space as the thousands separator.
+    /// </summary>
+    public static bool CentsMatter(decimal current, decimal? previous, decimal? delta)
+    {
+        var values = new List<decimal> { current };
+        if (previous is decimal earlier)
+        {
+            values.Add(earlier);
+        }
+
+        if (delta is decimal change)
+        {
+            values.Add(change);
+        }
+
+        return values.All(value => value != decimal.Truncate(value));
+    }
+
+    public static string FormatCard(decimal amount, decimal current, decimal? previous, decimal? delta)
+    {
+        if (!CentsMatter(current, previous, delta))
+        {
+            amount = decimal.Round(amount, 0, MidpointRounding.AwayFromZero);
+        }
+
+        return Format(amount);
+    }
+
     public static string DayMonth(DateOnly date) => $"{date.Day} {MonthName(date.Month)}";
 
     public static string DayShortMonth(DateOnly date) => $"{date.Day} {ShortMonth(date.Month)}";

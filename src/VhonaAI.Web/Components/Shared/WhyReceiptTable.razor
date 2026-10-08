@@ -2,7 +2,7 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th>RowId</th>
+                <th>Row</th>
                 <th>Period</th>
                 <th>Date</th>
                 <th>Description</th>
@@ -25,8 +25,8 @@
                             <div class="muted">@row.Counterparty</div>
                         }
                     </td>
-                    <td class="numeric">@row.Amount.ToString("C")</td>
-                    <td class="numeric">@(row.Balance?.ToString("C") ?? "—")</td>
+                    <td class="numeric">@RandAmounts.Format(row.Amount)</td>
+                    <td class="numeric">@(row.Balance is decimal balance ? RandAmounts.Format(balance) : "none")</td>
                     <td>@row.Columns</td>
                 </tr>
             }

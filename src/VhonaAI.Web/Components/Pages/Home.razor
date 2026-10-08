@@ -16,8 +16,8 @@
 
     <section class="panel">
         <header class="panel-header">
-            <h2>Import another CSV</h2>
-            <p>Mapping can be remapped at any time without losing persisted RowIds on previous imports.</p>
+            <h2>Bring in another file</h2>
+            <p>You can map the columns again. Earlier imports stay as they are.</p>
         </header>
         <label class="upload-button @(busy ? "is-disabled" : null)">
             <InputFile OnChange="OnTransactionsSelected" accept=".csv,.xlsx,text/csv" disabled="@busy" />
@@ -49,8 +49,8 @@ else if (snapshot?.HasData == true)
 
     <section class="panel">
         <header class="panel-header">
-            <h2>Import another CSV</h2>
-            <p>Mapping can be remapped at any time without losing persisted RowIds on previous imports.</p>
+            <h2>Bring in another file</h2>
+            <p>You can map the columns again. Earlier imports stay as they are.</p>
         </header>
         <label class="upload-button @(busy ? "is-disabled" : null)">
             <InputFile OnChange="OnTransactionsSelected" accept=".csv,.xlsx,text/csv" disabled="@busy" />
@@ -79,10 +79,10 @@ else
 {
     <section class="hero-card">
         <p class="eyebrow">@CurrentUser.OrganizationName</p>
-        <h1>Start with a CSV — then ask why with a receipt</h1>
+        <h1>Bring in your books, then ask why</h1>
         <p class="lede">
-            Upload a bank export or an invoice list (CSV or Excel). Map columns, persist RowIds,
-            see health KPIs, then tap a card to get a cited why. After a trusted why, opt in for a morning brief.
+            Upload a bank export or an invoice list. Map the columns, check the rows, and see how the month is doing.
+            Then ask why, with those rows in front of you.
         </p>
 
         <label class="upload-button @(busy ? "is-disabled" : null)">
@@ -108,12 +108,6 @@ else
             <p class="banner banner-error" role="alert">@error</p>
         }
 
-        <p class="hint">
-            <code>testdata/sample-transactions-clean.csv</code> is the fastest path to a cited why.
-            The default sample includes a few broken March rows to exercise validation.
-            Cash stays hidden unless a balance column is mapped — try
-            <code>testdata/sample-transactions-with-cash.csv</code>.
-        </p>
     </section>
 }
 
@@ -122,7 +116,10 @@ else
     <section class="panel">
         <header class="panel-header">
             <h2>Recent imports</h2>
-            <p>@transactionCount transaction@(transactionCount == 1 ? "" : "s") persisted for this organisation.</p>
+            @if (SavedBooksLine.Format(invoiceCount, transactionCount) is string savedLine)
+            {
+                <p>@savedLine</p>
+            }
         </header>
         <div class="table-scroll">
         <table class="data-table recent-table">
@@ -140,12 +137,12 @@ else
                     <tr>
                         <td>@job.OriginalFileName</td>
                         <td><span class="status-pill">@job.Status</span></td>
-                        <td>@(job.ImportedRowCount?.ToString() ?? "—")</td>
+                        <td>@(job.ImportedRowCount?.ToString() ?? "none")</td>
                         <td class="recent-links">
                             @if (job.Status == ImportStatus.Imported)
                             {
-                                <a href="/health">Health KPIs</a>
-                                <a href="@($"/imports/{job.Id}")">RowIds</a>
+                                <a href="/health">Health</a>
+                                <a href="@($"/imports/{job.Id}")">Rows</a>
                                 <a href="@($"/imports/{job.Id}/map")">Remap</a>
                             }
                             else if (job.Status == ImportStatus.Mapped || job.Status == ImportStatus.Validated)
@@ -165,12 +162,11 @@ else
     </section>
 }
 
-<PartnerWaitlistStrip Surface="home" />
-
 @code {
     private bool busy;
     private string? error;
     private IReadOnlyList<ImportJob> recent = [];
+    private int invoiceCount;
     private int transactionCount;
     private HealthSnapshot? snapshot;
     private MorningBriefLanding? briefLanding;
@@ -178,6 +174,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         recent = await Imports.ListRecentAsync();
+        invoiceCount = await Imports.CountInvoicesAsync();
         transactionCount = await Imports.CountTransactionsAsync();
         snapshot = await HealthKpis.GetSnapshotAsync();
         var preference = await Briefs.GetPreferenceAsync();
@@ -228,7 +225,7 @@ else
             var path = FindSampleCsv(fileName);
             if (path is null)
             {
-                error = $"Could not find testdata/{fileName}. Upload the file from the repo instead.";
+                error = "That sample file is not available. Upload your own file instead.";
                 return;
             }
 

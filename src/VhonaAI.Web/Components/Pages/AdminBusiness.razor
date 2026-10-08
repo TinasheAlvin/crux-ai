@@ -33,7 +33,7 @@
 
         <p>
             <button class="btn btn-outline" type="button" disabled="@busy" @onclick="ToggleDisabledAsync">
-                @(detail.IsDisabled ? "Re-enable" : "Disable")
+                @(detail.IsDisabled ? "Turn back on" : "Disable")
             </button>
             <a class="btn btn-outline" href="@($"/admin/businesses/{detail.Id}/export")">Export data</a>
         </p>
@@ -113,7 +113,7 @@
             </tbody>
         </table>
 
-        <h2>Who-to-call thresholds</h2>
+        <h2>Who to call thresholds</h2>
         <p class="hint">@(detail.Thresholds.IsCustom ? "Saved for this business." : "Using the global default.")</p>
         <form class="stack-form" @onsubmit="SaveThresholdsAsync">
             <label class="field-label">Missed cycles</label>

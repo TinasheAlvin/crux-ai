@@ -319,6 +319,13 @@ public sealed class ImportService : IImportAppService
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<int> CountInvoicesAsync(CancellationToken cancellationToken = default)
+    {
+        EnsureAuthenticated();
+        return await _db.Invoices
+            .CountAsync(invoice => invoice.OrganizationId == _currentUser.OrganizationId, cancellationToken);
+    }
+
     public async Task<int> CountTransactionsAsync(CancellationToken cancellationToken = default)
     {
         EnsureAuthenticated();

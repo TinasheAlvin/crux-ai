@@ -19,7 +19,7 @@ else
             <h1>Fix errors without starting over</h1>
             <p class="lede">
                 @validCount of @(validCount + invalidCount) row(s) are valid.
-                Edit the highlighted cells, re-validate, then persist. Mapping stays on this import.
+                Edit the highlighted cells, check them again, then save. The mapping stays on this import.
             </p>
         </header>
 
@@ -30,9 +30,9 @@ else
 
         <div class="actions actions-inline">
             <a class="btn btn-link" href="@($"/imports/{ImportJobId}/map")">Back to mapping</a>
-            <button class="btn btn-outline" type="button" @onclick="RevalidateAsync" disabled="@busy">Re-validate</button>
+            <button class="btn btn-outline" type="button" @onclick="RevalidateAsync" disabled="@busy">Check again</button>
             <button class="btn btn-primary" type="button" @onclick="() => PersistAsync(false)" disabled="@busy">
-                Persist @validCount valid row@(validCount == 1 ? "" : "s")
+                Save @validCount valid row@(validCount == 1 ? "" : "s")
             </button>
             @if (invalidCount > 0)
             {

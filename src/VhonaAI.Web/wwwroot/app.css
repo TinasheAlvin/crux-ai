@@ -1,31 +1,56 @@
 :root {
-    --ink: #102a43;
-    --ink-soft: #486581;
-    --paper: #f6f1e9;
-    --white: #fffcf7;
-    --teal: #0f766e;
-    --teal-dark: #115e59;
-    --line: #d9cfc3;
+    --cream: #F5F0E8;
+    --cream-deep: #EDE6DA;
+    --paper: #FFFFFF;
+    --white: #FFFFFF;
+    --teal: #0D9488;
+    --teal-dark: #0F766E;
+    --brass: #B8956A;
+    --charcoal: #1C1917;
+    --muted: #3c3833;
+    --ink: var(--charcoal);
+    --ink-soft: var(--muted);
+    --line: rgba(28, 25, 23, 0.1);
     --danger: #9b1c1c;
     --danger-bg: #fde8e8;
     --ok: #276749;
+    --serif: "Fraunces", Georgia, serif;
+    --sans: "Source Sans 3", sans-serif;
+    --bs-primary: #0D9488;
+    --bs-primary-rgb: 13, 148, 136;
+    --bs-link-color: #0F766E;
+    --bs-link-hover-color: #0D9488;
+    --bs-body-font-family: "Source Sans 3", sans-serif;
+    --bs-body-color: #1C1917;
+    --bs-body-bg: #F5F0E8;
+    --bs-body-color-rgb: 28, 25, 23;
+    --bs-emphasis-color: #1C1917;
 }
 
 html, body {
-    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-    background: var(--paper);
-    color: var(--ink);
+    font-family: var(--sans);
+    background: var(--cream);
+    color: var(--charcoal);
     max-width: 100%;
     overflow-x: hidden;
 }
 
-h1, h2, .navbar-brand, .btn, .upload-button, .org-chip, .status-pill {
-    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+h1, h2, .navbar-brand, .btn, .upload-button, .org-chip, .status-pill, .wordmark {
+    font-family: var(--serif);
+}
+
+.btn, .upload-button, .org-chip, .status-pill, .nav-link, .field-label, .data-table, .who-name, .who-tag {
+    font-family: var(--sans);
+}
+
+h1, h2 {
+    font-family: var(--serif);
+    font-weight: 560;
+    letter-spacing: -0.03em;
 }
 
 h1 {
     font-size: 2rem;
-    letter-spacing: -0.03em;
     margin-bottom: 0.5rem;
 }
 
@@ -37,14 +62,29 @@ a, .btn-link {
     color: var(--teal-dark);
 }
 
-.btn-primary, .btn-primary:hover, .btn-primary:focus {
+.btn-primary,
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary:disabled,
+.btn-primary.disabled {
     color: #fff;
     background-color: var(--teal);
+    border-color: var(--teal);
+    border-radius: 999px;
+    transition: none;
+}
+
+.btn-primary:hover,
+.btn-primary:active {
+    background-color: var(--teal-dark);
     border-color: var(--teal-dark);
 }
 
-.btn-primary:hover {
-    background-color: var(--teal-dark);
+.btn:focus, .btn:focus-visible, .form-control:focus, .form-control:focus-visible {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 0.2rem rgba(13, 148, 136, 0.28);
+    outline: none;
 }
 
 .btn-outline {
@@ -77,7 +117,7 @@ main {
     letter-spacing: 0.12em;
     font-size: 0.72rem;
     color: var(--ink-soft);
-    font-family: "Segoe UI", sans-serif;
+    font-family: var(--sans);
     margin-bottom: 0.35rem;
 }
 
@@ -98,7 +138,7 @@ main {
     border: 1px solid var(--line);
     border-radius: 18px;
     padding: 1.75rem;
-    box-shadow: 0 10px 30px rgba(16, 42, 67, 0.04);
+    box-shadow: 0 10px 30px rgba(28, 25, 23, 0.05);
     min-width: 0;
     max-width: 100%;
 }
@@ -178,7 +218,7 @@ main {
 .data-table {
     width: 100%;
     border-collapse: collapse;
-    font-family: "Segoe UI", sans-serif;
+    font-family: var(--sans);
     font-size: 0.92rem;
 }
 
@@ -310,7 +350,7 @@ main {
     align-items: center;
     gap: 0.5rem;
     margin-bottom: 1.25rem;
-    font-family: "Segoe UI", sans-serif;
+    font-family: var(--sans);
     font-size: 0.82rem;
     color: var(--ink-soft);
     flex-wrap: wrap;
@@ -334,17 +374,17 @@ main {
     align-items: center;
     justify-content: center;
     padding: 2rem 1rem;
-    background:
-        radial-gradient(circle at top left, rgba(15, 118, 110, 0.16), transparent 40%),
-        var(--paper);
+    background: var(--cream);
 }
 
 .auth-brand {
     display: flex;
-    gap: 0.85rem;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
     margin-bottom: 1.25rem;
     color: var(--ink);
+    width: min(34rem, 100%);
 }
 
 .auth-brand p {
@@ -362,7 +402,7 @@ main {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-family: "Segoe UI", sans-serif;
+    font-family: var(--sans);
     font-weight: 700;
 }
 
@@ -437,7 +477,7 @@ main {
 }
 
 .kpi-label {
-    font-family: "Segoe UI", sans-serif;
+    font-family: var(--sans);
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-size: 0.72rem;
@@ -446,7 +486,7 @@ main {
 }
 
 .kpi-value {
-    font-family: "Segoe UI", sans-serif;
+    font-family: var(--sans);
     font-size: 1.7rem;
     font-weight: 650;
     letter-spacing: -0.03em;
@@ -454,7 +494,7 @@ main {
 }
 
 .kpi-compare {
-    font-family: "Segoe UI", sans-serif;
+    font-family: var(--sans);
     font-size: 0.88rem;
     margin: 0.45rem 0 0;
 }
@@ -470,7 +510,7 @@ main {
 }
 
 .kpi-why {
-    font-family: "Segoe UI", sans-serif;
+    font-family: var(--sans);
     color: var(--teal-dark);
     font-weight: 600;
 }
@@ -492,7 +532,7 @@ main {
 .row-id-list {
     list-style: none;
     padding: 0;
-    font-family: "Segoe UI", sans-serif;
+    font-family: var(--sans);
 }
 
 .row-id-list li {
@@ -505,7 +545,7 @@ main {
 
 .why-chat-label {
     display: block;
-    font-family: "Segoe UI", sans-serif;
+    font-family: var(--sans);
     font-size: 0.82rem;
     font-weight: 600;
     margin-bottom: 0.4rem;
@@ -525,7 +565,7 @@ main {
 
 .why-answer-body {
     white-space: pre-wrap;
-    font-family: "Iowan Old Style", Palatino, Georgia, serif;
+    font-family: var(--serif);
     font-size: 1.02rem;
     background: transparent;
     border: 0;
@@ -581,20 +621,20 @@ main {
 }
 
 .receipt-strip-meta {
-    font-family: "Segoe UI", sans-serif;
+    font-family: var(--sans);
     font-weight: 650;
     margin: 0.15rem 0 0.35rem;
 }
 
 .receipt-strip-columns {
-    font-family: "Segoe UI", sans-serif;
+    font-family: var(--sans);
     font-size: 0.88rem;
     color: var(--ink-soft);
     margin: 0.65rem 0 0;
 }
 
 .receipt-strip-hint {
-    font-family: "Segoe UI", sans-serif;
+    font-family: var(--sans);
     font-size: 0.82rem;
     color: var(--teal-dark);
     font-weight: 600;
@@ -611,7 +651,7 @@ main {
 
 .receipt-details {
     margin-top: 0.5rem;
-    font-family: "Segoe UI", sans-serif;
+    font-family: var(--sans);
 }
 
 .receipt-details summary {
@@ -664,7 +704,7 @@ main {
 }
 
 .trust-prompt-q {
-    font-family: "Segoe UI", sans-serif;
+    font-family: var(--sans);
     font-size: 0.92rem;
     margin: 0 0 0.45rem;
 }
@@ -683,7 +723,7 @@ main {
 }
 
 .partner-instrumentation-copy {
-    font-family: "Segoe UI", sans-serif;
+    font-family: var(--sans);
     font-size: 0.88rem;
     color: var(--ink-soft);
     margin: 0 0 0.55rem;
@@ -698,7 +738,7 @@ main {
 }
 
 .field-label {
-    font-family: "Segoe UI", sans-serif;
+    font-family: var(--sans);
     font-size: 0.85rem;
 }
 
@@ -715,7 +755,7 @@ main {
 }
 
 .admin-stats {
-    font-family: "Segoe UI", sans-serif;
+    font-family: var(--sans);
     padding-left: 1.1rem;
 }
 
@@ -728,7 +768,7 @@ main {
 }
 
 .who-line {
-    font-family: "Segoe UI", sans-serif;
+    font-family: var(--sans);
     margin: 0 0 1rem;
 }
 
@@ -760,7 +800,7 @@ main {
 }
 
 .who-name {
-    font-family: "Segoe UI", sans-serif;
+    font-family: var(--sans);
     font-weight: 650;
 }
 
@@ -770,7 +810,7 @@ main {
 
 .who-detail, .who-rows {
     color: var(--ink-soft);
-    font-family: "Segoe UI", sans-serif;
+    font-family: var(--sans);
     font-size: 0.92rem;
 }
 
@@ -783,7 +823,7 @@ main {
 }
 
 .who-tag {
-    font-family: "Segoe UI", sans-serif;
+    font-family: var(--sans);
     font-size: 0.75rem;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -828,12 +868,12 @@ main {
 
 .who-draft-body {
     width: 100%;
-    font-family: "Segoe UI", sans-serif;
+    font-family: var(--sans);
     margin: 0.6rem 0;
 }
 
 .who-history {
-    font-family: "Segoe UI", sans-serif;
+    font-family: var(--sans);
     color: var(--ink-soft);
 }
 
@@ -869,6 +909,102 @@ main {
         letter-spacing: 0.04em;
         text-transform: uppercase;
     }
+}
+
+.sidebar {
+    background: var(--cream);
+    color: var(--charcoal);
+    border-right: 1px solid rgba(28, 25, 23, 0.1);
+}
+
+.sidebar-brand {
+    padding: 1.2rem 1.15rem 0.35rem;
+}
+
+.wordmark {
+    display: inline-flex;
+    align-items: center;
+    line-height: 0;
+    text-decoration: none;
+}
+
+.wordmark img {
+    display: block;
+    width: 140px;
+    height: auto;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+@media (max-width: 640.98px) {
+    .sidebar-brand {
+        padding-right: 4.75rem;
+        min-height: 3.4rem;
+    }
+
+    .wordmark img {
+        width: 112px;
+    }
+}
+
+.brass-rule {
+    display: block;
+    width: 2.4rem;
+    height: 2px;
+    margin-top: 0.45rem;
+    background: var(--brass);
+}
+
+.sidebar .nav-item {
+    font-family: var(--sans);
+    font-size: 0.95rem;
+    padding-bottom: 0.1rem;
+}
+
+.sidebar .nav-link {
+    color: var(--charcoal);
+    background: none;
+    border: none;
+    border-radius: 8px;
+    min-height: 2.55rem;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    text-decoration: none;
+    padding: 0.3rem 0.55rem;
+}
+
+.sidebar .nav-link.active {
+    background: rgba(13, 148, 136, 0.1);
+    color: var(--charcoal);
+    box-shadow: inset 3px 0 0 var(--teal);
+}
+
+.sidebar .nav-link:hover {
+    background: rgba(13, 148, 136, 0.06);
+    color: var(--charcoal);
+}
+
+.nav-icon {
+    display: inline-block;
+    width: 1.15rem;
+    height: 1.15rem;
+    margin-right: 0.7rem;
+    background: center / contain no-repeat;
+    flex: none;
+}
+
+.nav-icon-home { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%231C1917' d='M8 1.5 1.5 7h1.2v6.2h3.6V9.2h3.4v4H13.3V7h1.2z'/%3E%3C/svg%3E"); }
+.nav-icon-health { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%231C1917' d='M1 8h2.2l1.3-3.2 2.2 6.4 1.6-3.2H15v1.4H8.8L7.2 12.6 5 6.2 3.8 9.4H1z'/%3E%3C/svg%3E"); }
+.nav-icon-why { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%231C1917' d='M8 1.4a4.2 4.2 0 0 0-1.6 8.1v1.3h3.2v-1.3A4.2 4.2 0 0 0 8 1.4zM6.6 12.4h2.8v1.2H6.6z'/%3E%3C/svg%3E"); }
+.nav-icon-brief { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%231C1917' d='M3 2.2h10v11.6H3zM4.4 3.6v8.8h7.2V3.6zM5.6 5.4h4.8v1.2H5.6zm0 2.2h4.8v1.2H5.6z'/%3E%3C/svg%3E"); }
+.nav-icon-team { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%231C1917' d='M5.2 7.2a2.1 2.1 0 1 0 0-4.2 2.1 2.1 0 0 0 0 4.2zm5.6.4a1.8 1.8 0 1 0 0-3.6 1.8 1.8 0 0 0 0 3.6zM1.6 12.8c.3-1.8 1.8-2.8 3.6-2.8s3.3 1 3.6 2.8H1.6zm6.2-.2c.1-.8.6-1.6 1.5-2.1.4 0 .8.1 1.1.1 1.5 0 2.7.8 3 2H7.8z'/%3E%3C/svg%3E"); }
+.nav-icon-admin { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%231C1917' d='M8 1.2 2.2 3.4v4.2c0 3.2 2.3 5.4 5.8 6.6 3.5-1.2 5.8-3.4 5.8-6.6V3.4z'/%3E%3C/svg%3E"); }
+.nav-icon-call { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%231C1917' d='M3.2 1.6h2.2l1.1 2.6-1.4 1.1a8.2 8.2 0 0 0 3.6 3.6l1.1-1.4 2.6 1.1v2.2c0 .6-.5 1.2-1.2 1.2C6.2 12 4 9.8 4 6.8v-.2C4 5.5 3.4 5 2.8 5H3.2z'/%3E%3C/svg%3E"); }
+.nav-icon-business { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%231C1917' d='M2 14.2V6.4h3.2V2.2h5.6v4.2H14v7.8H2zm4.4-1.2V7.6H3.2v5.4h3.2zm1.2 0h1.6V3.4H7.6v9.6zm2.8 0h3.2V7.6h-3.2v5.4z'/%3E%3C/svg%3E"); }
+
+.admin-nav {
+    padding-bottom: 1rem;
 }
 
 .table-scroll {

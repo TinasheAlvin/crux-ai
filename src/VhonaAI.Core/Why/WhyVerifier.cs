@@ -1,5 +1,5 @@
-using System.Globalization;
 using System.Text;
+using VhonaAI.Core.Calling;
 using VhonaAI.Core.Entities;
 using VhonaAI.Core.Health;
 
@@ -7,8 +7,6 @@ namespace VhonaAI.Core.Why;
 
 public static class WhyVerifier
 {
-    private static readonly CultureInfo Za = CultureInfo.GetCultureInfo("en-ZA");
-
     public static WhyVerification Verify(
         string question,
         IReadOnlyList<Transaction> transactions,
@@ -285,7 +283,7 @@ public static class WhyVerifier
         _ => metric.ToString()
     };
 
-    private static string Money(decimal value) => value.ToString("C", Za);
+    private static string Money(decimal value) => RandAmounts.Format(value);
 
     private static string DeltaPhrase(decimal delta)
     {

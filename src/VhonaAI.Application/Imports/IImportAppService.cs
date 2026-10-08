@@ -44,6 +44,7 @@ public interface IImportAppService
     Task<IReadOnlyList<ImportJob>> ListRecentAsync(int take = 10, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Transaction>> ListTransactionsAsync(Guid importJobId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Invoice>> ListInvoicesAsync(Guid importJobId, CancellationToken cancellationToken = default);
+    Task<int> CountInvoicesAsync(CancellationToken cancellationToken = default);
     Task<int> CountTransactionsAsync(CancellationToken cancellationToken = default);
 }
 

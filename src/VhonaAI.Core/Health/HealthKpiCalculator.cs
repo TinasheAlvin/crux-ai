@@ -1,4 +1,5 @@
 using System.Globalization;
+using VhonaAI.Core.Calling;
 using VhonaAI.Core.Entities;
 using VhonaAI.Core.Mapping;
 
@@ -285,13 +286,13 @@ public static class HealthKpiCalculator
         decimal? previous)
     {
         var name = kind.ToString().ToLowerInvariant();
-        var currentText = current.ToString("C", CultureInfo.GetCultureInfo("en-ZA"));
+        var currentText = RandAmounts.Format(current);
         if (previous is null)
         {
             return $"Why is {name} {currentText} in {currentPeriod.Label}?";
         }
 
-        var previousText = previous.Value.ToString("C", CultureInfo.GetCultureInfo("en-ZA"));
+        var previousText = RandAmounts.Format(previous.Value);
         return $"Why did {name} change from {previousText} in {previousPeriod.Label} to {currentText} in {currentPeriod.Label}?";
     }
 }

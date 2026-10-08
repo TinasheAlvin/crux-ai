@@ -10,21 +10,14 @@
     @if (UseEntra)
     {
         <p class="lede">
-            Sign in with Microsoft Entra External ID. The first time, you name your own business.
+            Sign in with your Microsoft account. The first time, you name your business.
             Signing in again does not rename it.
         </p>
         <a class="btn btn-primary btn-lg" href="@SignInHref" data-enhance-nav="false">Sign in</a>
-        <p class="hint">
-            Use a user that already exists in the tenant. A sign-up flow that waits on email verification
-            will not fit the five-minute demo.
-        </p>
     }
     else
     {
-        <p class="lede">
-            Local demo sign-in bootstraps an organisation and owner membership.
-            Set <code>Auth:Provider</code> to <code>EntraExternalId</code> when the host should use Microsoft Entra External ID.
-        </p>
+        <p class="lede">Look around as the demo owner.</p>
 
         <form method="post" action="/auth/demo-login">
             <AntiforgeryToken />
@@ -35,9 +28,12 @@
             <button type="submit" class="btn btn-primary btn-lg">Continue as demo owner</button>
         </form>
 
-        <p class="hint">
-            Demo tenant: Harbour Street Studio · owner@harbourstreet.local
-        </p>
+        <p class="lede">Or start with no business, the way a first sign in does.</p>
+        <form method="post" action="/auth/demo-login-new">
+            <AntiforgeryToken />
+            <button type="submit" class="btn btn-outline btn-lg">Continue as a new owner</button>
+        </form>
+
     }
 
     @if (!string.IsNullOrWhiteSpace(Error))

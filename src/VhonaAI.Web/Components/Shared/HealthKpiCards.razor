@@ -5,8 +5,8 @@
             <p class="eyebrow">Health · @Snapshot.CurrentPeriod!.Label vs @Snapshot.PreviousPeriod!.Label</p>
             <h1>@Title</h1>
             <p class="lede">
-                Computed from persisted transactions and their RowIds.
-                Tap a card to ask why — every answer is cited, or Vhona fails closed.
+                From the transactions you saved.
+                Tap a card to ask why. Every answer cites the rows, or Vhona says it cannot tell.
             </p>
         </header>
 
@@ -20,7 +20,7 @@
             {
                 <a class="kpi-card" href="@($"/why/{card.Kind.ToString().ToLowerInvariant()}")">
                     <p class="kpi-label">@LabelFor(card.Kind)</p>
-                    <p class="kpi-value">@card.CurrentValue.ToString("C")</p>
+                    <p class="kpi-value">@CardAmount(card, card.CurrentValue)</p>
                     <p class="kpi-compare @DeltaClass(card)">@CompareText(card)</p>
                     @if (!string.IsNullOrWhiteSpace(card.MissingNote) && card.Kind == HealthMetricKind.Cash)
                     {
@@ -35,7 +35,7 @@
             @if (Snapshot.LatestImportJobId is Guid importId)
             {
                 <a class="btn btn-outline" href="@($"/imports/{importId}/map")">Remap columns</a>
-                <a class="btn btn-link" href="@($"/imports/{importId}")">View RowIds</a>
+                <a class="btn btn-link" href="@($"/imports/{importId}")">View rows</a>
             }
             @if (ShowHomeLink)
             {
@@ -71,8 +71,11 @@
         var percent = card.DeltaPercent is null
             ? string.Empty
             : $" ({card.DeltaPercent.Value * 100:0.#}%)";
-        return $"{arrow} {card.Delta.Value.ToString("C")} vs {card.PreviousValue.Value.ToString("C")}{percent}";
+        return $"{arrow} {CardAmount(card, card.Delta.Value)} vs {CardAmount(card, card.PreviousValue.Value)}{percent}";
     }
+
+    private static string CardAmount(MetricCard card, decimal amount) =>
+        RandAmounts.FormatCard(amount, card.CurrentValue, card.PreviousValue, card.Delta);
 
     private static string DeltaClass(MetricCard card)
     {

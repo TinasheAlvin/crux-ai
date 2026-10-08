@@ -1,4 +1,5 @@
-using System.Globalization;
+using VhonaAI.Core.Brief;
+using VhonaAI.Core.Calling;
 using VhonaAI.Core.Entities;
 using VhonaAI.Core.Health;
 using VhonaAI.Core.Why;
@@ -7,8 +8,6 @@ namespace VhonaAI.Tests;
 
 public class WhyVerifierTests
 {
-    private static readonly CultureInfo Za = CultureInfo.GetCultureInfo("en-ZA");
-
     [Fact]
     public void Cited_answer_explains_revenue_change_from_persisted_row_ids()
     {
@@ -30,8 +29,8 @@ public class WhyVerifierTests
         Assert.Contains("r-feb-in", result.Citations.Select(c => c.RowId));
         Assert.DoesNotContain("r-mar-out", result.Citations.Select(c => c.RowId));
         Assert.DoesNotContain("r-feb-out", result.Citations.Select(c => c.RowId));
-        Assert.Contains(3500m.ToString("C", Za), result.Answer);
-        Assert.Contains(2800m.ToString("C", Za), result.Answer);
+        Assert.Contains(RandAmounts.Format(3500m), result.Answer);
+        Assert.Contains(RandAmounts.Format(2800m), result.Answer);
         Assert.All(result.Citations, citation =>
         {
             Assert.Contains("Date", citation.Columns);
@@ -115,7 +114,7 @@ public class WhyVerifierTests
         Assert.Equal(HealthMetricKind.Expenses, result.Metric);
         Assert.Contains("r-mar-out", result.Citations.Select(c => c.RowId));
         Assert.Contains("r-feb-out", result.Citations.Select(c => c.RowId));
-        Assert.Contains(900m.ToString("C", Za), result.Answer);
+        Assert.Contains(RandAmounts.Format(900m), result.Answer);
     }
 
     [Fact]
@@ -135,8 +134,8 @@ public class WhyVerifierTests
         Assert.Contains("r-mar-2", result.Citations.Select(c => c.RowId));
         Assert.Contains("r-feb", result.Citations.Select(c => c.RowId));
         Assert.All(result.Citations, citation => Assert.Contains("Balance", citation.Columns));
-        Assert.Contains(11_800m.ToString("C", Za), result.Answer);
-        Assert.Contains(12_000m.ToString("C", Za), result.Answer);
+        Assert.Contains(RandAmounts.Format(11_800m), result.Answer);
+        Assert.Contains(RandAmounts.Format(12_000m), result.Answer);
     }
 
     [Fact]
@@ -156,6 +155,32 @@ public class WhyVerifierTests
         Assert.DoesNotContain("r-mar-in", result.Answer, StringComparison.Ordinal);
         Assert.Contains("r-feb-in", result.Citations.Select(c => c.RowId));
         Assert.Contains("r-mar-in", result.Citations.Select(c => c.RowId));
+    }
+
+    [Fact]
+    public void Why_and_brief_text_format_rand_like_the_cards()
+    {
+        var transactions = new List<Transaction>
+        {
+            Row("r-feb-in", new DateOnly(2026, 2, 14), 4850m, "February sales"),
+            Row("r-mar-in", new DateOnly(2026, 3, 5), 3200.50m, "March sales")
+        };
+        var snapshot = HealthKpiCalculator.Compute(transactions, cashFieldMapped: false);
+
+        var result = WhyVerifier.Verify("Why did revenue change?", transactions, snapshot);
+        var story = MorningBriefComposer.ComposeSingleStory(snapshot, transactions);
+
+        Assert.True(result.Verified);
+        Assert.Contains("from R4 850 in ", result.Answer);
+        Assert.Contains("to R3 200.50 in ", result.Answer);
+        Assert.Contains("down R1 649.50", result.Answer);
+        Assert.DoesNotContain("R4,850.00", result.Answer);
+        Assert.DoesNotContain(".00", result.Answer);
+        Assert.Contains("from R4 850 in ", story.Answer);
+        Assert.Contains("to R3 200.50 in ", story.Answer);
+        Assert.DoesNotContain(",", story.Answer);
+        Assert.Contains("from R4 850 in ", snapshot.Revenue!.WhyPrompt);
+        Assert.Contains("to R3 200.50 in ", snapshot.Revenue.WhyPrompt);
     }
 
     [Fact]

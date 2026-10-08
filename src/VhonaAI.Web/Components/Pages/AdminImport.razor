@@ -26,9 +26,9 @@
                     @foreach (var row in detail.Transactions)
                     {
                         <tr>
-                            <td><code>@row.RowId</code></td>
+                            <td><code class="row-id">@row.RowId</code></td>
                             <td>@row.Date.ToString("yyyy-MM-dd")</td>
-                            <td>@(row.BookedDate?.ToString("yyyy-MM-dd") ?? "—")</td>
+                            <td>@(row.BookedDate?.ToString("yyyy-MM-dd") ?? "none")</td>
                             <td>@row.Description</td>
                             <td>@row.Amount</td>
                         </tr>
@@ -45,7 +45,7 @@
                     @foreach (var row in detail.Invoices)
                     {
                         <tr>
-                            <td><code>@row.RowId</code></td>
+                            <td><code class="row-id">@row.RowId</code></td>
                             <td>@row.Number</td>
                             <td>@row.Customer</td>
                             <td>@row.InvoiceDate.ToString("yyyy-MM-dd")</td>

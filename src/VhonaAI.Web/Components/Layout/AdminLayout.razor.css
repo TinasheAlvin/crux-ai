@@ -1,0 +1,115 @@
+.page {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: clip;
+}
+
+main {
+    flex: 1;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.sidebar {
+    background: #F5F0E8;
+    border-right: 1px solid rgba(28, 25, 23, 0.1);
+    color: #1C1917;
+}
+
+.top-row {
+    background-color: #F5F0E8;
+    border-bottom: 1px solid rgba(28, 25, 23, 0.1);
+    justify-content: flex-end;
+    height: 3.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.top-row a,
+.top-row .btn-link {
+    white-space: nowrap;
+    margin-left: 1.5rem;
+    text-decoration: none;
+}
+
+.navbar-toggler {
+    appearance: none;
+    cursor: pointer;
+    width: 3.5rem;
+    height: 2.5rem;
+    position: absolute;
+    top: 0.5rem;
+    right: 1rem;
+    border: 1px solid rgba(28, 25, 23, 0.15);
+    border-radius: 8px;
+    background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%231C1917' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") no-repeat center/1.75rem #F5F0E8;
+}
+
+.navbar-toggler:checked {
+    background-color: rgba(13, 148, 136, 0.12);
+}
+
+.nav-scrollable {
+    display: none;
+}
+
+.navbar-toggler:checked ~ .nav-scrollable {
+    display: block;
+}
+
+@media (max-width: 640.98px) {
+    .top-row {
+        justify-content: space-between;
+        height: auto;
+        min-height: 3.5rem;
+        flex-wrap: wrap;
+        gap: 0.35rem 0.75rem;
+        padding-top: 0.45rem;
+        padding-bottom: 0.45rem;
+    }
+
+    .top-row a,
+    .top-row .btn-link {
+        margin-left: 0;
+        white-space: normal;
+    }
+}
+
+@media (min-width: 641px) {
+    .page {
+        flex-direction: row;
+    }
+
+    .sidebar {
+        width: 250px;
+        height: 100vh;
+        position: sticky;
+        top: 0;
+        flex: none;
+    }
+
+    .navbar-toggler {
+        display: none;
+    }
+
+    .nav-scrollable {
+        display: block;
+        height: calc(100vh - 5.5rem);
+        overflow-y: auto;
+    }
+
+    .top-row {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+    .top-row,
+    article {
+        padding-left: 2rem !important;
+        padding-right: 1.5rem !important;
+    }
+}

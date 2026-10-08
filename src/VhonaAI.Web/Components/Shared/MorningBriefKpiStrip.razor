@@ -5,7 +5,7 @@
         {
             <div class="kpi-card is-static">
                 <p class="kpi-label">@LabelFor(card.Kind)</p>
-                <p class="kpi-value">@card.CurrentValue.ToString("C")</p>
+                <p class="kpi-value">@CardAmount(card, card.CurrentValue)</p>
                 <p class="kpi-compare @DeltaClass(card)">@CompareText(card)</p>
             </div>
         }
@@ -35,8 +35,11 @@
         var percent = card.DeltaPercent is null
             ? string.Empty
             : $" ({card.DeltaPercent.Value * 100:0.#}%)";
-        return $"{arrow} {card.Delta.Value.ToString("C")} vs {card.PreviousValue.Value.ToString("C")}{percent}";
+        return $"{arrow} {CardAmount(card, card.Delta.Value)} vs {CardAmount(card, card.PreviousValue.Value)}{percent}";
     }
+
+    private static string CardAmount(MorningBriefMetric card, decimal amount) =>
+        RandAmounts.FormatCard(amount, card.CurrentValue, card.PreviousValue, card.Delta);
 
     private static string DeltaClass(MorningBriefMetric card)
     {

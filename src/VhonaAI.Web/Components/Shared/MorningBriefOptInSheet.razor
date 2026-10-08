@@ -3,7 +3,7 @@
     <aside class="brief-sheet" role="dialog" aria-labelledby="brief-sheet-title" aria-describedby="brief-sheet-lede">
         <p class="eyebrow">Morning brief</p>
         <h2 id="brief-sheet-title">@MorningBriefMessages.SheetTitle</h2>
-        <p id="brief-sheet-lede" class="lede">@MorningBriefMessages.SheetLede</p>
+        <p id="brief-sheet-lede" class="lede">Yesterday's snapshot plus one cited explanation. Never a pile of stories.</p>
         <div class="actions brief-sheet-actions">
             <button class="btn btn-primary btn-lg" type="button" @onclick="OptInAsync" disabled="@busy">
                 @MorningBriefMessages.Cta
@@ -18,7 +18,7 @@ else if (Preference.OptedIn && ShowConfirmation)
 {
     <aside class="brief-sheet is-confirmed" role="status">
         <p class="eyebrow">Morning brief</p>
-        <p class="lede">@MorningBriefMessages.OptedIn</p>
+        <p class="lede">You are in. Next visit you get yesterday's snapshot and one explanation with its rows.</p>
         <div class="actions">
             <a class="btn btn-primary" href="/brief">@MorningBriefMessages.SeeBrief</a>
         </div>
