@@ -1,31 +1,56 @@
 :root {
-    --ink: #102a43;
-    --ink-soft: #486581;
-    --paper: #f6f1e9;
-    --white: #fffcf7;
-    --teal: #0f766e;
-    --teal-dark: #115e59;
-    --line: #d9cfc3;
+    --cream: #F5F0E8;
+    --cream-deep: #EDE6DA;
+    --paper: #FFFFFF;
+    --white: #FFFFFF;
+    --teal: #0D9488;
+    --teal-dark: #0F766E;
+    --brass: #B8956A;
+    --charcoal: #1C1917;
+    --muted: #3c3833;
+    --ink: var(--charcoal);
+    --ink-soft: var(--muted);
+    --line: rgba(28, 25, 23, 0.1);
     --danger: #9b1c1c;
     --danger-bg: #fde8e8;
     --ok: #276749;
+    --serif: "Fraunces", Georgia, serif;
+    --sans: "Source Sans 3", sans-serif;
+    --bs-primary: #0D9488;
+    --bs-primary-rgb: 13, 148, 136;
+    --bs-link-color: #0F766E;
+    --bs-link-hover-color: #0D9488;
+    --bs-body-font-family: "Source Sans 3", sans-serif;
+    --bs-body-color: #1C1917;
+    --bs-body-bg: #F5F0E8;
+    --bs-body-color-rgb: 28, 25, 23;
+    --bs-emphasis-color: #1C1917;
 }
 
 html, body {
-    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-    background: var(--paper);
-    color: var(--ink);
+    font-family: var(--sans);
+    background: var(--cream);
+    color: var(--charcoal);
     max-width: 100%;
     overflow-x: hidden;
 }
 
-h1, h2, .navbar-brand, .btn, .upload-button, .org-chip, .status-pill {
-    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+h1, h2, .navbar-brand, .btn, .upload-button, .org-chip, .status-pill, .wordmark {
+    font-family: var(--serif);
+}
+
+.btn, .upload-button, .org-chip, .status-pill, .nav-link, .field-label, .data-table, .who-name, .who-tag {
+    font-family: var(--sans);
+}
+
+h1, h2 {
+    font-family: var(--serif);
+    font-weight: 560;
+    letter-spacing: -0.03em;
 }
 
 h1 {
     font-size: 2rem;
-    letter-spacing: -0.03em;
     margin-bottom: 0.5rem;
 }
 
@@ -37,10 +62,11 @@ a, .btn-link {
     color: var(--teal-dark);
 }
 
-.btn-primary, .btn-primary:hover, .btn-primary:focus {
+.btn-primary, .btn-primary:hover, .btn-primary:focus, .btn-primary:active {
     color: #fff;
     background-color: var(--teal);
-    border-color: var(--teal-dark);
+    border-color: var(--teal);
+    border-radius: 999px;
 }
 
 .btn-primary:hover {

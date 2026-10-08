@@ -1,0 +1,39 @@
+@font-face {
+    font-family: "Fraunces";
+    font-style: normal;
+    font-weight: 560;
+    font-display: swap;
+    src: url("fraunces-560.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Fraunces";
+    font-style: normal;
+    font-weight: 640;
+    font-display: swap;
+    src: url("fraunces-640.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Source Sans 3";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("source-sans-400.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Source Sans 3";
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url("source-sans-600.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Source Sans 3";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("source-sans-700.ttf") format("truetype");
+}
