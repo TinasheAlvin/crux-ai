@@ -43,6 +43,33 @@ public sealed class OrgBootstrapper
         return (user, organization, membership);
     }
 
+    /// <summary>
+    /// Signs in a demo person the way a first Entra visit does: an account, and no business yet.
+    /// If that email already owns a business, a fresh account is returned so onboarding stays reachable.
+    /// </summary>
+    public async Task<AppUser> EnsureDemoUserWithoutBusinessAsync(
+        string email,
+        string displayName,
+        CancellationToken cancellationToken = default)
+    {
+        email = (email ?? string.Empty).Trim();
+        var user = await UpsertExternalUserAsync($"demo:{email}", email, displayName, cancellationToken);
+        await _db.SaveChangesAsync(cancellationToken);
+        if (await FindMembershipAsync(user.Id, cancellationToken) is null)
+        {
+            return user;
+        }
+
+        var at = email.IndexOf('@');
+        var stamp = Guid.NewGuid().ToString("N")[..8];
+        var freshEmail = at > 0
+            ? $"{email[..at]}+{stamp}{email[at..]}"
+            : $"{stamp}@harbourstreet.local";
+        var fresh = await UpsertExternalUserAsync($"demo:{freshEmail}", freshEmail, displayName, cancellationToken);
+        await _db.SaveChangesAsync(cancellationToken);
+        return fresh;
+    }
+
     public async Task<(AppUser User, Organization Organization, Membership Membership)> EnsureExternalUserAsync(
         string externalId,
         string email,

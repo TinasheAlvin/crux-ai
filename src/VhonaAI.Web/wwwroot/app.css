@@ -980,7 +980,6 @@ main {
 .nav-icon-business { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%231C1917' d='M2 14.2V6.4h3.2V2.2h5.6v4.2H14v7.8H2zm4.4-1.2V7.6H3.2v5.4h3.2zm1.2 0h1.6V3.4H7.6v9.6zm2.8 0h3.2V7.6h-3.2v5.4z'/%3E%3C/svg%3E"); }
 
 .admin-nav {
-    display: block;
     padding-bottom: 1rem;
 }
 

@@ -28,6 +28,12 @@
             <button type="submit" class="btn btn-primary btn-lg">Continue as demo owner</button>
         </form>
 
+        <p class="lede">Or start with no business, the way a first sign in does.</p>
+        <form method="post" action="/auth/demo-login-new">
+            <AntiforgeryToken />
+            <button type="submit" class="btn btn-outline btn-lg">Continue as a new owner</button>
+        </form>
+
     }
 
     @if (!string.IsNullOrWhiteSpace(Error))

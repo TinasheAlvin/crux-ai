@@ -116,7 +116,10 @@ else
     <section class="panel">
         <header class="panel-header">
             <h2>Recent imports</h2>
-            <p>@transactionCount transaction@(transactionCount == 1 ? "" : "s") saved for this business.</p>
+            @if (SavedBooksLine.Format(invoiceCount, transactionCount) is string savedLine)
+            {
+                <p>@savedLine</p>
+            }
         </header>
         <div class="table-scroll">
         <table class="data-table recent-table">
@@ -163,6 +166,7 @@ else
     private bool busy;
     private string? error;
     private IReadOnlyList<ImportJob> recent = [];
+    private int invoiceCount;
     private int transactionCount;
     private HealthSnapshot? snapshot;
     private MorningBriefLanding? briefLanding;
@@ -170,6 +174,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         recent = await Imports.ListRecentAsync();
+        invoiceCount = await Imports.CountInvoicesAsync();
         transactionCount = await Imports.CountTransactionsAsync();
         snapshot = await HealthKpis.GetSnapshotAsync();
         var preference = await Briefs.GetPreferenceAsync();

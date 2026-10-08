@@ -55,6 +55,50 @@ public class BusinessOnboardingTests
     }
 
     [Fact]
+    public async Task A_new_demo_owner_has_no_business_and_stays_reachable()
+    {
+        await using var db = await CreateDbAsync();
+        var bootstrapper = new OrgBootstrapper(db);
+
+        var first = await bootstrapper.EnsureDemoUserWithoutBusinessAsync(
+            "newowner@harbourstreet.local",
+            "New Owner");
+
+        Assert.Equal("newowner@harbourstreet.local", first.Email);
+        Assert.Null(await bootstrapper.FindMembershipAsync(first.Id));
+        Assert.Equal(0, await db.Organizations.CountAsync());
+
+        var again = await bootstrapper.EnsureDemoUserWithoutBusinessAsync(
+            "newowner@harbourstreet.local",
+            "New Owner");
+        Assert.Equal(first.Id, again.Id);
+
+        db.Organizations.Add(new Organization
+        {
+            Id = Guid.NewGuid(),
+            Name = "Named Studio",
+            CreatedAt = DateTime.UtcNow
+        });
+        db.Memberships.Add(new Membership
+        {
+            Id = Guid.NewGuid(),
+            OrganizationId = db.Organizations.Local.Single().Id,
+            UserId = first.Id,
+            Role = MembershipRole.Owner,
+            CreatedAt = DateTime.UtcNow
+        });
+        await db.SaveChangesAsync();
+
+        var fresh = await bootstrapper.EnsureDemoUserWithoutBusinessAsync(
+            "newowner@harbourstreet.local",
+            "New Owner");
+
+        Assert.NotEqual(first.Id, fresh.Id);
+        Assert.Null(await bootstrapper.FindMembershipAsync(fresh.Id));
+        Assert.StartsWith("newowner+", fresh.Email);
+    }
+
+    [Fact]
     public async Task Demo_sign_in_does_not_rename_an_existing_business()
     {
         await using var db = await CreateDbAsync();
