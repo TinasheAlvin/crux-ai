@@ -34,8 +34,8 @@ public class WhoToCallServiceTests
             Assert.False(empty.HasInvoices);
             Assert.Empty(empty.Flags);
 
-            await service.LoadSampleAsync();
-            var again = await Assert.ThrowsAsync<InvalidOperationException>(() => service.LoadSampleAsync());
+            await service.LoadLegacyFixtureAsync();
+            var again = await Assert.ThrowsAsync<InvalidOperationException>(() => service.LoadLegacyFixtureAsync());
             Assert.Contains("no invoices", again.Message, StringComparison.OrdinalIgnoreCase);
 
             var list = await service.GetListAsync();
@@ -78,7 +78,7 @@ public class WhoToCallServiceTests
         await using (db)
         {
             var service = Service(db, user, clock);
-            await service.LoadSampleAsync();
+            await service.LoadLegacyFixtureAsync();
             var late = (await service.GetListAsync()).Flags[0];
             var saved = await service.SaveDraftAsync(late.CustomerId, "Please see INV 2295 when you can.");
             Assert.Equal(ReminderDraftTemplate.NotSent, saved.Status);
@@ -97,7 +97,7 @@ public class WhoToCallServiceTests
         await using (db)
         {
             var service = Service(db, user, clock);
-            await service.LoadSampleAsync();
+            await service.LoadLegacyFixtureAsync();
             var list = await service.GetListAsync();
             var sondela = list.Flags.Single(flag => flag.CustomerName == "Sondela Dental Studio");
             var marula = list.Flags.Single(flag => flag.CustomerName == "Marula Ridge Office Park");
@@ -209,7 +209,7 @@ public class WhoToCallServiceTests
         await using (db)
         {
             var service = Service(db, user, clock);
-            await service.LoadSampleAsync();
+            await service.LoadLegacyFixtureAsync();
             var open = await db.Invoices.Where(item => item.Status == InvoiceStatus.Open).ToListAsync();
             Assert.Equal(2, open.Count);
             foreach (var invoice in open)
@@ -234,7 +234,7 @@ public class WhoToCallServiceTests
         await using (db)
         {
             var service = Service(db, user, clock);
-            await service.LoadSampleAsync();
+            await service.LoadLegacyFixtureAsync();
             Assert.Equal(4, (await service.GetListAsync()).Flags.Count);
 
             var settings = new CallSettingsService(db, user);
@@ -251,7 +251,7 @@ public class WhoToCallServiceTests
         var (db, owner, clock) = await OpenAsync();
         await using (db)
         {
-            await Service(db, owner, clock).LoadSampleAsync();
+            await Service(db, owner, clock).LoadLegacyFixtureAsync();
             var member = new Person(owner.OrganizationId, Guid.NewGuid(), "Member", owner.OrganizationName);
             var service = Service(db, member, clock);
             var list = await service.GetListAsync();
@@ -259,7 +259,7 @@ public class WhoToCallServiceTests
             Assert.False(list.CanLoadSample);
             Assert.NotEmpty(list.Flags);
 
-            var blocked = await Assert.ThrowsAsync<InvalidOperationException>(() => service.LoadSampleAsync());
+            var blocked = await Assert.ThrowsAsync<InvalidOperationException>(() => service.LoadLegacyFixtureAsync());
             Assert.Contains("owner", blocked.Message, StringComparison.OrdinalIgnoreCase);
             var draft = await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 service.SaveDraftAsync(list.Flags[0].CustomerId, "Hello there"));
@@ -300,7 +300,7 @@ public class WhoToCallServiceTests
         await using var studioDb = new VhonaDbContext(options, studio);
         await using var bakeryDb = new VhonaDbContext(options, bakeryUser);
         var clock = new FixedClock(Now);
-        await Service(studioDb, studio, clock).LoadSampleAsync();
+        await Service(studioDb, studio, clock).LoadLegacyFixtureAsync();
 
         var bakeryCustomer = Guid.NewGuid();
         bakeryDb.Customers.Add(new Customer
@@ -360,7 +360,7 @@ public class WhoToCallServiceTests
         await using (db)
         {
             var calls = Service(db, user, clock);
-            await calls.LoadSampleAsync();
+            await calls.LoadLegacyFixtureAsync();
             var briefs = Briefs(db, user, clock, calls);
 
             var hidden = await briefs.GetLandingAsync();

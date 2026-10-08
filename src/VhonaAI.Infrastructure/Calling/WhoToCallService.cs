@@ -38,6 +38,7 @@ public sealed class WhoToCallService : IWhoToCallAppService
         var computed = await ComputeAsync(cancellationToken);
         var visible = await VisibleFlagsAsync(computed, cancellationToken);
         var invoiceCount = await _db.Invoices.CountAsync(cancellationToken);
+        var sample = await SampleSourceAsync(cancellationToken);
         return new WhoToCallList
         {
             AsAt = computed.Result.AsAt,
@@ -45,7 +46,8 @@ public sealed class WhoToCallService : IWhoToCallAppService
             SortExplanation = WhoToCallResult.SortExplanation,
             ReceiptFooter = WhoToCallResult.ReceiptFooter,
             CanLoadSample = _currentUser.IsOwner && invoiceCount == 0,
-            UsingSample = await UsingSampleAsync(cancellationToken),
+            UsingSample = sample.Using,
+            SampleName = sample.Name,
             IsOwner = _currentUser.IsOwner,
             HasInvoices = invoiceCount > 0,
             Flags = visible
@@ -192,34 +194,96 @@ public sealed class WhoToCallService : IWhoToCallAppService
         return await HistoryForAsync(customerId, cancellationToken);
     }
 
-    public async Task LoadSampleAsync(CancellationToken cancellationToken = default)
+    public async Task LoadSampleAsync(string bookId, CancellationToken cancellationToken = default)
     {
         RequireOwner();
+        await EnsureEmptyAsync(cancellationToken);
+        var ledger = SampleBookCatalog.Build(bookId);
+        await PersistAsync(ledger.Customers, ledger.CreditNotes, ledger.Transactions, ledger.DisplayName, cancellationToken);
+    }
+
+    /// <summary>The original four customer fixture. Tests use this. The product offers Karoo and Axum instead.</summary>
+    public async Task LoadLegacyFixtureAsync(CancellationToken cancellationToken = default)
+    {
+        RequireOwner();
+        await EnsureEmptyAsync(cancellationToken);
+        var books = WhoToCallSample.Build(_currentUser.OrganizationName);
+        await PersistAsync(books.Customers, [], [], SampleSourceName, cancellationToken);
+    }
+
+    private async Task EnsureEmptyAsync(CancellationToken cancellationToken)
+    {
         if (await _db.Invoices.AnyAsync(cancellationToken))
         {
             throw new InvalidOperationException("Sample books load only when this business has no invoices yet.");
         }
+    }
 
-        var books = WhoToCallSample.Build(_currentUser.OrganizationName);
+    private async Task PersistAsync(
+        IReadOnlyList<WhoToCallCustomerBook> customers,
+        IReadOnlyList<SampleCreditNote> creditNotes,
+        IReadOnlyList<SampleBankRow> transactions,
+        string sourceName,
+        CancellationToken cancellationToken)
+    {
         var now = _clock.UtcNow;
-        var source = new DataSource
+        var orgId = _currentUser.OrganizationId;
+        var hasBank = transactions.Count > 0;
+        var invoiceJobId = Guid.NewGuid();
+        var transactionJobId = Guid.NewGuid();
+        var sourceId = Guid.NewGuid();
+
+        if (hasBank)
         {
-            Id = Guid.NewGuid(),
-            OrganizationId = _currentUser.OrganizationId,
-            Name = SampleSourceName,
+            _db.ImportJobs.Add(new ImportJob
+            {
+                Id = invoiceJobId,
+                OrganizationId = orgId,
+                CreatedByUserId = _currentUser.UserId,
+                OriginalFileName = sourceName + " invoices.csv",
+                StoragePath = "sample/" + sourceName + "/invoices.csv",
+                Status = ImportStatus.Imported,
+                Kind = ImportKind.Invoices,
+                ImportedRowCount = customers.Sum(customer => customer.Invoices.Count),
+                CreatedAt = now,
+                UpdatedAt = now
+            });
+            _db.ImportJobs.Add(new ImportJob
+            {
+                Id = transactionJobId,
+                OrganizationId = orgId,
+                CreatedByUserId = _currentUser.UserId,
+                OriginalFileName = sourceName + " transactions.csv",
+                StoragePath = "sample/" + sourceName + "/transactions.csv",
+                Status = ImportStatus.Imported,
+                Kind = ImportKind.Transactions,
+                MappingJson = """{"Date":"Date","Description":"Description","Amount":"Amount","Balance":"Balance","BookedDate":"BookedDate","Category":"Category","Counterparty":"Counterparty"}""",
+                ImportedRowCount = transactions.Count,
+                CreatedAt = now,
+                UpdatedAt = now.AddSeconds(1)
+            });
+        }
+
+        _db.DataSources.Add(new DataSource
+        {
+            Id = sourceId,
+            OrganizationId = orgId,
+            Name = sourceName,
             Kind = DataSourceKind.InvoiceCsv,
             ExternalSystem = "sample",
+            ImportJobId = hasBank ? invoiceJobId : null,
             CreatedAt = now
-        };
-        _db.DataSources.Add(source);
+        });
 
-        foreach (var customer in books.Customers)
+        var invoiceIds = new Dictionary<string, Guid>(StringComparer.Ordinal);
+        var sourceRow = 1;
+        foreach (var customer in customers)
         {
             _db.Customers.Add(new Customer
             {
                 Id = customer.CustomerId,
-                OrganizationId = _currentUser.OrganizationId,
-                DataSourceId = source.Id,
+                OrganizationId = orgId,
+                DataSourceId = sourceId,
                 RowId = customer.RowId,
                 Name = customer.Name,
                 NormalizedName = CustomerNames.Normalize(customer.Name),
@@ -234,15 +298,18 @@ public sealed class WhoToCallService : IWhoToCallAppService
             foreach (var invoice in customer.Invoices)
             {
                 var invoiceId = Guid.NewGuid();
+                invoiceIds[invoice.RowId] = invoiceId;
                 _db.Invoices.Add(new Invoice
                 {
                     Id = invoiceId,
-                    OrganizationId = _currentUser.OrganizationId,
+                    OrganizationId = orgId,
                     CustomerId = customer.CustomerId,
-                    DataSourceId = source.Id,
+                    DataSourceId = sourceId,
+                    ImportJobId = hasBank ? invoiceJobId : null,
                     RowId = invoice.RowId,
                     Number = invoice.Number,
                     InvoiceDate = invoice.InvoiceDate,
+                    BookedDate = invoice.InvoiceDate,
                     DueDate = invoice.DueDate,
                     Amount = invoice.Amount,
                     AmountDue = invoice.AmountDue,
@@ -250,7 +317,7 @@ public sealed class WhoToCallService : IWhoToCallAppService
                     PaidDate = invoice.PaidDate,
                     Currency = "ZAR",
                     Terms = invoice.Terms,
-                    SourceRowNumber = 1,
+                    SourceRowNumber = sourceRow++,
                     ImportedAt = invoice.ImportedAt == default ? now : invoice.ImportedAt
                 });
 
@@ -260,7 +327,7 @@ public sealed class WhoToCallService : IWhoToCallAppService
                     _db.InvoiceLines.Add(new InvoiceLine
                     {
                         Id = Guid.NewGuid(),
-                        OrganizationId = _currentUser.OrganizationId,
+                        OrganizationId = orgId,
                         InvoiceId = invoiceId,
                         RowId = line.RowId,
                         LineNumber = lineNumber++,
@@ -274,19 +341,69 @@ public sealed class WhoToCallService : IWhoToCallAppService
                     _db.Payments.Add(new Payment
                     {
                         Id = Guid.NewGuid(),
-                        OrganizationId = _currentUser.OrganizationId,
+                        OrganizationId = orgId,
                         InvoiceId = invoiceId,
                         CustomerId = customer.CustomerId,
-                        DataSourceId = source.Id,
+                        DataSourceId = sourceId,
+                        ImportJobId = hasBank ? invoiceJobId : null,
                         RowId = "pay-" + invoice.RowId,
                         PaidDate = paid,
                         Amount = invoice.Amount,
                         Reference = invoice.Number,
                         SourceRowNumber = 1,
-                        ImportedAt = invoice.ImportedAt == default ? now : invoice.ImportedAt
+                        ImportedAt = now
                     });
                 }
             }
+        }
+
+        var creditRow = 1;
+        foreach (var note in creditNotes)
+        {
+            if (!invoiceIds.TryGetValue(note.InvoiceRowId, out var invoiceId))
+            {
+                throw new InvalidOperationException("A sample credit note does not match an invoice.");
+            }
+
+            var owner = customers.First(customer => customer.Invoices.Any(invoice => invoice.RowId == note.InvoiceRowId));
+            _db.CreditNotes.Add(new CreditNote
+            {
+                Id = Guid.NewGuid(),
+                OrganizationId = orgId,
+                InvoiceId = invoiceId,
+                CustomerId = owner.CustomerId,
+                DataSourceId = sourceId,
+                ImportJobId = hasBank ? invoiceJobId : null,
+                RowId = note.RowId,
+                Number = note.Number,
+                IssuedDate = note.IssuedDate,
+                Amount = note.Amount,
+                Reason = note.Reason,
+                SourceRowNumber = creditRow++,
+                ImportedAt = now
+            });
+        }
+
+        foreach (var row in transactions)
+        {
+            _db.Transactions.Add(new Transaction
+            {
+                Id = Guid.NewGuid(),
+                OrganizationId = orgId,
+                ImportJobId = transactionJobId,
+                DataSourceId = sourceId,
+                RowId = row.RowId,
+                SourceRowNumber = row.SourceRowNumber,
+                Date = row.Date,
+                BookedDate = row.BookedDate,
+                Description = row.Description,
+                Amount = row.Amount,
+                Currency = "ZAR",
+                Category = row.Category,
+                Counterparty = row.Counterparty,
+                Balance = row.Balance,
+                ImportedAt = now
+            });
         }
 
         await _db.SaveChangesAsync(cancellationToken);
@@ -440,19 +557,20 @@ public sealed class WhoToCallService : IWhoToCallAppService
             names.TryGetValue(item.ActedByUserId, out var name) && !string.IsNullOrWhiteSpace(name) ? name : "Someone")).ToList();
     }
 
-    private async Task<bool> UsingSampleAsync(CancellationToken cancellationToken)
+    private async Task<(bool Using, string? Name)> SampleSourceAsync(CancellationToken cancellationToken)
     {
-        var sourceId = await _db.DataSources.AsNoTracking()
-            .Where(item => item.Name == SampleSourceName)
-            .Select(item => (Guid?)item.Id)
+        var source = await _db.DataSources.AsNoTracking()
+            .Where(item => item.ExternalSystem == "sample")
+            .Select(item => new { item.Id, item.Name })
             .FirstOrDefaultAsync(cancellationToken);
-        if (sourceId is null)
+        if (source is null)
         {
-            return false;
+            return (false, null);
         }
 
         var invoices = await _db.Invoices.AsNoTracking().Select(item => item.DataSourceId).ToListAsync(cancellationToken);
-        return invoices.Count > 0 && invoices.All(id => id == sourceId);
+        var usingSample = invoices.Count > 0 && invoices.All(id => id == source.Id);
+        return (usingSample, usingSample ? source.Name : null);
     }
 
     private void RequireMember()

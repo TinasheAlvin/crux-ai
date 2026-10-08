@@ -26,7 +26,7 @@ else
             }
             @if (list.UsingSample)
             {
-                <p class="hint">Sample books. Customer names are made up.</p>
+                <p class="hint">@SampleHint(list.SampleName)</p>
             }
             <p class="hint"><a href="/who-to-call/settings">Thresholds</a></p>
         </header>
@@ -41,7 +41,11 @@ else
             <p>@(list.HasInvoices ? "No one is flagged from these books." : "No invoices are loaded yet.")</p>
             @if (list.CanLoadSample)
             {
-                <button class="btn btn-primary" type="button" disabled="@busy" @onclick="LoadSampleAsync">Load sample books</button>
+                <p>Pick a fictional business with a year of books. Karoo Kitchen Group is the primary sample.</p>
+                <div class="sample-picks">
+                    <button class="btn btn-primary" type="button" disabled="@busy" @onclick='() => LoadBookAsync(SampleBookCatalog.KarooId)'>Load Karoo Kitchen Group</button>
+                    <button class="btn btn-outline" type="button" disabled="@busy" @onclick='() => LoadBookAsync(SampleBookCatalog.AxumId)'>Load Axum Home</button>
+                </div>
             }
         }
         else
@@ -155,15 +159,34 @@ else
 
     private void MarkCopied() => copied = true;
 
-    private async Task LoadSampleAsync()
+    private async Task LoadBookAsync(string bookId)
     {
         await RunAsync(async () =>
         {
-            await Calls.LoadSampleAsync();
-            banner = "Sample books are loaded.";
+            await Calls.LoadSampleAsync(bookId);
+            banner = bookId == SampleBookCatalog.AxumId
+                ? "Axum Home sample books are loaded."
+                : "Karoo Kitchen Group sample books are loaded.";
             bannerIsError = false;
             await ReloadAsync();
         });
+    }
+
+    private static string SampleHint(string? name)
+    {
+        if (name == "Axum Home")
+        {
+            var units = RandAmounts.Format(AxumHomeBook.NextTwoDayUnits);
+            var text = units.StartsWith('R') ? units[1..] : units;
+            return $"Axum Home sample. Next two days in the demo add up to {text} units. Customer names are made up.";
+        }
+
+        if (name == "Karoo Kitchen Group")
+        {
+            return "Karoo Kitchen Group sample. Customer names are made up.";
+        }
+
+        return "Sample books. Customer names are made up.";
     }
 
     private async Task RecordAsync(CallActionKind kind)
