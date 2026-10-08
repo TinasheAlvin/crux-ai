@@ -302,7 +302,7 @@ public sealed class WhoToCallService : IWhoToCallAppService
         var booksCustomers = customers.Select(MapCustomer).ToList();
         var countableDates = booksCustomers
             .SelectMany(customer => customer.Invoices)
-            .Where(invoice => invoice.Status is InvoiceStatus.Open or InvoiceStatus.Paid)
+            .Where(invoice => WhoToCallRules.IsCountableStatus(invoice.Status))
             .Select(invoice => invoice.InvoiceDate);
         var today = DateOnly.FromDateTime(_clock.UtcNow);
         var asAt = AsAtDates.Resolve(AsAtDates.Current, countableDates, today);
@@ -400,7 +400,7 @@ public sealed class WhoToCallService : IWhoToCallAppService
     {
         var actedOn = DateOnly.FromDateTime(actedAt);
         return book.Invoices.Any(invoice =>
-            invoice.Status is InvoiceStatus.Open or InvoiceStatus.Paid
+            WhoToCallRules.IsCountableStatus(invoice.Status)
             && (invoice.InvoiceDate > actedOn || invoice.ImportedAt > actedAt));
     }
 

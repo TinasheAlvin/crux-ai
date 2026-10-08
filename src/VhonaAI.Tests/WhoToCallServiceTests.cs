@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text;
 using VhonaAI.Application.Calling;
 using VhonaAI.Core.Calling;
 using VhonaAI.Core.Entities;
@@ -8,7 +9,10 @@ using VhonaAI.Core.Time;
 using VhonaAI.Core.Why;
 using VhonaAI.Infrastructure.Brief;
 using VhonaAI.Infrastructure.Calling;
+using VhonaAI.Infrastructure.Csv;
 using VhonaAI.Infrastructure.Data;
+using VhonaAI.Infrastructure.Imports;
+using VhonaAI.Infrastructure.Storage;
 using VhonaAI.Infrastructure.Health;
 using VhonaAI.Infrastructure.Why;
 using Microsoft.EntityFrameworkCore;
@@ -150,6 +154,46 @@ public class WhoToCallServiceTests
             });
             await db.SaveChangesAsync();
             Assert.Contains((await service.GetListAsync()).Flags, flag => flag.CustomerId == sondela.CustomerId);
+        }
+    }
+
+    [Fact]
+    public async Task An_imported_overdue_invoice_is_flagged_late_with_its_row()
+    {
+        var (db, user, clock) = await OpenAsync();
+        await using (db)
+        {
+            var root = Path.Combine(Path.GetTempPath(), "vhonaai-tests", Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(root);
+            var imports = new ImportService(db, new LocalFileStorage(Path.Combine(root, "uploads")), new CsvHelperReader(), user);
+            const string csv = """
+                Customer,Invoice Number,Invoice Date,Due Date,Amount,Amount Due,Status
+                Naledi Khumalo,INV-2295,2026-03-31,2026-02-12,12400.00,12400.00,Overdue
+                """;
+            await using var upload = new MemoryStream(Encoding.UTF8.GetBytes(csv));
+            var job = await imports.CreateFromUploadAsync(upload, "overdue.csv", upload.Length, ImportKind.Invoices);
+            await imports.SaveMappingAsync(job, imports.GetMapping(job, await imports.LoadTableAsync(job)));
+            var imported = await imports.PersistInvoicesAsync(job, includeOnlyValid: false);
+
+            var stored = await db.Invoices.SingleAsync();
+            Assert.Equal(InvoiceStatus.Overdue, stored.Status);
+            var rowId = imported.Invoices[0].RowId;
+            Assert.Equal(rowId, stored.RowId);
+
+            var flag = Assert.Single((await Service(db, user, clock).GetListAsync()).Flags);
+            Assert.Equal(CallFlagKind.Late, flag.Kind);
+            Assert.Equal("Naledi Khumalo", flag.CustomerName);
+            Assert.Equal(rowId, Assert.Single(flag.CitedRowIds));
+            Assert.Equal(47, flag.OldestDaysOverdue);
+            Assert.Equal(12400m, flag.OpenTotal);
+            Assert.Contains("INV-2295", flag.DraftBody);
+
+            var detail = await Service(db, user, clock).GetFlagAsync(flag.CustomerId);
+            var open = Assert.Single(detail!.Flag.Late!.OpenInvoices);
+            Assert.Equal(rowId, open.RowId);
+            Assert.Equal("INV-2295", open.Number);
+            Assert.Equal(47, open.DaysOverdue);
+            Assert.True(open.IsOpen);
         }
     }
 

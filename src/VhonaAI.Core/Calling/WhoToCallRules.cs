@@ -83,8 +83,15 @@ public static class WhoToCallRules
         return TryDropped(customer, countable, asAt, thresholds);
     }
 
+    /// <summary>Open and Overdue are the same unpaid invoice. The file's word does not change the rule.</summary>
+    public static bool IsUnpaid(InvoiceStatus status) =>
+        status is InvoiceStatus.Open or InvoiceStatus.Overdue;
+
+    public static bool IsCountableStatus(InvoiceStatus status) =>
+        IsUnpaid(status) || status == InvoiceStatus.Paid;
+
     private static bool IsCountable(WhoToCallInvoice invoice) =>
-        invoice.Status is InvoiceStatus.Open or InvoiceStatus.Paid;
+        IsCountableStatus(invoice.Status);
 
     private static WhoToCallFlag? TryLate(
         WhoToCallCustomerBook customer,
@@ -93,7 +100,7 @@ public static class WhoToCallRules
         string businessName)
     {
         var open = countable
-            .Where(invoice => invoice.Status == InvoiceStatus.Open
+            .Where(invoice => IsUnpaid(invoice.Status)
                               && invoice.AmountDue > 0
                               && invoice.DueDate is DateOnly due
                               && due < asAt)
@@ -189,7 +196,7 @@ public static class WhoToCallRules
 
     private static LateInvoiceRow ToLateRow(WhoToCallInvoice invoice, DateOnly asAt)
     {
-        var overdue = invoice.Status == InvoiceStatus.Open
+        var overdue = IsUnpaid(invoice.Status)
                       && invoice.AmountDue > 0
                       && invoice.DueDate is DateOnly due
                       && due < asAt
@@ -202,7 +209,7 @@ public static class WhoToCallRules
             Issued = invoice.InvoiceDate,
             Due = invoice.DueDate,
             Amount = invoice.Amount,
-            AmountDue = invoice.Status == InvoiceStatus.Open ? invoice.AmountDue : invoice.Amount,
+            AmountDue = IsUnpaid(invoice.Status) ? invoice.AmountDue : invoice.Amount,
             IsOpen = overdue is not null,
             DaysOverdue = overdue,
             PaidDate = invoice.PaidDate
