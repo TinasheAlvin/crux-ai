@@ -1,5 +1,7 @@
 using System.Text.Json;
 using VhonaAI.Application.Health;
+using VhonaAI.Core.Calling;
+using VhonaAI.Core.Entities;
 using VhonaAI.Core.Health;
 using VhonaAI.Core.Identity;
 using VhonaAI.Core.Mapping;
@@ -43,8 +45,17 @@ public sealed class HealthKpiService : IHealthKpiAppService
 
         var mapping = DeserializeMapping(latestJob?.MappingJson);
         var cashMapped = HealthKpiCalculator.MappingIncludesCashField(mapping);
+        var invoiceDates = await _db.Invoices
+            .AsNoTracking()
+            .Where(invoice => invoice.OrganizationId == _currentUser.OrganizationId)
+            .Where(invoice => invoice.Status == InvoiceStatus.Open
+                              || invoice.Status == InvoiceStatus.Overdue
+                              || invoice.Status == InvoiceStatus.Paid)
+            .Select(invoice => invoice.InvoiceDate)
+            .ToListAsync(cancellationToken);
+        var booksAsAt = AsAtDates.Resolve(AsAtDates.Current, invoiceDates, DateOnly.FromDateTime(DateTime.UtcNow));
 
-        return HealthKpiCalculator.Compute(transactions, cashMapped, latestJob?.Id);
+        return HealthKpiCalculator.Compute(transactions, cashMapped, latestJob?.Id, booksAsAt);
     }
 
     private static IReadOnlyDictionary<string, string> DeserializeMapping(string? json)

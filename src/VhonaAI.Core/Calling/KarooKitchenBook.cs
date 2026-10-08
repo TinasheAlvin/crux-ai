@@ -83,6 +83,7 @@ public static class KarooKitchenBook
             gardens,
             woodstock
         };
+        customers.AddRange(MoreAccounts());
         var firstGardens = gardenInvoices[0].RowId;
 
         var notes = new List<SampleCreditNote>
@@ -108,6 +109,31 @@ public static class KarooKitchenBook
             Transactions = TillAndCosts()
         };
     }
+
+    private static IEnumerable<WhoToCallCustomerBook> MoreAccounts()
+    {
+        yield return Account("Kloof Street Supper Club", "kloof", "Lebo Dlamini", "0825552106", "lebo@kloofstreet.example", new DateOnly(2025, 8, 6), new DateOnly(2026, 7, 6), 6400m, "Staff supper, Gardens");
+        yield return Account("Tamboerskloof House", "tambo", "Chris Naidoo", "0825552109", "chris@tamboerskloofhouse.example", new DateOnly(2025, 9, 9), new DateOnly(2026, 7, 9), 8700m, "House dinner, Gardens");
+        yield return Account("Vredehoek Residents", "vrede", "Fatima Essop", "0825552121", "fatima@vredehoekresidents.example", new DateOnly(2025, 8, 21), new DateOnly(2026, 6, 21), 5200m, "Residents supper, Gardens");
+        yield return Account("Green Point Film Office", "green", "Sam Petersen", "0825552111", "sam@greenpointfilm.example", new DateOnly(2025, 8, 11), new DateOnly(2026, 7, 11), 11200m, "Night shoot catering, Sea Point");
+        yield return Account("Mouille Point Yacht Club", "mouille", "Helen Visser", "0825552114", "helen@mouillepoint.example", new DateOnly(2025, 9, 14), new DateOnly(2026, 7, 13), 9800m, "Club lunch, Sea Point");
+        yield return Account("Sea Point Bowling Club", "bowling", "Andre Fortuin", "0825552103", "andre@seapointbowling.example", new DateOnly(2025, 10, 3), new DateOnly(2026, 7, 3), 4300m, "Prize lunch, Sea Point");
+        yield return Account("Stellenbosch Wine Desk", "wine", "Mia Louw", "0825552117", "mia@stellenboschwine.example", new DateOnly(2025, 8, 17), new DateOnly(2026, 7, 12), 15600m, "Tasting lunch, Stellenbosch");
+        yield return Account("Jonkershoek School Fete", "jonker", "Ruth Jacobs", "0825552122", "ruth@jonkershoekschool.example", new DateOnly(2025, 9, 22), new DateOnly(2026, 6, 22), 7600m, "Fete kitchen, Stellenbosch");
+        yield return Account("Devon Valley Weddings", "devon", "Liam October", "0825552125", "liam@devonvalley.example", new DateOnly(2025, 8, 25), new DateOnly(2026, 7, 10), 13400m, "Wedding supper, Stellenbosch");
+    }
+
+    private static WhoToCallCustomerBook Account(
+        string name,
+        string slug,
+        string contact,
+        string phone,
+        string email,
+        DateOnly first,
+        DateOnly last,
+        decimal amount,
+        string description) =>
+        Person(name, slug, contact, phone, email, MonthInvoices(slug, first, last, amount, description));
 
     private static WhoToCallCustomerBook SignalHill()
     {

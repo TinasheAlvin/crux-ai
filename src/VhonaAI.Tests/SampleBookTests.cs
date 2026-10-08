@@ -19,6 +19,7 @@ public class SampleBookTests
     public void Karoo_books_match_the_published_months_and_the_three_flags()
     {
         var ledger = KarooKitchenBook.Build();
+        Assert.InRange(ledger.Customers.Count, 12, 15);
         Assert.Equal(KarooKitchenBook.AsAt, LatestCountable(ledger));
         Assert.DoesNotContain(ledger.Transactions, row => row.Date >= new DateOnly(2026, 7, 1));
 
@@ -70,10 +71,32 @@ public class SampleBookTests
         Assert.Equal(715, AxumDemoFigures.ModelCount);
         Assert.Equal(308092, AxumHomeBook.NextTwoDayUnits);
 
-        var historyRows = ledger.Transactions.Where(row => row.Description.Contains(" units", StringComparison.Ordinal)).ToList();
+        Assert.Equal(25, AxumHomeBook.WholesalePrices.Count);
+        Assert.All(AxumDemoFigures.Skus, sku =>
+        {
+            var price = AxumHomeBook.Price(sku);
+            Assert.InRange(price, 18m, 180m);
+        });
+        var historyRows = ledger.Transactions.Where(row => row.RowId.StartsWith("axum-h-", StringComparison.Ordinal)).ToList();
         Assert.Equal(AxumDemoFigures.History.Length, historyRows.Count);
-        Assert.Equal(AxumDemoFigures.History.Sum(row => (decimal)row.Units), historyRows.Sum(row => row.Amount));
+        Assert.Equal(
+            AxumDemoFigures.History.Sum(row => row.Units * AxumHomeBook.Price(row.Sku)),
+            historyRows.Sum(row => row.Amount));
         Assert.Contains(historyRows, row => row.Date == AxumHomeBook.AsAt && row.Description.StartsWith("DW190 Dishwashing liquid", StringComparison.Ordinal));
+        var march = ledger.Transactions.Where(row => row.Date.Year == 2026 && row.Date.Month == 3).ToList();
+        var marchRevenue = march.Where(row => row.Amount > 0).Sum(row => row.Amount);
+        var marchStock = -march.Single(row => row.Category == "Stock purchases").Amount;
+        Assert.Equal(decimal.Round(marchRevenue * 0.61m, 0), marchStock);
+        Assert.Contains(march, row => row.Category == "Delivery");
+        Assert.Contains(march, row => row.Category == "Wages");
+        Assert.Contains(march, row => row.Category == "Rent");
+        var februaryClose = ledger.Transactions
+            .Where(row => row.Date.Year == 2026 && row.Date.Month == 2)
+            .OrderBy(row => row.Date)
+            .ThenBy(row => row.SourceRowNumber)
+            .Last()
+            .Balance;
+        Assert.Equal(AxumHomeBook.FebruaryCash, februaryClose);
 
         var months = ledger.Transactions.Select(row => new DateOnly(row.Date.Year, row.Date.Month, 1)).Distinct().OrderBy(month => month).ToList();
         Assert.Equal(new DateOnly(2025, 5, 1), months[0]);
@@ -213,9 +236,17 @@ public class SampleBookTests
         Assert.Null(await studioCalls.GetFlagAsync(axum.Flags[0].CustomerId));
 
         var axumHealth = await new HealthKpiService(bakeryDb, bakery).GetSnapshotAsync();
-        Assert.Equal(new DateOnly(2026, 4, 1), axumHealth.CurrentPeriod!.Start);
+        Assert.Equal(new DateOnly(2026, 3, 1), axumHealth.CurrentPeriod!.Start);
+        Assert.Equal(new DateOnly(2026, 2, 1), axumHealth.PreviousPeriod!.Start);
+        var openMonth = axumHealth.OpenMonthNote;
+        Assert.NotNull(openMonth);
+        Assert.Contains("April 2026 is still open", openMonth);
+        Assert.Contains("March 2026", openMonth);
+        Assert.Contains("February 2026", openMonth);
+        Assert.Equal(openMonth + " ", axumHealth.Revenue!.WhyPrompt[..(openMonth.Length + 1)]);
         Assert.NotNull(axumHealth.Cash);
         Assert.Null(axumHealth.Cash!.MissingNote);
+        Assert.Equal(AxumHomeBook.AsAt, axum.AsAt);
 
         var member = new Person(studioId, Guid.NewGuid(), "Member", "Harbour Street Studio");
         var blocked = await Assert.ThrowsAsync<InvalidOperationException>(() =>
