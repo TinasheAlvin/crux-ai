@@ -26,10 +26,6 @@
                     <p class="kpi-label">@LabelFor(card.Kind)</p>
                     <p class="kpi-value">@CardAmount(card, card.CurrentValue)</p>
                     <p class="kpi-compare @DeltaClass(card)">@CompareText(card)</p>
-                    @if (!string.IsNullOrWhiteSpace(Snapshot.OpenMonthNote))
-                    {
-                        <p class="kpi-missing">@Snapshot.OpenMonthNote</p>
-                    }
                     @if (!string.IsNullOrWhiteSpace(card.MissingNote) && card.Kind == HealthMetricKind.Cash)
                     {
                         <p class="kpi-missing">@card.MissingNote</p>

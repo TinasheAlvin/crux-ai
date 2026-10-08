@@ -75,7 +75,7 @@ public class SampleBookTests
         Assert.All(AxumDemoFigures.Skus, sku =>
         {
             var price = AxumHomeBook.Price(sku);
-            Assert.InRange(price, 18m, 180m);
+            Assert.InRange(price, 6m, 40m);
         });
         var historyRows = ledger.Transactions.Where(row => row.RowId.StartsWith("axum-h-", StringComparison.Ordinal)).ToList();
         Assert.Equal(AxumDemoFigures.History.Length, historyRows.Count);
@@ -119,6 +119,61 @@ public class SampleBookTests
         Assert.Contains(ledger.Customers.SelectMany(customer => customer.Invoices), invoice => invoice.Status == InvoiceStatus.Void);
         Assert.NotEmpty(ledger.CreditNotes);
         Assert.Equal(AxumDemoFigures.Regions.Length, ledger.Customers.Count);
+    }
+
+    [Fact]
+    public void Axum_complete_months_stay_inside_a_mid_sized_band()
+    {
+        var ledger = AxumHomeBook.Build();
+        var first = ledger.Transactions.OrderBy(row => row.Date).ThenBy(row => row.SourceRowNumber).First();
+        decimal previousCash = first.Balance - first.Amount;
+        decimal? previousRevenue = null;
+        decimal? previousExpenses = null;
+        decimal? previousProfit = null;
+        for (var month = new DateOnly(2025, 5, 1); month <= new DateOnly(2026, 3, 1); month = month.AddMonths(1))
+        {
+            var rows = ledger.Transactions.Where(row => row.Date.Year == month.Year && row.Date.Month == month.Month).ToList();
+            var revenue = rows.Where(row => row.Amount > 0).Sum(row => row.Amount);
+            var expenses = rows.Where(row => row.Amount < 0).Sum(row => -row.Amount);
+            var profit = revenue - expenses;
+            var cash = rows.OrderBy(row => row.Date).ThenBy(row => row.SourceRowNumber).Last().Balance;
+            var stock = -rows.Single(row => row.Category == "Stock purchases").Amount;
+            Assert.InRange(revenue, 4_000_000m, 8_000_000m);
+            Assert.InRange(stock / revenue, 0.55m, 0.65m);
+            Assert.InRange(cash, 1_500_000m, 4_000_000m);
+            Assert.Contains(rows, row => row.Category == "Delivery");
+            Assert.Contains(rows, row => row.Category == "Wages");
+            Assert.Contains(rows, row => row.Category == "Rent");
+            if (previousRevenue is decimal earlierRevenue)
+            {
+                Assert.InRange(revenue / earlierRevenue - 1m, -0.20m, 0.20m);
+                Assert.InRange(expenses / previousExpenses!.Value - 1m, -0.20m, 0.20m);
+                Assert.InRange(profit / previousProfit!.Value - 1m, -0.20m, 0.20m);
+            }
+
+            Assert.InRange(cash / previousCash - 1m, -0.30m, 0.30m);
+            previousRevenue = revenue;
+            previousExpenses = expenses;
+            previousProfit = profit;
+            previousCash = cash;
+        }
+
+        var history = ledger.Transactions.Where(row => row.RowId.StartsWith("axum-h-", StringComparison.Ordinal)).ToList();
+        Assert.Equal(AxumDemoFigures.History.Length, history.Count);
+        Assert.DoesNotContain(history, row => row.Description.Contains(AxumHomeBook.GeneratedMark, StringComparison.Ordinal));
+        for (var i = 0; i < AxumDemoFigures.History.Length; i++)
+        {
+            var source = AxumDemoFigures.History[i];
+            var row = history.Single(item => item.RowId == $"axum-h-{i:0000}");
+            Assert.Equal(source.Day, row.Date);
+            Assert.Equal(source.Units * AxumHomeBook.Price(source.Sku), row.Amount);
+            Assert.Contains($"{source.Units} units", row.Description, StringComparison.Ordinal);
+        }
+
+        var generated = ledger.Transactions.Where(row => row.RowId.StartsWith("axum-g-", StringComparison.Ordinal)).ToList();
+        Assert.NotEmpty(generated);
+        Assert.All(generated, row => Assert.Contains(AxumHomeBook.GeneratedMark, row.Description, StringComparison.Ordinal));
+        Assert.Equal(308092, AxumHomeBook.NextTwoDayUnits);
     }
 
     [Fact]
