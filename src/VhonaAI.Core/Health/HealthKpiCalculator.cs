@@ -70,6 +70,12 @@ public sealed class HealthSnapshot
     public IReadOnlyList<string> MissingNotes { get; init; } = [];
     public Guid? LatestImportJobId { get; init; }
 
+    /// <summary>
+    /// Set when the books' as-at date falls before the end of that month.
+    /// The cards then compare the last full month with the month before it.
+    /// </summary>
+    public string? OpenMonthNote { get; init; }
+
     public IEnumerable<MetricCard> VisibleCards
     {
         get
@@ -96,14 +102,32 @@ public static class HealthKpiCalculator
     public static HealthSnapshot Compute(
         IReadOnlyList<Transaction> transactions,
         bool cashFieldMapped,
-        Guid? latestImportJobId = null)
+        Guid? latestImportJobId = null,
+        DateOnly? booksAsAt = null)
     {
         if (transactions.Count == 0)
         {
             return new HealthSnapshot { HasData = false, LatestImportJobId = latestImportJobId };
         }
 
-        var currentPeriod = MonthPeriod.FromDate(transactions.Max(t => t.Date));
+        var latestPeriod = MonthPeriod.FromDate(transactions.Max(t => t.Date));
+        var currentPeriod = latestPeriod;
+        string? openMonthNote = null;
+        if (booksAsAt is DateOnly asAt && MonthIsOpen(asAt))
+        {
+            var asAtPeriod = MonthPeriod.FromDate(asAt);
+            var lastFull = asAtPeriod.Previous;
+            if (latestPeriod.Year == asAtPeriod.Year
+                && latestPeriod.Month == asAtPeriod.Month
+                && transactions.Any(row => lastFull.Contains(row.Date)))
+            {
+                currentPeriod = lastFull;
+                openMonthNote =
+                    $"{RandAmounts.MonthName(asAt.Month)} {asAt.Year} is still open, up to {RandAmounts.DayMonth(asAt)}. " +
+                    $"These cards compare {RandAmounts.MonthName(currentPeriod.Month)} {currentPeriod.Year} with {RandAmounts.MonthName(currentPeriod.Previous.Month)} {currentPeriod.Previous.Year}.";
+            }
+        }
+
         var previousPeriod = currentPeriod.Previous;
         var currentRows = transactions.Where(t => currentPeriod.Contains(t.Date)).ToList();
         var previousRows = transactions.Where(t => previousPeriod.Contains(t.Date)).ToList();
@@ -121,7 +145,8 @@ public static class HealthKpiCalculator
             currentRows,
             previousRows,
             row => row.Amount > 0,
-            row => row.Amount);
+            row => row.Amount,
+            openMonthNote);
 
         var expenses = BuildFlowCard(
             HealthMetricKind.Expenses,
@@ -130,7 +155,8 @@ public static class HealthKpiCalculator
             currentRows,
             previousRows,
             row => row.Amount < 0,
-            row => Math.Abs(row.Amount));
+            row => Math.Abs(row.Amount),
+            openMonthNote);
 
         var profit = BuildTotalsCard(
             HealthMetricKind.Profit,
@@ -140,9 +166,10 @@ public static class HealthKpiCalculator
             previousRows.Count == 0 ? null : revenue.PreviousValue - expenses.PreviousValue,
             currentRows.Select(t => t.RowId).ToList(),
             previousRows.Select(t => t.RowId).ToList(),
-            previousRows.Count == 0 ? $"No {previousPeriod.Label} transactions to compare." : null);
+            previousRows.Count == 0 ? $"No {previousPeriod.Label} transactions to compare." : null,
+            openMonthNote);
 
-        var cash = BuildCashCard(cashFieldMapped, currentPeriod, previousPeriod, currentRows, previousRows);
+        var cash = BuildCashCard(cashFieldMapped, currentPeriod, previousPeriod, currentRows, previousRows, openMonthNote);
         if (cashFieldMapped && cash is null)
         {
             notes.Add("Cash is hidden — the mapped balance field has no usable values in this month.");
@@ -163,9 +190,13 @@ public static class HealthKpiCalculator
             Profit = profit,
             Cash = cash,
             MissingNotes = notes.Distinct().ToList(),
-            LatestImportJobId = latestImportJobId
+            LatestImportJobId = latestImportJobId,
+            OpenMonthNote = openMonthNote
         };
     }
+
+    public static bool MonthIsOpen(DateOnly asAt) =>
+        asAt.Day < DateTime.DaysInMonth(asAt.Year, asAt.Month);
 
     public static bool MappingIncludesCashField(IReadOnlyDictionary<string, string>? mapping) =>
         mapping is not null
@@ -178,7 +209,8 @@ public static class HealthKpiCalculator
         IReadOnlyList<Transaction> currentRows,
         IReadOnlyList<Transaction> previousRows,
         Func<Transaction, bool> selector,
-        Func<Transaction, decimal> value)
+        Func<Transaction, decimal> value,
+        string? openMonthNote = null)
     {
         var currentMatch = currentRows.Where(selector).ToList();
         var previousMatch = previousRows.Where(selector).ToList();
@@ -196,7 +228,8 @@ public static class HealthKpiCalculator
             previousTotal,
             currentMatch.Select(t => t.RowId).ToList(),
             previousMatch.Select(t => t.RowId).ToList(),
-            missing);
+            missing,
+            openMonthNote);
     }
 
     private static MetricCard? BuildCashCard(
@@ -204,7 +237,8 @@ public static class HealthKpiCalculator
         MonthPeriod currentPeriod,
         MonthPeriod previousPeriod,
         IReadOnlyList<Transaction> currentRows,
-        IReadOnlyList<Transaction> previousRows)
+        IReadOnlyList<Transaction> previousRows,
+        string? openMonthNote = null)
     {
         if (!cashFieldMapped)
         {
@@ -235,7 +269,8 @@ public static class HealthKpiCalculator
             previousCash?.Balance,
             currentRowIds,
             previousRowIds,
-            missing);
+            missing,
+            openMonthNote);
     }
 
     private static (decimal Balance, string RowId)? LatestBalance(IReadOnlyList<Transaction> rows)
@@ -257,7 +292,8 @@ public static class HealthKpiCalculator
         decimal? previous,
         IReadOnlyList<string> currentRowIds,
         IReadOnlyList<string> previousRowIds,
-        string? missingNote)
+        string? missingNote,
+        string? openMonthNote = null)
     {
         decimal? delta = previous is null ? null : current - previous;
         decimal? percent = previous is null || previous == 0
@@ -272,11 +308,14 @@ public static class HealthKpiCalculator
             Delta = delta,
             DeltaPercent = percent,
             MissingNote = missingNote,
-            WhyPrompt = SeedWhyPrompt(kind, currentPeriod, previousPeriod, current, previous),
+            WhyPrompt = WithOpenMonth(openMonthNote, SeedWhyPrompt(kind, currentPeriod, previousPeriod, current, previous)),
             CurrentRowIds = currentRowIds,
             PreviousRowIds = previousRowIds
         };
     }
+
+    private static string WithOpenMonth(string? openMonthNote, string prompt) =>
+        string.IsNullOrWhiteSpace(openMonthNote) ? prompt : openMonthNote + " " + prompt;
 
     public static string SeedWhyPrompt(
         HealthMetricKind kind,

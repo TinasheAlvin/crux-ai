@@ -95,6 +95,13 @@ a, .btn-link {
     border-radius: 999px;
 }
 
+.sample-picks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
 .btn-lg {
     padding: 0.7rem 1.4rem;
     border-radius: 999px;

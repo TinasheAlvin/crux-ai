@@ -129,6 +129,45 @@ public class HealthKpiCalculatorTests
     }
 
     [Fact]
+    public void An_open_as_at_month_compares_the_last_full_month()
+    {
+        var transactions = new List<Transaction>
+        {
+            Row("feb-in", new DateOnly(2026, 2, 12), 4000m, balance: 14000m),
+            Row("mar-in", new DateOnly(2026, 3, 12), 5000m, balance: 19000m),
+            Row("apr-in", new DateOnly(2026, 4, 8), 900m, balance: 19900m)
+        };
+
+        var snapshot = HealthKpiCalculator.Compute(
+            transactions,
+            cashFieldMapped: true,
+            booksAsAt: new DateOnly(2026, 4, 13));
+
+        Assert.Equal("Mar 2026", snapshot.CurrentPeriod!.Label);
+        Assert.Equal("Feb 2026", snapshot.PreviousPeriod!.Label);
+        Assert.Equal(5000m, snapshot.Revenue!.CurrentValue);
+        Assert.Equal(4000m, snapshot.Revenue.PreviousValue);
+        Assert.Equal(19000m, snapshot.Cash!.CurrentValue);
+        Assert.Contains("April 2026 is still open, up to 13 April", snapshot.OpenMonthNote);
+        Assert.Contains("These cards compare March 2026 with February 2026", snapshot.OpenMonthNote);
+        Assert.StartsWith(snapshot.OpenMonthNote!, snapshot.Revenue.WhyPrompt);
+
+        var closed = HealthKpiCalculator.Compute(
+            transactions,
+            cashFieldMapped: false,
+            booksAsAt: new DateOnly(2026, 4, 30));
+        Assert.Equal("Apr 2026", closed.CurrentPeriod!.Label);
+        Assert.Null(closed.OpenMonthNote);
+
+        var laterBooks = HealthKpiCalculator.Compute(
+            transactions.Take(2).ToList(),
+            cashFieldMapped: false,
+            booksAsAt: new DateOnly(2026, 7, 13));
+        Assert.Equal("Mar 2026", laterBooks.CurrentPeriod!.Label);
+        Assert.Null(laterBooks.OpenMonthNote);
+    }
+
+    [Fact]
     public void MappingIncludesCashField_requires_balance()
     {
         var withBalance = new Dictionary<string, string>

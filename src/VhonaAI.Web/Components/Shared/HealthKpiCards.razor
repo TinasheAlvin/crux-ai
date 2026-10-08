@@ -8,6 +8,10 @@
                 From the transactions you saved.
                 Tap a card to ask why. Every answer cites the rows, or Vhona says it cannot tell.
             </p>
+            @if (!string.IsNullOrWhiteSpace(Snapshot.OpenMonthNote))
+            {
+                <p class="hint">@Snapshot.OpenMonthNote</p>
+            }
         </header>
 
         @foreach (var note in Snapshot.MissingNotes)

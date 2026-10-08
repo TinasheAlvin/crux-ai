@@ -145,7 +145,7 @@ public class WhoToCallDraftRenderTests : TestContext
         public Task<IReadOnlyList<CallActionDto>> GetHistoryAsync(Guid customerId, CancellationToken cancellationToken = default) =>
             Task.FromResult<IReadOnlyList<CallActionDto>>([]);
 
-        public Task LoadSampleAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+        public Task LoadSampleAsync(string bookId, CancellationToken cancellationToken = default) => Task.CompletedTask;
     }
 
     private sealed class Owner : ICurrentUser

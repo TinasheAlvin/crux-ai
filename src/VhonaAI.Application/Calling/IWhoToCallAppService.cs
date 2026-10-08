@@ -19,7 +19,7 @@ public interface IWhoToCallAppService
 
     Task<IReadOnlyList<CallActionDto>> GetHistoryAsync(Guid customerId, CancellationToken cancellationToken = default);
 
-    Task LoadSampleAsync(CancellationToken cancellationToken = default);
+    Task LoadSampleAsync(string bookId, CancellationToken cancellationToken = default);
 }
 
 public sealed class WhoToCallList
@@ -30,6 +30,7 @@ public sealed class WhoToCallList
     public string ReceiptFooter { get; init; } = WhoToCallResult.ReceiptFooter;
     public bool CanLoadSample { get; init; }
     public bool UsingSample { get; init; }
+    public string? SampleName { get; init; }
     public bool IsOwner { get; init; }
     public bool HasInvoices { get; init; }
     public IReadOnlyList<WhoToCallFlag> Flags { get; init; } = [];
