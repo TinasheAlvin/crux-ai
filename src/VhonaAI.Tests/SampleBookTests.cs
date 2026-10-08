@@ -298,7 +298,8 @@ public class SampleBookTests
         Assert.Contains("April 2026 is still open", openMonth);
         Assert.Contains("March 2026", openMonth);
         Assert.Contains("February 2026", openMonth);
-        Assert.Equal(openMonth + " ", axumHealth.Revenue!.WhyPrompt[..(openMonth.Length + 1)]);
+        Assert.DoesNotContain("is still open", axumHealth.Revenue!.WhyPrompt, StringComparison.Ordinal);
+        Assert.StartsWith("Why did revenue change from ", axumHealth.Revenue.WhyPrompt);
         Assert.NotNull(axumHealth.Cash);
         Assert.Null(axumHealth.Cash!.MissingNote);
         Assert.Equal(AxumHomeBook.AsAt, axum.AsAt);

@@ -50,45 +50,79 @@ public static class WhyVerifier
 
         if (intent.WantsChange)
         {
-            if (currentRows.Count == 0 || previousRows.Count == 0)
+            if (card.PreviousValue is null || currentRows.Count == 0 && previousRows.Count == 0)
             {
                 return WhyVerification.FailClosed(question);
             }
 
-            var currentValue = ValueFromRows(metric, currentRows);
-            var previousValue = ValueFromRows(metric, previousRows);
-            if (currentValue is null || previousValue is null)
+            var unresolved = card.CurrentRowIds.Concat(card.PreviousRowIds)
+                .Any(rowId => !byId.ContainsKey(rowId));
+            if (unresolved || currentRows.Count == 0 || previousRows.Count == 0)
             {
-                return WhyVerification.FailClosed(question);
+                var heldColumns = ColumnsFor(metric);
+                return new WhyVerification
+                {
+                    Verified = false,
+                    Held = true,
+                    Question = question,
+                    Answer = WhyMessages.Held,
+                    Metric = metric,
+                    Citations = Cite(currentRows, heldColumns, snapshot.CurrentPeriod.Label)
+                        .Concat(Cite(previousRows, heldColumns, snapshot.PreviousPeriod.Label))
+                        .ToList()
+                };
             }
 
+            var explanation = WhyReasons.Explain(
+                metric,
+                snapshot.CurrentPeriod,
+                snapshot.PreviousPeriod,
+                card.CurrentValue,
+                card.PreviousValue.Value,
+                currentRows,
+                previousRows);
             var columns = ColumnsFor(metric);
-            var citations = Cite(currentRows, columns, snapshot.CurrentPeriod.Label)
-                .Concat(Cite(previousRows, columns, snapshot.PreviousPeriod.Label))
+            if (explanation.Held)
+            {
+                var checkedRows = Cite(currentRows, columns, snapshot.CurrentPeriod.Label)
+                    .Concat(Cite(previousRows, columns, snapshot.PreviousPeriod.Label))
+                    .ToList();
+                return new WhyVerification
+                {
+                    Verified = false,
+                    Held = true,
+                    Question = question,
+                    Answer = explanation.Answer,
+                    Metric = metric,
+                    Citations = checkedRows
+                };
+            }
+
+            var citedIds = explanation.Reasons.SelectMany(reason => reason.RowIds).ToHashSet(StringComparer.Ordinal);
+            if (metric == HealthMetricKind.Cash)
+            {
+                foreach (var row in previousRows)
+                {
+                    citedIds.Add(row.RowId);
+                }
+            }
+
+            var citations = Cite(currentRows.Where(row => citedIds.Contains(row.RowId)), columns, snapshot.CurrentPeriod.Label)
+                .Concat(Cite(previousRows.Where(row => citedIds.Contains(row.RowId)), columns, snapshot.PreviousPeriod.Label))
                 .ToList();
             if (citations.Count == 0)
             {
                 return WhyVerification.FailClosed(question);
             }
 
-            var delta = currentValue.Value - previousValue.Value;
-            var answer = BuildChangeAnswer(
-                metric,
-                snapshot.CurrentPeriod,
-                snapshot.PreviousPeriod,
-                currentValue.Value,
-                previousValue.Value,
-                delta,
-                currentRows,
-                previousRows);
-
             return new WhyVerification
             {
                 Verified = true,
                 Question = question,
-                Answer = answer,
+                Answer = explanation.Answer,
                 Metric = metric,
-                Citations = citations
+                Citations = citations,
+                Reasons = explanation.Reasons
             };
         }
 
@@ -187,38 +221,6 @@ public static class WhyVerifier
             .LastOrDefault()
             ?.Balance;
 
-    private static string BuildChangeAnswer(
-        HealthMetricKind metric,
-        MonthPeriod currentPeriod,
-        MonthPeriod previousPeriod,
-        decimal current,
-        decimal previous,
-        decimal delta,
-        IReadOnlyList<Transaction> currentRows,
-        IReadOnlyList<Transaction> previousRows)
-    {
-        var name = LabelFor(metric);
-        var sb = new StringBuilder();
-        sb.Append(name)
-            .Append(" changed from ")
-            .Append(Money(previous))
-            .Append(" in ")
-            .Append(previousPeriod.Label)
-            .Append(" to ")
-            .Append(Money(current))
-            .Append(" in ")
-            .Append(currentPeriod.Label)
-            .Append(" (")
-            .Append(DeltaPhrase(delta))
-            .Append(").");
-
-        sb.AppendLine();
-        sb.AppendLine();
-        AppendValueBasis(sb, metric, currentPeriod.Label, current, currentRows);
-        AppendValueBasis(sb, metric, previousPeriod.Label, previous, previousRows);
-        return sb.ToString();
-    }
-
     private static string BuildLevelAnswer(
         HealthMetricKind metric,
         MonthPeriod currentPeriod,
@@ -284,19 +286,4 @@ public static class WhyVerifier
     };
 
     private static string Money(decimal value) => RandAmounts.Format(value);
-
-    private static string DeltaPhrase(decimal delta)
-    {
-        if (delta > 0)
-        {
-            return "up " + Money(delta);
-        }
-
-        if (delta < 0)
-        {
-            return "down " + Money(Math.Abs(delta));
-        }
-
-        return "unchanged";
-    }
 }

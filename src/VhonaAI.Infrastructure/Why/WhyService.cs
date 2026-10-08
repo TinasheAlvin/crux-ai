@@ -182,24 +182,31 @@ public sealed class WhyService : IWhyAppService
                 Category = txn.Category,
                 Counterparty = txn.Counterparty,
                 Reference = txn.Reference,
-                Balance = txn.Balance
+                Balance = txn.Balance,
+                SourceRowNumber = txn.SourceRowNumber
             });
         }
 
         return rows;
     }
 
-    private static WhyAskResult ToResult(WhyAnswer log, IReadOnlyList<WhyCitedRow> rows) =>
-        new()
+    private static WhyAskResult ToResult(WhyAnswer log, IReadOnlyList<WhyCitedRow> rows)
+    {
+        var metric = Enum.TryParse<HealthMetricKind>(log.Metric, ignoreCase: true, out var parsed) ? parsed : (HealthMetricKind?)null;
+        var held = log.Answer == WhyMessages.Held || log.Answer == WhyMessages.HeldUnexplained;
+        return new WhyAskResult
         {
             AnswerId = log.Id,
             Question = log.Question,
             Answer = log.Answer,
             Verified = log.Verified,
-            Metric = Enum.TryParse<HealthMetricKind>(log.Metric, ignoreCase: true, out var metric) ? metric : null,
+            Metric = metric,
             CreatedAt = log.CreatedAt,
-            CitedRows = rows
+            CitedRows = rows,
+            Held = held,
+            Reasons = held || metric is null ? [] : WhyReasons.Rebuild(metric.Value, rows)
         };
+    }
 
     private static WhyAskResult UnloggedFailClosed(string question) =>
         new()

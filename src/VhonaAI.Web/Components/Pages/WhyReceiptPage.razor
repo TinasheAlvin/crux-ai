@@ -29,10 +29,10 @@ else
 {
     <section class="panel">
         <p class="eyebrow">@CurrentUser.OrganizationName · receipt</p>
-        <h1>Cited rows</h1>
+        <h1>@(ReasonTitle ?? "Cited rows")</h1>
         <blockquote class="why-prompt">@result.Question</blockquote>
-        <p class="lede">@result.CitedRows.Count row@(result.CitedRows.Count == 1 ? "" : "s"). Columns: @ColumnsSummary.</p>
-        <WhyReceiptTable Rows="result.CitedRows" />
+        <p class="lede">@ShownRows.Count row@(ShownRows.Count == 1 ? "" : "s"). Columns: @ColumnsSummary.</p>
+        <WhyReceiptTable Rows="ShownRows" />
         <TrustPrompt AnswerId="result.AnswerId" />
         <div class="actions">
             <a class="btn btn-primary" href="/why">@WhyMessages.TryAnother</a>
@@ -44,8 +44,37 @@ else
 @code {
     [Parameter] public Guid AnswerId { get; set; }
 
+    [SupplyParameterFromQuery(Name = "part")]
+    public int? Part { get; set; }
+
     private bool loading = true;
     private WhyAskResult? result;
+
+    private WhyReasonLine? SelectedReason =>
+        result is not null && Part is int part && part >= 0 && part < result.Reasons.Count
+            ? result.Reasons[part]
+            : null;
+
+    private string? ReasonTitle => SelectedReason?.Title;
+
+    private IReadOnlyList<WhyCitedRow> ShownRows
+    {
+        get
+        {
+            if (result is null)
+            {
+                return [];
+            }
+
+            if (SelectedReason is null)
+            {
+                return result.CitedRows;
+            }
+
+            var ids = SelectedReason.RowIds.ToHashSet(StringComparer.Ordinal);
+            return result.CitedRows.Where(row => ids.Contains(row.RowId)).ToList();
+        }
+    }
 
     protected override async Task OnParametersSetAsync()
     {

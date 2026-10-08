@@ -145,8 +145,7 @@ public static class HealthKpiCalculator
             currentRows,
             previousRows,
             row => row.Amount > 0,
-            row => row.Amount,
-            openMonthNote);
+            row => row.Amount);
 
         var expenses = BuildFlowCard(
             HealthMetricKind.Expenses,
@@ -155,8 +154,7 @@ public static class HealthKpiCalculator
             currentRows,
             previousRows,
             row => row.Amount < 0,
-            row => Math.Abs(row.Amount),
-            openMonthNote);
+            row => Math.Abs(row.Amount));
 
         var profit = BuildTotalsCard(
             HealthMetricKind.Profit,
@@ -166,10 +164,9 @@ public static class HealthKpiCalculator
             previousRows.Count == 0 ? null : revenue.PreviousValue - expenses.PreviousValue,
             currentRows.Select(t => t.RowId).ToList(),
             previousRows.Select(t => t.RowId).ToList(),
-            previousRows.Count == 0 ? $"No {previousPeriod.Label} transactions to compare." : null,
-            openMonthNote);
+            previousRows.Count == 0 ? $"No {previousPeriod.Label} transactions to compare." : null);
 
-        var cash = BuildCashCard(cashFieldMapped, currentPeriod, previousPeriod, currentRows, previousRows, openMonthNote);
+        var cash = BuildCashCard(cashFieldMapped, currentPeriod, previousPeriod, currentRows, previousRows);
         if (cashFieldMapped && cash is null)
         {
             notes.Add("Cash is hidden — the mapped balance field has no usable values in this month.");
@@ -209,8 +206,7 @@ public static class HealthKpiCalculator
         IReadOnlyList<Transaction> currentRows,
         IReadOnlyList<Transaction> previousRows,
         Func<Transaction, bool> selector,
-        Func<Transaction, decimal> value,
-        string? openMonthNote = null)
+        Func<Transaction, decimal> value)
     {
         var currentMatch = currentRows.Where(selector).ToList();
         var previousMatch = previousRows.Where(selector).ToList();
@@ -228,8 +224,7 @@ public static class HealthKpiCalculator
             previousTotal,
             currentMatch.Select(t => t.RowId).ToList(),
             previousMatch.Select(t => t.RowId).ToList(),
-            missing,
-            openMonthNote);
+            missing);
     }
 
     private static MetricCard? BuildCashCard(
@@ -237,8 +232,7 @@ public static class HealthKpiCalculator
         MonthPeriod currentPeriod,
         MonthPeriod previousPeriod,
         IReadOnlyList<Transaction> currentRows,
-        IReadOnlyList<Transaction> previousRows,
-        string? openMonthNote = null)
+        IReadOnlyList<Transaction> previousRows)
     {
         if (!cashFieldMapped)
         {
@@ -269,8 +263,7 @@ public static class HealthKpiCalculator
             previousCash?.Balance,
             currentRowIds,
             previousRowIds,
-            missing,
-            openMonthNote);
+            missing);
     }
 
     private static (decimal Balance, string RowId)? LatestBalance(IReadOnlyList<Transaction> rows)
@@ -292,8 +285,7 @@ public static class HealthKpiCalculator
         decimal? previous,
         IReadOnlyList<string> currentRowIds,
         IReadOnlyList<string> previousRowIds,
-        string? missingNote,
-        string? openMonthNote = null)
+        string? missingNote)
     {
         decimal? delta = previous is null ? null : current - previous;
         decimal? percent = previous is null || previous == 0
@@ -308,14 +300,11 @@ public static class HealthKpiCalculator
             Delta = delta,
             DeltaPercent = percent,
             MissingNote = missingNote,
-            WhyPrompt = WithOpenMonth(openMonthNote, SeedWhyPrompt(kind, currentPeriod, previousPeriod, current, previous)),
+            WhyPrompt = SeedWhyPrompt(kind, currentPeriod, previousPeriod, current, previous),
             CurrentRowIds = currentRowIds,
             PreviousRowIds = previousRowIds
         };
     }
-
-    private static string WithOpenMonth(string? openMonthNote, string prompt) =>
-        string.IsNullOrWhiteSpace(openMonthNote) ? prompt : openMonthNote + " " + prompt;
 
     public static string SeedWhyPrompt(
         HealthMetricKind kind,
