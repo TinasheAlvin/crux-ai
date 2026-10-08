@@ -29,8 +29,9 @@ public class WhyVerifierTests
         Assert.Contains("r-feb-in", result.Citations.Select(c => c.RowId));
         Assert.DoesNotContain("r-mar-out", result.Citations.Select(c => c.RowId));
         Assert.DoesNotContain("r-feb-out", result.Citations.Select(c => c.RowId));
-        Assert.Contains(RandAmounts.Format(3500m), result.Answer);
-        Assert.Contains(RandAmounts.Format(2800m), result.Answer);
+        Assert.Contains("Revenue is up R700, 25% above February.", result.Answer);
+        Assert.Contains("Card machine settlement is up R700.", result.Answer);
+        Assert.Equal(700m, result.Reasons.Sum(reason => reason.Amount));
         Assert.All(result.Citations, citation =>
         {
             Assert.Contains("Date", citation.Columns);
@@ -134,8 +135,8 @@ public class WhyVerifierTests
         Assert.Contains("r-mar-2", result.Citations.Select(c => c.RowId));
         Assert.Contains("r-feb", result.Citations.Select(c => c.RowId));
         Assert.All(result.Citations, citation => Assert.Contains("Balance", citation.Columns));
-        Assert.Contains(RandAmounts.Format(11_800m), result.Answer);
-        Assert.Contains(RandAmounts.Format(12_000m), result.Answer);
+        Assert.Contains("Cash is down R200, 1.7% below February.", result.Answer);
+        Assert.Equal(-200m, result.Reasons.Sum(reason => reason.Amount));
     }
 
     [Fact]
@@ -171,14 +172,14 @@ public class WhyVerifierTests
         var story = MorningBriefComposer.ComposeSingleStory(snapshot, transactions);
 
         Assert.True(result.Verified);
-        Assert.Contains("from R4 850 in ", result.Answer);
-        Assert.Contains("to R3 200.50 in ", result.Answer);
+        Assert.Contains("Revenue is down R1 649.50, 34% below February.", result.Answer);
         Assert.Contains("down R1 649.50", result.Answer);
         Assert.DoesNotContain("R4,850.00", result.Answer);
         Assert.DoesNotContain(".00", result.Answer);
-        Assert.Contains("from R4 850 in ", story.Answer);
-        Assert.Contains("to R3 200.50 in ", story.Answer);
-        Assert.DoesNotContain(",", story.Answer);
+        Assert.Contains("Revenue is down R1 649.50, 34% below February.", story.Answer);
+        Assert.Contains("R4 850", story.Answer);
+        Assert.DoesNotContain("R4,850", story.Answer);
+        Assert.DoesNotContain("R1,649", story.Answer);
         Assert.Contains("from R4 850 in ", snapshot.Revenue!.WhyPrompt);
         Assert.Contains("to R3 200.50 in ", snapshot.Revenue.WhyPrompt);
     }

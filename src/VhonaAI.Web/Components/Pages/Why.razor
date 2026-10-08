@@ -23,17 +23,74 @@ else if (!snapshot.HasData)
 }
 else
 {
-    <section class="panel" aria-busy="@checking">
+    <section class="panel why-screen" aria-busy="@checking">
         <p class="eyebrow">@CurrentUser.OrganizationName · receipted why</p>
-        <h1>@(card is null ? "Ask why" : $"Why {LabelFor(card.Kind).ToLowerInvariant()}?")</h1>
-
-        @if (ShowSeededPrompt)
+        @if (!string.IsNullOrWhiteSpace(snapshot.OpenMonthNote))
         {
-            <blockquote class="why-prompt">@card!.WhyPrompt</blockquote>
+            <p class="hint">@snapshot.OpenMonthNote</p>
         }
-        else if (!string.IsNullOrWhiteSpace(MetricName) && card is null)
+
+        @if (Headline is not null)
+        {
+            <h1 class="why-lead why-answer-body">@Headline</h1>
+        }
+        else
+        {
+            <h1>Ask why</h1>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(MetricName) && card is null)
         {
             <p class="banner">That KPI is not available to seed. @WhyMessages.TryAnother, or go back to health.</p>
+        }
+
+        @if (checking)
+        {
+            <p class="banner" role="status">@WhyMessages.Checking</p>
+        }
+        else if (result is { Held: true })
+        {
+            <p class="why-held" role="status">@WhyMessages.Held</p>
+        }
+        else if (result is { Verified: true })
+        {
+            <div class="why-reasons">
+                @for (var index = 0; index < result.Reasons.Count; index++)
+                {
+                    var reason = result.Reasons[index];
+                    var rows = RowsFor(reason);
+                    <section class="why-reason">
+                        <h2>@reason.Title</h2>
+                        <a class="why-reason-count" href="@($"/receipts/{result.AnswerId}?part={index}")">@RowCount(rows.Count)</a>
+                        @if (rows.Count > 0 && rows.Count <= 8)
+                        {
+                            <ul class="why-reason-rows">
+                                @foreach (var row in rows)
+                                {
+                                    <li>
+                                        <span>
+                                            <span class="why-row-name">@row.Description</span>
+                                            <span class="why-row-meta">@RandAmounts.DayMonth(row.Date)</span>
+                                        </span>
+                                        <span class="why-row-amount">@RandAmounts.Format(row.Amount)</span>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </section>
+                }
+            </div>
+            <TrustPrompt AnswerId="result.AnswerId" />
+            <MorningBriefOptInSheet Preference="preference"
+                                    PreferenceChanged="OnPreferenceChanged"
+                                    ShowConfirmation="justOptedIn" />
+        }
+        else if (result is not null)
+        {
+            <div class="why-fail-closed" role="status">
+                <p class="banner why-unverified">@WhyMessages.Unverified</p>
+                <button class="btn btn-outline" type="button" @onclick="TryAnother">@WhyMessages.TryAnother</button>
+            </div>
         }
 
         <div class="why-chat">
@@ -47,30 +104,6 @@ else
                 <a class="btn btn-outline" href="/health">Back to health</a>
             </div>
         </div>
-
-        @if (checking)
-        {
-            <p class="banner" role="status">@WhyMessages.Checking</p>
-        }
-        else if (result is not null && result.Verified)
-        {
-            <article class="why-answer">
-                <p class="eyebrow">Answer</p>
-                <pre class="why-answer-body">@result.Answer</pre>
-                <WhyReceipt Result="result" />
-                <TrustPrompt AnswerId="result.AnswerId" />
-            </article>
-            <MorningBriefOptInSheet Preference="preference"
-                                    PreferenceChanged="OnPreferenceChanged"
-                                    ShowConfirmation="justOptedIn" />
-        }
-        else if (result is not null)
-        {
-            <div class="why-fail-closed" role="status">
-                <p class="banner why-unverified">@WhyMessages.Unverified</p>
-                <button class="btn btn-outline" type="button" @onclick="TryAnother">@WhyMessages.TryAnother</button>
-            </div>
-        }
     </section>
 
     @if (ShowLog)
@@ -133,8 +166,10 @@ else
     private bool justOptedIn;
     private bool checking => busy || pendingAutoAsk;
     private bool ShowLog => !checking && result is { Verified: true } && recent.Count > 0;
-    private bool ShowSeededPrompt =>
-        card is not null && (result is null || result.Question == card.WhyPrompt);
+    private string? Headline =>
+        card is not null && snapshot?.PreviousPeriod is not null && card.PreviousValue is decimal previous
+            ? WhyReasons.Headline(LabelFor(card.Kind), card.CurrentValue, previous, snapshot.PreviousPeriod)
+            : null;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -220,6 +255,23 @@ else
         justOptedIn = state.OptedIn;
         preference = state;
     }
+
+    private List<WhyCitedRow> RowsFor(WhyReasonLine reason)
+    {
+        if (result is null)
+        {
+            return [];
+        }
+
+        var wanted = reason.RowIds.ToHashSet(StringComparer.Ordinal);
+        return result.CitedRows
+            .Where(row => wanted.Contains(row.RowId))
+            .OrderBy(row => row.Date)
+            .ThenBy(row => row.RowId, StringComparer.Ordinal)
+            .ToList();
+    }
+
+    private static string RowCount(int count) => count == 1 ? "1 row" : $"{count} rows";
 
     private static string LabelFor(HealthMetricKind kind) => kind switch
     {
