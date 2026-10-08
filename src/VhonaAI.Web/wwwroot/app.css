@@ -62,15 +62,23 @@ a, .btn-link {
     color: var(--teal-dark);
 }
 
-.btn-primary, .btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+.btn-primary,
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary:disabled,
+.btn-primary.disabled {
     color: #fff;
     background-color: var(--teal);
     border-color: var(--teal);
     border-radius: 999px;
+    transition: none;
 }
 
-.btn-primary:hover {
+.btn-primary:hover,
+.btn-primary:active {
     background-color: var(--teal-dark);
+    border-color: var(--teal-dark);
 }
 
 .btn:focus, .btn:focus-visible, .form-control:focus, .form-control:focus-visible {

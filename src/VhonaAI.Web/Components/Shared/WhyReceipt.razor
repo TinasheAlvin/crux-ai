@@ -2,7 +2,7 @@
 {
     <a class="receipt-strip" href="@($"/receipts/{Result.AnswerId}")" aria-label="Open receipt to see cited rows">
         <p class="eyebrow">Receipt</p>
-        <p class="receipt-strip-meta">Row IDs</p>
+        <p class="receipt-strip-meta">Rows behind this answer</p>
         <div class="receipt-ids">
             @foreach (var row in Result.CitedRows)
             {
