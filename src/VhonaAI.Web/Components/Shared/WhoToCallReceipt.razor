@@ -13,8 +13,8 @@
 
     @if (Detail.Flag.Late is { } late)
     {
-        <div class="table-scroll">
-            <table class="data-table">
+        <div class="table-scroll who-late-scroll">
+            <table class="data-table who-late-table">
                 <thead>
                     <tr>
                         <th>Invoice</th>
@@ -28,28 +28,19 @@
                     @foreach (var row in late.Invoices)
                     {
                         <tr class="@(row.IsOpen ? "who-open" : null)">
-                            <td>@row.Number</td>
-                            <td>@RandAmounts.DayShortMonth(row.Issued)</td>
-                            <td>@(row.Due is DateOnly due ? RandAmounts.DayShortMonth(due) : "")</td>
-                            <td>@RandAmounts.Format(row.IsOpen ? row.AmountDue : row.Amount)</td>
-                            <td>
-                                @if (row.IsOpen && row.DaysOverdue is int days)
-                                {
-                                    @(days == 1 ? "1 day" : $"{days} days")
-                                }
-                                else if (row.PaidDate is DateOnly paid)
-                                {
-                                    <span>Paid @RandAmounts.DayShortMonth(paid)</span>
-                                }
-                            </td>
+                            <td data-label="Invoice">@row.Number</td>
+                            <td data-label="Issued">@RandAmounts.DayShortMonth(row.Issued)</td>
+                            <td data-label="Due">@(row.Due is DateOnly due ? RandAmounts.DayShortMonth(due) : "")</td>
+                            <td data-label="Amount">@RandAmounts.Format(row.IsOpen ? row.AmountDue : row.Amount)</td>
+                            <td data-label="Overdue">@OverdueLabel(row)</td>
                         </tr>
                     }
-                    <tr>
-                        <td>Open</td>
-                        <td></td>
-                        <td></td>
-                        <td>@RandAmounts.Format(Detail.Flag.OpenTotal)</td>
-                        <td></td>
+                    <tr class="who-total">
+                        <td data-label="Invoice">Overdue</td>
+                        <td data-label="Issued"></td>
+                        <td data-label="Due"></td>
+                        <td data-label="Amount">@RandAmounts.Format(OverdueTotal(late))</td>
+                        <td data-label="Overdue"></td>
                     </tr>
                 </tbody>
             </table>
@@ -153,6 +144,29 @@
     [Parameter] public bool CanRecord { get; set; }
 
     private Task OnDate(ChangeEventArgs args) => SnoozeDateChanged.InvokeAsync(args.Value?.ToString() ?? string.Empty);
+
+    private static decimal OverdueTotal(LateReceipt late) =>
+        late.Invoices.Where(row => row.IsOpen).Sum(row => row.AmountDue);
+
+    private static string OverdueLabel(LateInvoiceRow row)
+    {
+        if (row.IsOpen && row.DaysOverdue is int days)
+        {
+            return days == 1 ? "1 day" : $"{days} days";
+        }
+
+        if (row.NotDueYet)
+        {
+            return "Not due yet";
+        }
+
+        if (row.PaidDate is DateOnly paid)
+        {
+            return "Paid " + RandAmounts.DayShortMonth(paid);
+        }
+
+        return string.Empty;
+    }
 
     private static string HistoryLabel(CallActionDto item) => item.Kind switch
     {

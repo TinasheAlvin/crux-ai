@@ -24,10 +24,23 @@
 </section>
 
 @code {
+    private readonly AdminViewGuard views = new();
     private AdminOverview? overview;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        views.MarkInteractive();
+        if (!views.TryRecord("console"))
+        {
+            return;
+        }
+
         overview = await Admin.GetOverviewAsync();
+        StateHasChanged();
     }
 }

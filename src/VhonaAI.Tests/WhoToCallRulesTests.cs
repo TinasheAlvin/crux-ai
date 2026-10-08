@@ -115,6 +115,32 @@ public class WhoToCallRulesTests
     }
 
     [Fact]
+    public void A_not_yet_due_invoice_stays_out_of_the_overdue_total()
+    {
+        var overdue = Open("overdue", new DateOnly(2026, 1, 10), new DateOnly(2026, 2, 9), 800m);
+        var pending = Open("inv-1004", new DateOnly(2026, 3, 20), new DateOnly(2026, 4, 19), 12400m, number: "INV 1004");
+        var dueToday = Open("due-today", AsAt, AsAt, 50m, number: "INV today");
+        var flag = Assert.Single(Evaluate(Customer("Clinic", overdue, pending, dueToday)).Flags);
+
+        Assert.Equal(CallFlagKind.Late, flag.Kind);
+        Assert.Equal(800m, flag.OpenTotal);
+        Assert.Equal(1, flag.OpenInvoiceCount);
+        Assert.Equal(800m, flag.Late!.Invoices.Where(row => row.IsOpen).Sum(row => row.AmountDue));
+
+        var notDue = Assert.Single(flag.Late.Invoices, row => row.Number == "INV 1004");
+        Assert.Equal(12400m, notDue.Amount);
+        Assert.False(notDue.IsOpen);
+        Assert.True(notDue.NotDueYet);
+        Assert.Null(notDue.DaysOverdue);
+        Assert.DoesNotContain(flag.Late.OpenInvoices, row => row.Number == "INV 1004");
+        Assert.True(Assert.Single(flag.Late.Invoices, row => row.Number == "INV today").NotDueYet);
+
+        Assert.DoesNotContain("INV 1004", flag.DraftBody);
+        Assert.DoesNotContain("R12 400", flag.DraftBody);
+        Assert.Contains("R800", flag.DraftBody);
+    }
+
+    [Fact]
     public void One_overdue_invoice_is_late_without_the_history_minimum()
     {
         var result = Evaluate(Customer("Once", Open("once", new DateOnly(2026, 1, 1), new DateOnly(2026, 2, 1), 50m)));
@@ -280,11 +306,12 @@ public class WhoToCallRulesTests
         DateOnly? due,
         decimal amount,
         InvoiceStatus status = InvoiceStatus.Open,
-        decimal? amountDue = null) =>
+        decimal? amountDue = null,
+        string? number = null) =>
         new()
         {
             RowId = rowId,
-            Number = string.IsNullOrEmpty(rowId) ? "INV" : rowId,
+            Number = number ?? (string.IsNullOrEmpty(rowId) ? "INV" : rowId),
             InvoiceDate = issued,
             DueDate = due,
             Amount = amount,

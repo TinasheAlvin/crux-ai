@@ -837,6 +837,40 @@ main {
     color: var(--ink-soft);
 }
 
+@media (max-width: 640px) {
+    .who-late-scroll {
+        overflow: visible;
+    }
+
+    .who-late-table thead {
+        display: none;
+    }
+
+    .who-late-table tr {
+        display: block;
+        margin: 0 0 0.75rem;
+        padding: 0.35rem 0.15rem 0.5rem;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+    }
+
+    .who-late-table td {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.75rem;
+        border-bottom: none;
+        padding: 0.28rem 0.7rem;
+    }
+
+    .who-late-table td::before {
+        content: attr(data-label);
+        color: var(--ink-soft);
+        font-size: 0.75rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+}
+
 .table-scroll {
     overflow-x: auto;
 }

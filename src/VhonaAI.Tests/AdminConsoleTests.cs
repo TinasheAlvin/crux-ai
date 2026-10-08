@@ -77,6 +77,45 @@ public class AdminConsoleTests
     }
 
     [Fact]
+    public void An_admin_page_view_is_recorded_on_the_interactive_pass_only()
+    {
+        var guard = new AdminViewGuard();
+        Assert.False(guard.TryRecord("console"));
+
+        guard.MarkInteractive();
+        Assert.True(guard.TryRecord("console"));
+        Assert.False(guard.TryRecord("console"));
+        Assert.True(guard.TryRecord("business-2"));
+    }
+
+    [Fact]
+    public async Task Opening_the_admin_console_writes_one_audit_row()
+    {
+        var (db, service, _) = await OpenWorldAsync();
+        await using (db)
+        {
+            var guard = new AdminViewGuard();
+            if (guard.TryRecord("console"))
+            {
+                await service.GetOverviewAsync();
+            }
+
+            guard.MarkInteractive();
+            if (guard.TryRecord("console"))
+            {
+                await service.GetOverviewAsync();
+            }
+
+            if (guard.TryRecord("console"))
+            {
+                await service.GetOverviewAsync();
+            }
+
+            Assert.Equal(1, await db.AdminAuditEntries.CountAsync(item => item.Action == "console.open"));
+        }
+    }
+
+    [Fact]
     public async Task Admin_views_and_changes_are_audited_and_the_tenant_filter_stays_on()
     {
         var (db, service, world) = await OpenWorldAsync();

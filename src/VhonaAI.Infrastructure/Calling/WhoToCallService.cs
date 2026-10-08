@@ -47,6 +47,7 @@ public sealed class WhoToCallService : IWhoToCallAppService
             CanLoadSample = _currentUser.IsOwner && invoiceCount == 0,
             UsingSample = await UsingSampleAsync(cancellationToken),
             IsOwner = _currentUser.IsOwner,
+            HasInvoices = invoiceCount > 0,
             Flags = visible
         };
     }
