@@ -150,7 +150,8 @@ public class HealthKpiCalculatorTests
         Assert.Equal(19000m, snapshot.Cash!.CurrentValue);
         Assert.Contains("April 2026 is still open, up to 13 April", snapshot.OpenMonthNote);
         Assert.Contains("These cards compare March 2026 with February 2026", snapshot.OpenMonthNote);
-        Assert.StartsWith(snapshot.OpenMonthNote!, snapshot.Revenue.WhyPrompt);
+        Assert.Equal("Why did revenue change from R4 000 in Feb 2026 to R5 000 in Mar 2026?", snapshot.Revenue.WhyPrompt);
+        Assert.DoesNotContain("is still open", snapshot.Revenue.WhyPrompt);
 
         var closed = HealthKpiCalculator.Compute(
             transactions,

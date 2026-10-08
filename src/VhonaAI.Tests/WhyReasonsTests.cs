@@ -145,7 +145,11 @@ public class WhyReasonsTests
         Assert.Equal("Revenue is up R1 000, 25% above February.", FirstLine(result.Answer));
         Assert.DoesNotContain("apr", result.Citations.Select(citation => citation.RowId));
         Assert.DoesNotContain("is still open", result.Answer, StringComparison.Ordinal);
-        Assert.Equal(1, CountOf(File.ReadAllText(WhyPage()), "<p class=\"hint\">"));
+        Assert.DoesNotContain("is still open", snapshot.Revenue.WhyPrompt, StringComparison.Ordinal);
+        Assert.Equal("Why did revenue change from R4 000 in Feb 2026 to R5 000 in Mar 2026?", snapshot.Revenue.WhyPrompt);
+        var page = File.ReadAllText(WhyPage());
+        Assert.Equal(1, CountOf(page, "<p class=\"hint\">"));
+        Assert.DoesNotContain("why-reason-rows", page, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -162,6 +166,124 @@ public class WhyReasonsTests
             result.Reasons.Select(reason => reason.Title).ToArray());
         Assert.Equal(snapshot.Revenue.Delta, result.Reasons.Sum(reason => reason.Amount));
         Assert.DoesNotContain(result.Reasons, reason => reason.Name == WhyMessages.EverythingElse);
+    }
+
+    [Fact]
+    public void Everything_else_is_smaller_than_each_shown_reason()
+    {
+        var transactions = KarooKitchenBook.Build().Transactions.Select(ToTransaction).ToList();
+        var snapshot = HealthKpiCalculator.Compute(transactions, cashFieldMapped: true, booksAsAt: KarooKitchenBook.AsAt);
+        var result = WhyVerifier.Verify(snapshot.Profit!.WhyPrompt, transactions, snapshot);
+
+        Assert.True(result.Verified);
+        var remainder = Assert.Single(result.Reasons, reason => reason.Remainder);
+        var shown = result.Reasons.Where(reason => !reason.Remainder).ToList();
+        Assert.NotEmpty(shown);
+        Assert.All(shown, reason => Assert.True(Math.Abs(remainder.Amount) < Math.Abs(reason.Amount)));
+        Assert.True(Math.Abs(remainder.Amount) <= Math.Abs(snapshot.Profit.Delta!.Value) / 3m);
+    }
+
+    [Fact]
+    public void A_down_movement_is_named_when_it_is_one_of_the_largest()
+    {
+        var transactions = new List<Transaction>
+        {
+            Row("feb-a", new DateOnly(2026, 2, 4), 1_000m, "North order", "Sales", "North"),
+            Row("feb-b", new DateOnly(2026, 2, 4), 1_000m, "South order", "Sales", "South"),
+            Row("feb-c", new DateOnly(2026, 2, 4), 50m, "East order", "Sales", "East"),
+            Row("mar-a", new DateOnly(2026, 3, 4), 100m, "North order", "Sales", "North"),
+            Row("mar-b", new DateOnly(2026, 3, 4), 100m, "South order", "Sales", "South"),
+            Row("mar-c", new DateOnly(2026, 3, 4), 1_550m, "East order", "Sales", "East")
+        };
+        var snapshot = HealthKpiCalculator.Compute(transactions, cashFieldMapped: false);
+        var result = WhyVerifier.Verify(snapshot.Revenue!.WhyPrompt, transactions, snapshot);
+
+        Assert.True(result.Verified);
+        Assert.Equal(
+            ["East is up R1 500.", "North is down R900.", "South is down R900."],
+            result.Reasons.Select(reason => reason.Title).ToArray());
+        Assert.DoesNotContain(result.Reasons, reason => reason.Remainder);
+    }
+
+    [Fact]
+    public void The_next_grouping_is_used_when_customers_leave_too_much_over()
+    {
+        var transactions = new List<Transaction>();
+        for (var i = 0; i < 6; i++)
+        {
+            transactions.Add(Row($"feb-{i}", new DateOnly(2026, 2, 4), 10m, $"Order {i}", "Sales", $"Shop {i}"));
+            transactions.Add(Row($"mar-{i}", new DateOnly(2026, 3, 4), 210m, $"Order {i}", "Sales", $"Shop {i}"));
+        }
+
+        transactions.Add(Row("feb-food", new DateOnly(2026, 2, 8), -100m, "Food", "Food", "Freshy"));
+        transactions.Add(Row("mar-food", new DateOnly(2026, 3, 8), -1_400m, "Food", "Food", "Freshy"));
+        var snapshot = HealthKpiCalculator.Compute(transactions, cashFieldMapped: false);
+        var result = WhyVerifier.Verify(snapshot.Profit!.WhyPrompt, transactions, snapshot);
+
+        Assert.True(result.Verified);
+        Assert.Equal(
+            ["Food is down R1 300.", "Sales is up R1 200."],
+            result.Reasons.Select(reason => reason.Title).ToArray());
+        Assert.DoesNotContain(result.Reasons, reason => reason.Remainder);
+    }
+
+    [Fact]
+    public void Held_when_no_grouping_explains_the_change_in_three_reasons()
+    {
+        var transactions = new List<Transaction>();
+        for (var i = 0; i < 6; i++)
+        {
+            transactions.Add(Row($"feb-{i}", new DateOnly(2026, 2, 4), 10m, $"Line {i}", $"Cat {i}", $"Shop {i}"));
+            transactions.Add(Row($"mar-{i}", new DateOnly(2026, 3, 4), 110m, $"Line {i}", $"Cat {i}", $"Shop {i}"));
+        }
+
+        var snapshot = HealthKpiCalculator.Compute(transactions, cashFieldMapped: false);
+        var result = WhyVerifier.Verify(snapshot.Revenue!.WhyPrompt, transactions, snapshot);
+
+        Assert.True(result.Held);
+        Assert.False(result.Verified);
+        Assert.Equal(WhyMessages.HeldUnexplained, result.Answer);
+        Assert.Empty(result.Reasons);
+        Assert.DoesNotContain("R600", result.Answer);
+    }
+
+    [Fact]
+    public void Axum_revenue_why_keeps_the_month_totals_and_names_the_real_drop()
+    {
+        var ledger = AxumHomeBook.Build();
+        var transactions = ledger.Transactions.Select(ToTransaction).ToList();
+        var snapshot = HealthKpiCalculator.Compute(transactions, cashFieldMapped: true, booksAsAt: AxumHomeBook.AsAt);
+
+        Assert.Equal(5_890_390m, snapshot.Revenue!.CurrentValue);
+        Assert.Equal(5_536_966m, snapshot.Revenue.PreviousValue);
+        Assert.Equal(5_705_390m, snapshot.Expenses!.CurrentValue);
+        Assert.Equal(5_336_966m, snapshot.Expenses.PreviousValue);
+        Assert.Equal(185_000m, snapshot.Profit!.CurrentValue);
+        Assert.Equal(200_000m, snapshot.Profit.PreviousValue);
+        Assert.Equal(3_740_000m, snapshot.Cash!.CurrentValue);
+        Assert.Equal(3_555_000m, snapshot.Cash.PreviousValue);
+        Assert.Equal(
+            "Why did revenue change from R5 536 966 in Feb 2026 to R5 890 390 in Mar 2026?",
+            snapshot.Revenue.WhyPrompt);
+
+        var result = WhyVerifier.Verify(snapshot.Revenue.WhyPrompt, transactions, snapshot);
+        Assert.True(result.Verified);
+        Assert.Equal(
+            [
+                "Northern Area is up R220 036.",
+                "Eastern Cape is up R136 988.",
+                "Bloemfontein Pantry is down R3 600."
+            ],
+            result.Reasons.Select(reason => reason.Title).ToArray());
+        Assert.Contains(result.Reasons, reason => reason.Name == AxumHomeBook.DroppedCustomer && reason.Amount < 0);
+        var remainder = result.Reasons.SingleOrDefault(reason => reason.Remainder);
+        if (remainder is not null)
+        {
+            Assert.All(
+                result.Reasons.Where(reason => !reason.Remainder),
+                reason => Assert.True(Math.Abs(remainder.Amount) < Math.Abs(reason.Amount)));
+            Assert.True(Math.Abs(remainder.Amount) <= Math.Abs(snapshot.Revenue.Delta!.Value) / 3m);
+        }
     }
 
     [Fact]

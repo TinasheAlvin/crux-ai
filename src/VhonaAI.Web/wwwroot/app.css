@@ -537,13 +537,19 @@ main {
 }
 
 .why-reason {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.35rem 1rem;
     background: #FBF8F2;
     border: 1px solid rgba(28, 25, 23, 0.1);
     border-radius: 0.9rem;
-    padding: 0.95rem 1.05rem 0.85rem;
+    padding: 0.95rem 1.05rem;
 }
 
 .why-reason h2 {
+    flex: 1 1 14rem;
     margin: 0;
     font-family: var(--sans);
     font-size: 1.05rem;
@@ -554,48 +560,13 @@ main {
 
 .why-reason-count {
     display: inline-block;
-    margin-top: 0.35rem;
+    margin-top: 0;
     color: var(--teal-dark);
     font-family: var(--sans);
     font-size: 0.92rem;
     font-weight: 700;
     text-decoration: underline;
     text-underline-offset: 0.15em;
-}
-
-.why-reason-rows {
-    list-style: none;
-    margin: 0.55rem 0 0;
-    padding: 0;
-}
-
-.why-reason-rows li {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    column-gap: 0.75rem;
-    align-items: center;
-    padding: 0.45rem 0;
-    border-top: 1px solid rgba(28, 25, 23, 0.08);
-    font-size: 0.95rem;
-}
-
-.why-row-name, .why-row-meta {
-    display: block;
-}
-
-.why-row-name {
-    font-weight: 700;
-}
-
-.why-row-meta {
-    color: var(--ink-soft);
-    font-family: var(--sans);
-    font-size: 0.82rem;
-}
-
-.why-row-amount {
-    font-variant-numeric: tabular-nums;
-    font-weight: 700;
 }
 
 .why-held {

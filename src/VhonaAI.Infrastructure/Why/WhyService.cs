@@ -193,7 +193,7 @@ public sealed class WhyService : IWhyAppService
     private static WhyAskResult ToResult(WhyAnswer log, IReadOnlyList<WhyCitedRow> rows)
     {
         var metric = Enum.TryParse<HealthMetricKind>(log.Metric, ignoreCase: true, out var parsed) ? parsed : (HealthMetricKind?)null;
-        var held = log.Answer == WhyMessages.Held;
+        var held = log.Answer == WhyMessages.Held || log.Answer == WhyMessages.HeldUnexplained;
         return new WhyAskResult
         {
             AnswerId = log.Id,

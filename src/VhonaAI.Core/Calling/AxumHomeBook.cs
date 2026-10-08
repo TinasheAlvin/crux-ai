@@ -316,7 +316,131 @@ public static class AxumHomeBook
                 placed += amount;
             }
         }
+
+        ReshapeFebruary(bank);
     }
+
+    /// <summary>
+    /// February's generated orders follow March by region, apart from two areas that carry the increase.
+    /// The month totals stay the same. Bloemfontein Pantry is left as the real drop.
+    /// </summary>
+    private static void ReshapeFebruary(List<SampleBankRow> bank)
+    {
+        var february = new DateOnly(2026, 2, 1);
+        var march = new DateOnly(2026, 3, 1);
+        var generated = bank
+            .Where(row => row.RowId.StartsWith("axum-g-", StringComparison.Ordinal)
+                && row.Date.Year == february.Year
+                && row.Date.Month == february.Month)
+            .ToList();
+        if (generated.Count == 0)
+        {
+            return;
+        }
+
+        var drivers = new HashSet<string>(StringComparer.Ordinal) { "Northern Area", "Eastern Cape" };
+        var pool = generated.Sum(row => row.Amount);
+        var amounts = new Dictionary<string, decimal>(StringComparer.Ordinal);
+        decimal used = 0;
+        foreach (var row in generated)
+        {
+            if (drivers.Contains(row.Counterparty))
+            {
+                continue;
+            }
+
+            var price = Price(SkuOf(row));
+            var wanted = RevenueFor(bank, march, row.Counterparty) - Floor(bank, february, row.Counterparty, row.RowId);
+            var units = wanted <= 0 ? 0 : (int)decimal.Round(wanted / price, 0, MidpointRounding.AwayFromZero);
+            var amount = units * price;
+            amounts[row.RowId] = amount;
+            used += amount;
+        }
+
+        var driverPool = pool - used;
+        if (driverPool % 2 != 0)
+        {
+            var nudge = generated.First(row => !drivers.Contains(row.Counterparty) && Price(SkuOf(row)) % 2 == 1);
+            var price = Price(SkuOf(nudge));
+            amounts[nudge.RowId] += price;
+            driverPool -= price;
+        }
+
+        var eastern = generated.Single(row => row.Counterparty == "Eastern Cape");
+        var northern = generated.Single(row => row.Counterparty == "Northern Area");
+        var easternPrice = Price(SkuOf(eastern));
+        var northernPrice = Price(SkuOf(northern));
+        var easternTarget = RevenueFor(bank, march, eastern.Counterparty) - 137_000m;
+        var easternUnits = (int)decimal.Round(easternTarget / easternPrice, 0, MidpointRounding.AwayFromZero);
+        decimal easternAmount = 0;
+        for (var step = 0; step < 40; step++)
+        {
+            var shift = step % 2 == 0 ? step / 2 : -(step / 2 + 1);
+            var trial = (easternUnits + shift) * easternPrice;
+            var rest = driverPool - trial;
+            if (trial > 0 && rest > 0 && rest % northernPrice == 0)
+            {
+                easternAmount = trial;
+                break;
+            }
+        }
+
+        if (easternAmount == 0)
+        {
+            throw new InvalidOperationException("February could not be reshaped without changing the month total.");
+        }
+
+        amounts[eastern.RowId] = easternAmount;
+        amounts[northern.RowId] = driverPool - easternAmount;
+        var dust = generated
+            .Where(row => !drivers.Contains(row.Counterparty))
+            .Sum(row => RevenueFor(bank, march, row.Counterparty) - Floor(bank, february, row.Counterparty, row.RowId) - amounts[row.RowId]);
+        var donor = generated.FirstOrDefault(row => !drivers.Contains(row.Counterparty) && Price(SkuOf(row)) == 10m && amounts[row.RowId] >= 10m);
+        if (donor is not null && dust == -10m)
+        {
+            amounts[donor.RowId] -= 10m;
+            amounts[northern.RowId] += 10m;
+        }
+
+        if (amounts.Values.Sum() != pool)
+        {
+            throw new InvalidOperationException("February reshape changed the month total.");
+        }
+
+        for (var i = 0; i < bank.Count; i++)
+        {
+            if (!amounts.TryGetValue(bank[i].RowId, out var amount))
+            {
+                continue;
+            }
+
+            var sku = SkuOf(bank[i]);
+            var units = (int)(amount / Price(sku));
+            bank[i] = bank[i] with
+            {
+                Amount = amount,
+                Description = $"{sku}, {units} units, {GeneratedMark}"
+            };
+        }
+    }
+
+    private static string SkuOf(SampleBankRow row)
+    {
+        var comma = row.Description.IndexOf(',');
+        return comma < 0 ? row.Description : row.Description[..comma];
+    }
+
+    private static decimal RevenueFor(List<SampleBankRow> bank, DateOnly month, string counterparty) =>
+        bank.Where(row => row.Date.Year == month.Year && row.Date.Month == month.Month && row.Amount > 0 && row.Counterparty == counterparty)
+            .Sum(row => row.Amount);
+
+    private static decimal Floor(List<SampleBankRow> bank, DateOnly month, string counterparty, string generatedRowId) =>
+        bank.Where(row => row.Date.Year == month.Year
+                && row.Date.Month == month.Month
+                && row.Amount > 0
+                && row.Counterparty == counterparty
+                && row.RowId != generatedRowId)
+            .Sum(row => row.Amount);
 
     private readonly record struct Stockist(int Number, string Region, string Sku, int Day);
 

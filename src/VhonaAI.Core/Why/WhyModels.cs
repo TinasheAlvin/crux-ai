@@ -8,6 +8,7 @@ public static class WhyMessages
     public const string TryAnother = "Try another question";
     public const string Checking = "Checking persisted rows…";
     public const string Held = "Held: the rows don't add up to the change, so Vhona won't guess";
+    public const string HeldUnexplained = "Held: three reasons would leave too much unexplained, so Vhona won't guess";
     public const string EverythingElse = "Everything else";
 }
 

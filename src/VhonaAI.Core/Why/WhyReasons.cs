@@ -8,8 +8,9 @@ namespace VhonaAI.Core.Why;
 
 /// <summary>
 /// Splits a verified month on month change into the largest named movements.
-/// Names come from the counterparty or category on the saved rows.
-/// The description is used only when both of those are blank.
+/// Names come from the counterparty, then the category, then the description.
+/// A grouping is used only when the rows left over are smaller than each shown reason
+/// and no more than a third of the change.
 /// </summary>
 public static class WhyReasons
 {
@@ -50,43 +51,13 @@ public static class WhyReasons
         var delta = cardCurrent - cardPrevious;
         if (!RowsMatchCard(metric, currentRows, previousRows, cardCurrent, cardPrevious, delta))
         {
-            return WhyExplanation.Hold(headline);
+            return WhyExplanation.Hold(headline, WhyMessages.Held);
         }
 
-        var grouped = ChooseGroups(metric, currentRows, previousRows);
-        if (grouped is null)
+        var reasons = ChooseReasons(metric, currentRows, previousRows, delta);
+        if (reasons is null)
         {
-            return WhyExplanation.Hold(headline);
-        }
-
-        var ordered = grouped
-            .Where(bucket => bucket.Amount != 0)
-            .OrderByDescending(bucket => Math.Abs(bucket.Amount))
-            .ThenBy(bucket => bucket.Name, StringComparer.Ordinal)
-            .ToList();
-        if (ordered.Count == 0)
-        {
-            return delta == 0
-                ? WhyExplanation.Shown(headline, [])
-                : WhyExplanation.Hold(headline);
-        }
-
-        var head = ordered.Take(MaxNamedReasons).ToList();
-        var rest = ordered.Skip(MaxNamedReasons).ToList();
-        var reasons = head.Select(bucket => Line(bucket.Name, bucket.Amount, bucket.RowIds, remainder: false)).ToList();
-        if (rest.Count > 0)
-        {
-            var remainder = rest.Sum(bucket => bucket.Amount);
-            if (remainder != 0)
-            {
-                var rowIds = rest.SelectMany(bucket => bucket.RowIds).Distinct(StringComparer.Ordinal).ToList();
-                reasons.Add(Line(WhyMessages.EverythingElse, remainder, rowIds, remainder: true));
-            }
-        }
-
-        if (reasons.Sum(reason => reason.Amount) != delta)
-        {
-            return WhyExplanation.Hold(headline);
+            return WhyExplanation.Hold(headline, WhyMessages.HeldUnexplained);
         }
 
         return WhyExplanation.Shown(headline, reasons);
@@ -180,55 +151,81 @@ public static class WhyReasons
         };
     }
 
-    private static List<Bucket>? ChooseGroups(
+    private static List<WhyReasonLine>? ChooseReasons(
         HealthMetricKind metric,
         IReadOnlyList<Transaction> currentRows,
-        IReadOnlyList<Transaction> previousRows)
+        IReadOnlyList<Transaction> previousRows,
+        decimal delta)
     {
-        (Func<Transaction, string?> Key, bool Required)[] dimensions =
+        Func<Transaction, string?>[] levels =
         [
-            (row => row.Counterparty, false),
-            (row => row.Category, false),
-            (row => row.Description, true)
+            row => row.Counterparty,
+            row => row.Category,
+            row => row.Description
         ];
 
-        List<Bucket>? best = null;
-        var bestScore = decimal.MinValue;
-        foreach (var dimension in dimensions)
+        foreach (var level in levels)
         {
-            if (dimension.Required && best is not null)
-            {
-                break;
-            }
-
-            var buckets = Group(metric, currentRows, previousRows, dimension.Key);
+            var buckets = Group(metric, currentRows, previousRows, level);
             if (buckets is null)
             {
                 continue;
             }
 
-            var score = SplitScore(buckets);
-            if (best is null || score > bestScore)
+            var reasons = TryLevel(buckets, delta);
+            if (reasons is not null)
             {
-                best = buckets;
-                bestScore = score;
+                return reasons;
             }
         }
 
-        return best;
+        return null;
     }
 
-    private static decimal SplitScore(List<Bucket> buckets)
+    private static List<WhyReasonLine>? TryLevel(List<Bucket> buckets, decimal delta)
     {
-        var movers = buckets.Where(bucket => bucket.Amount != 0).ToList();
-        var total = movers.Sum(bucket => Math.Abs(bucket.Amount));
-        if (movers.Count == 0 || total == 0)
+        var ordered = buckets
+            .Where(bucket => bucket.Amount != 0)
+            .OrderByDescending(bucket => Math.Abs(bucket.Amount))
+            .ThenBy(bucket => bucket.Name, StringComparer.Ordinal)
+            .ToList();
+        if (ordered.Count == 0)
         {
-            return 0;
+            return delta == 0 ? [] : null;
         }
 
-        var largest = movers.Max(bucket => Math.Abs(bucket.Amount));
-        return 1m - (largest / total);
+        var head = ordered.Take(MaxNamedReasons).ToList();
+        var rest = ordered.Skip(MaxNamedReasons).ToList();
+        var reasons = head.Select(bucket => Line(bucket.Name, bucket.Amount, bucket.RowIds, remainder: false)).ToList();
+        var remainder = rest.Sum(bucket => bucket.Amount);
+        if (remainder != 0)
+        {
+            if (!RemainderFits(remainder, head, delta))
+            {
+                return null;
+            }
+
+            var rowIds = rest.SelectMany(bucket => bucket.RowIds).Distinct(StringComparer.Ordinal).ToList();
+            reasons.Add(Line(WhyMessages.EverythingElse, remainder, rowIds, remainder: true));
+        }
+
+        return reasons.Sum(reason => reason.Amount) == delta ? reasons : null;
+    }
+
+    private static bool RemainderFits(decimal remainder, List<Bucket> shown, decimal delta)
+    {
+        var smallest = shown.Min(bucket => Math.Abs(bucket.Amount));
+        if (Math.Abs(remainder) >= smallest)
+        {
+            return false;
+        }
+
+        if (delta == 0)
+        {
+            return false;
+        }
+
+        return Math.Abs(remainder) <= Math.Abs(delta) / 3m;
     }
 
     private static List<Bucket>? Group(
@@ -353,11 +350,11 @@ public sealed class WhyExplanation
     public required string Answer { get; init; }
     public required IReadOnlyList<WhyReasonLine> Reasons { get; init; }
 
-    public static WhyExplanation Hold(string headline) => new()
+    public static WhyExplanation Hold(string headline, string reason) => new()
     {
         Held = true,
         Headline = headline,
-        Answer = WhyMessages.Held,
+        Answer = reason,
         Reasons = []
     };
 
