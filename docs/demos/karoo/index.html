@@ -167,6 +167,23 @@
       .branch-row { grid-template-columns: 6rem 1fr 3.6rem; }
       .branch-row .yoy { display: none; }
     }
+    .in-app { margin-top: 2.75rem; }
+    .in-app h2 { font-size: clamp(1.8rem, 3vw, 2.4rem); margin: 0.55rem 0 0.4rem; }
+    .in-app .sub { margin-bottom: 1.1rem; }
+    .in-app-grid { display: grid; gap: 1.25rem; }
+    .in-app figure { margin: 0; }
+    .in-app img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border: 1px solid var(--line);
+      border-radius: 0.85rem;
+      background: var(--paper);
+    }
+    .in-app figcaption { color: var(--muted); font-size: 0.88rem; margin-top: 0.45rem; }
+    @media (min-width: 960px) {
+      .in-app-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; }
+    }
   </style>
 </head>
 <body>
@@ -506,6 +523,26 @@
           <p class="also">Also in Demos: <a href="../axum-home/">Axum Home</a></p>
         </div>
       </div>
+
+      <section class="in-app" id="in-the-app">
+        <p class="sample-label">Sample</p>
+        <h2 class="serif">In the app</h2>
+        <p class="sub">These screens are this sample loaded in Vhona. The customer names are made up. June on the Home cards is the same sample as the profit and loss above: revenue R741&nbsp;200, profit R86&nbsp;100, cash R412&nbsp;300.</p>
+        <div class="in-app-grid">
+          <figure>
+            <img src="app-home.webp" width="1280" height="1163" alt="Sample Home screen for Karoo Kitchen Group. June revenue is R741 200, expenses R655 100, profit R86 100, and cash R412 300." />
+            <figcaption>Home. June revenue R741&nbsp;200, expenses R655&nbsp;100, profit R86&nbsp;100, cash R412&nbsp;300.</figcaption>
+          </figure>
+          <figure>
+            <img src="app-why.webp" width="1280" height="2651" alt="Sample Why screen for Karoo revenue. Revenue is down R70 800, 8.7 percent below May. Gardens, Stellenbosch, and Sea Point are the three reasons, each with its till rows." />
+            <figcaption>Why. Revenue is down R70&nbsp;800, 8.7% below May, the same 8.7% the June note already states. The three branches are the reasons.</figcaption>
+          </figure>
+          <figure>
+            <img src="app-who.webp" width="1280" height="900" alt="Sample Who to call screen for Karoo Kitchen Group. Signal Hill Functions is late, Oranjezicht Boardroom has stopped, and Stellenbosch Picnic Co has dropped. The customer names are made up." />
+            <figcaption>Who to call. Three made up customers: one late, one stopped, one dropped.</figcaption>
+          </figure>
+        </div>
+      </section>
     </div>
   </main>
 
