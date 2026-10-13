@@ -15,13 +15,13 @@ public class WhyScreenTests
         var march = new MonthPeriod(2026, 3);
         var february = new MonthPeriod(2026, 2);
 
-        Assert.Equal("Revenue down R70 800 in June vs May", WhyScreen.Headline("Revenue", 741_200m, 812_000m, june, may));
-        Assert.Equal("June revenue was R741 200. May was R812 000.", WhyScreen.Lede("Revenue", 741_200m, 812_000m, june, may));
+        Assert.Equal("Revenue down R70\u00A0800 in June vs May", WhyScreen.Headline("Revenue", 741_200m, 812_000m, june, may));
+        Assert.Equal("June revenue was R741\u00A0200. May was R812\u00A0000.", WhyScreen.Lede("Revenue", 741_200m, 812_000m, june, may));
         Assert.Equal("Counted to 30 June 2026", WhyScreen.CountedTo(june));
-        Assert.Equal("Revenue up R353 424 in March vs February", WhyScreen.Headline("Revenue", 5_890_390m, 5_536_966m, march, february));
+        Assert.Equal("Revenue up R353\u00A0424 in March vs February", WhyScreen.Headline("Revenue", 5_890_390m, 5_536_966m, march, february));
         Assert.Equal("Counted to 31 March 2026", WhyScreen.CountedTo(march));
         Assert.Equal(
-            "June expenses were R655 100. May was R636 700.",
+            "June expenses were R655\u00A0100. May was R636\u00A0700.",
             WhyScreen.Lede("Expenses", 655_100m, 636_700m, june, may));
         Assert.Equal("Less than May", WhyScreen.MovementHeading(-70_800m, may));
         Assert.Equal("More than February", WhyScreen.MovementHeading(353_424m, february));
@@ -87,8 +87,8 @@ public class WhyScreenTests
     {
         var transactions = new List<Transaction>
         {
-            Row("feb", new DateOnly(2026, 2, 28), -10m, "Fees", "Bank fees", "Bank", 1_000m),
-            Row("mar", new DateOnly(2026, 3, 18), 50m, "Deposit", "Sales", "North", 2_000m)
+            Row("feb", new DateOnly(2026, 2, 28), -10m, "Fees", "Bank fees", "Bank", 1_000m, 1),
+            Row("mar", new DateOnly(2026, 3, 18), 50m, "March deposit", "Sales", "North", 2_000m, 2)
         };
         var snapshot = HealthKpiCalculator.Compute(transactions, cashFieldMapped: true);
         var result = WhyVerifier.Verify(snapshot.Cash!.WhyPrompt, transactions, snapshot);
@@ -103,14 +103,60 @@ public class WhyScreenTests
 
         Assert.Equal(WhyMessages.Held, result.Answer);
         Assert.Equal("Your books say cash went up", sheet.BooksLabel);
-        Assert.Equal("R1 000", sheet.BooksAmount);
+        Assert.Equal("R1\u00A0000", sheet.BooksAmount);
         Assert.Equal("The rows Vhona can see add up to", sheet.RowsLabel);
         Assert.Equal("R50", sheet.RowsAmount);
         Assert.Equal("With no rows behind it", sheet.GapLabel);
         Assert.Equal("R950", sheet.GapAmount);
         Assert.DoesNotContain("City of Cape Town", sheet.Title, StringComparison.Ordinal);
         Assert.DoesNotContain("Xero", sheet.Title, StringComparison.Ordinal);
-        Assert.Contains("do not match", string.Join(" ", sheet.Checks), StringComparison.Ordinal);
+        Assert.NotNull(sheet.Unmatched);
+        Assert.Equal("18 Mar", sheet.Unmatched.DateLabel);
+        Assert.Equal("North", sheet.Unmatched.Payee);
+        Assert.Equal("March deposit, North", sheet.Unmatched.Description);
+        Assert.Equal("R950", sheet.Unmatched.Amount);
+        Assert.Equal("#2", sheet.Unmatched.Chip);
+        Assert.Equal("On 18 Mar, North has R950 with no matching amount.", sheet.Unmatched.Sentence);
+        Assert.DoesNotContain("fixture", sheet.Unmatched.Sentence, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("test", sheet.Unmatched.Sentence, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void A_reason_moving_the_other_way_shows_a_minus_so_the_column_adds_up()
+    {
+        var transactions = AxumHomeBook.Build().Transactions.Select(ToTransaction).ToList();
+        var snapshot = HealthKpiCalculator.Compute(transactions, cashFieldMapped: true, booksAsAt: AxumHomeBook.AsAt);
+        var result = WhyVerifier.Verify(snapshot.Revenue!.WhyPrompt, transactions, snapshot);
+        var figure = result.Reasons.Sum(reason => reason.Amount);
+
+        Assert.Equal(353_424m, figure);
+        decimal shown = 0;
+        foreach (var reason in result.Reasons)
+        {
+            var text = WhyScreen.ColumnAmount(reason.Amount, figure);
+            if (Math.Sign(reason.Amount) == Math.Sign(figure))
+            {
+                Assert.StartsWith("R", text);
+                Assert.DoesNotContain("\u2212", text);
+                shown += Math.Abs(reason.Amount);
+            }
+            else
+            {
+                Assert.StartsWith("\u2212R", text);
+                shown -= Math.Abs(reason.Amount);
+            }
+        }
+
+        Assert.Equal(figure, shown);
+        var pantry = result.Reasons.Single(reason => reason.Name == "Bloemfontein Pantry");
+        Assert.Equal("\u2212R3\u00A0600", WhyScreen.ColumnAmount(pantry.Amount, figure));
+
+        var karoo = KarooKitchenBook.Build().Transactions.Select(ToTransaction).ToList();
+        var karooSnapshot = HealthKpiCalculator.Compute(karoo, cashFieldMapped: true, booksAsAt: KarooKitchenBook.AsAt);
+        var karooResult = WhyVerifier.Verify(karooSnapshot.Revenue!.WhyPrompt, karoo, karooSnapshot);
+        var karooFigure = karooResult.Reasons.Sum(reason => reason.Amount);
+        Assert.True(karooFigure < 0);
+        Assert.All(karooResult.Reasons, reason => Assert.False(WhyScreen.ColumnAmount(reason.Amount, karooFigure).Contains('\u2212')));
     }
 
     [Fact]
@@ -171,6 +217,12 @@ public class WhyScreenTests
         Assert.Contains("extra", card);
         Assert.Contains("and @sheet.MoreCount more", card);
         Assert.Contains("What to check", page);
+        Assert.Contains("HeldView.Unmatched", page);
+        Assert.Contains("ColumnAmount", card);
+        var karooPage = File.ReadAllText(Source("docs", "demos", "karoo", "index.html"));
+        Assert.Contains("For awareness.", karooPage);
+        Assert.Contains("R89\u00A0000", karooPage);
+        Assert.DoesNotContain("Action required.", karooPage);
         Assert.Contains("With no rows behind it", File.ReadAllText(Source("src", "VhonaAI.Core", "Why", "WhyScreen.cs")));
         Assert.DoesNotContain("why-reason-rows", screen, StringComparison.Ordinal);
         Assert.DoesNotContain("@reason.Title", screen, StringComparison.Ordinal);
@@ -242,7 +294,8 @@ public class WhyScreenTests
         string description,
         string? category = null,
         string? counterparty = null,
-        decimal? balance = null) => new()
+        decimal? balance = null,
+        int sourceRow = 1) => new()
     {
         RowId = rowId,
         Date = date,
@@ -251,6 +304,6 @@ public class WhyScreenTests
         Category = category,
         Counterparty = counterparty,
         Balance = balance,
-        SourceRowNumber = 1
+        SourceRowNumber = sourceRow
     };
 }

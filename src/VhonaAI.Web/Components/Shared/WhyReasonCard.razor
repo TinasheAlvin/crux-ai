@@ -1,4 +1,3 @@
-@using VhonaAI.Core.Calling
 @using VhonaAI.Core.Health
 @using VhonaAI.Core.Why
 
@@ -32,7 +31,7 @@
                             <small>@context</small>
                         }
                     </span>
-                    <span class="why-amt num">@Money(Math.Abs(reason.Amount))</span>
+                    <span class="why-amt num">@WhyScreen.ColumnAmount(reason.Amount, figure)</span>
                     <span class="why-see">
                         <span class="show">See the rows</span>
                         <span class="hide">Hide the rows</span>
@@ -55,7 +54,7 @@
                             <tr class="why-diff">
                                 <td></td>
                                 <td>@sheet.DifferenceLabel</td>
-                                <td class="num">@Money(Math.Abs(sheet.Difference))</td>
+                                <td class="num">@WhyScreen.Money(Math.Abs(sheet.Difference))</td>
                             </tr>
                         </tbody>
                     </table>
@@ -79,7 +78,7 @@
                 Adds up to the figure
                 <small>@WhyScreen.AddsUpCaption(named, hasRemainder)</small>
             </span>
-            <span class="why-amt num">@Money(Math.Abs(figure))</span>
+            <span class="why-amt num">@WhyScreen.Money(Math.Abs(figure))</span>
             <span class="why-pad"></span>
         </div>
     </section>
@@ -90,6 +89,4 @@
     [Parameter] public MetricCard? Card { get; set; }
     [Parameter] public MonthPeriod? Current { get; set; }
     [Parameter] public MonthPeriod? Previous { get; set; }
-
-    private static string Money(decimal amount) => RandAmounts.Format(amount);
 }

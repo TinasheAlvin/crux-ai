@@ -1,4 +1,3 @@
-@using VhonaAI.Core.Calling
 @using VhonaAI.Core.Why
 
 <tr class="why-grp"><td colspan="3">@Band.Name</td></tr>
@@ -26,5 +25,5 @@ else
 @code {
     [Parameter, EditorRequired] public WhyMonthBand Band { get; set; } = null!;
 
-    private static string Money(decimal amount) => RandAmounts.Format(amount);
+    private static string Money(decimal amount) => WhyScreen.Money(amount);
 }

@@ -12,6 +12,27 @@ public static class WhyScreen
 {
     public const int VisibleChips = 3;
 
+    /// <summary>
+    /// Display money. Thousands stay on one line at a phone width.
+    /// </summary>
+    public static string Money(decimal amount) =>
+        RandAmounts.Format(amount).Replace(" ", "\u00A0");
+
+    /// <summary>
+    /// Reasons that move with the figure stay unsigned. A reason that moves the other way
+    /// keeps a minus, so the column adds up to the figure.
+    /// </summary>
+    public static string ColumnAmount(decimal reasonAmount, decimal figure)
+    {
+        var text = Money(Math.Abs(reasonAmount));
+        if (figure != 0 && reasonAmount != 0 && Math.Sign(reasonAmount) != Math.Sign(figure))
+        {
+            return "\u2212" + text;
+        }
+
+        return text;
+    }
+
     public static string Headline(
         string label,
         decimal current,
@@ -28,7 +49,7 @@ public static class WhyScreen
         }
 
         var direction = delta > 0 ? "up" : "down";
-        return $"{label} {direction} {RandAmounts.Format(Math.Abs(delta))} in {now} vs {then}";
+        return $"{label} {direction} {Money(Math.Abs(delta))} in {now} vs {then}";
     }
 
     public static string Lede(
@@ -42,7 +63,7 @@ public static class WhyScreen
         var then = RandAmounts.MonthName(previousPeriod.Month);
         var noun = label.ToLowerInvariant();
         var verb = string.Equals(label, "Expenses", StringComparison.Ordinal) ? "were" : "was";
-        return $"{now} {noun} {verb} {RandAmounts.Format(current)}. {then} was {RandAmounts.Format(previous)}.";
+        return $"{now} {noun} {verb} {Money(current)}. {then} was {Money(previous)}.";
     }
 
     public static string CountedTo(MonthPeriod currentPeriod)
@@ -164,42 +185,111 @@ public static class WhyScreen
             var title = spread is null
                 ? "Held. Too much of the change is spread over small rows to name a reason."
                 : "Held. Too much of the change is spread over small rows to name a reason. Everything else would be "
-                    + RandAmounts.Format(Math.Abs(remainder))
+                    + Money(Math.Abs(remainder))
                     + ", bigger than the smallest reason.";
             return new WhyHeldSheet
             {
                 Title = title,
                 BooksLabel = Went(noun, books),
-                BooksAmount = RandAmounts.Format(Math.Abs(books)),
+                BooksAmount = Money(Math.Abs(books)),
                 RowsLabel = remainder < 0 ? "Everything else would be down" : "Everything else would be",
-                RowsAmount = RandAmounts.Format(Math.Abs(remainder)),
+                RowsAmount = Money(Math.Abs(remainder)),
                 GapLabel = "Smallest reason",
-                GapAmount = RandAmounts.Format(smallest),
+                GapAmount = Money(smallest),
                 Checks =
                 [
                     "Naming three reasons would leave a remainder bigger than the smallest one.",
                     "Vhona will not guess a reason from that."
                 ],
+                Unmatched = null,
                 Foot = "When the rows group more clearly, the reasons show here. Vhona doesn't guess in the meantime."
             };
         }
 
         var seen = RowsSeen(metric, cited, currentPeriod, previousPeriod);
+        var unmatched = UnmatchedRow(metric, cited, currentPeriod);
         return new WhyHeldSheet
         {
             Title = "Held. The rows don't add up to the figure yet, so Vhona won't give a reason.",
             BooksLabel = Went(noun, books),
-            BooksAmount = RandAmounts.Format(Math.Abs(books)),
+            BooksAmount = Money(Math.Abs(books)),
             RowsLabel = "The rows Vhona can see add up to",
-            RowsAmount = RandAmounts.Format(seen),
+            RowsAmount = Money(seen),
             GapLabel = "With no rows behind it",
-            GapAmount = RandAmounts.Format(Math.Abs(books - seen)),
-            Checks =
-            [
-                "The figure on the card and the rows Vhona can add up do not match.",
-                "Upload the file with the missing lines, or bring the books in again."
-            ],
+            GapAmount = Money(Math.Abs(books - seen)),
+            Checks = unmatched is null
+                ?
+                [
+                    "The figure on the card and the rows Vhona can add up do not match.",
+                    "Upload the file with the missing lines, or bring the books in again."
+                ]
+                :
+                [
+                    "If that row is already in the books, bring them in again so Vhona sees it."
+                ],
+            Unmatched = unmatched,
             Foot = "When the rows add up, the reasons show here. Vhona doesn't guess in the meantime."
+        };
+    }
+
+    public static WhyUnmatchedRow? UnmatchedRow(
+        HealthMetricKind metric,
+        IReadOnlyList<WhyCitedRow> cited,
+        MonthPeriod currentPeriod)
+    {
+        if (metric != HealthMetricKind.Cash)
+        {
+            return null;
+        }
+
+        var ordered = cited
+            .Where(row => row.Balance is not null)
+            .OrderBy(row => row.Date)
+            .ThenBy(row => row.SourceRowNumber)
+            .ThenBy(row => row.RowId, StringComparer.Ordinal)
+            .ToList();
+
+        WhyUnmatchedRow? best = null;
+        var bestGap = 0m;
+        WhyCitedRow? prior = null;
+        foreach (var row in ordered)
+        {
+            if (prior?.Balance is decimal earlier
+                && row.Balance is decimal balance
+                && currentPeriod.Contains(row.Date))
+            {
+                var unexplained = balance - earlier - row.Amount;
+                if (unexplained != 0 && Math.Abs(unexplained) > bestGap)
+                {
+                    bestGap = Math.Abs(unexplained);
+                    best = DescribeUnmatched(row, unexplained);
+                }
+            }
+
+            prior = row;
+        }
+
+        return best;
+    }
+
+    private static WhyUnmatchedRow DescribeUnmatched(WhyCitedRow row, decimal unexplained)
+    {
+        var payee = string.IsNullOrWhiteSpace(row.Counterparty) ? row.Description.Trim() : row.Counterparty.Trim();
+        var description = string.IsNullOrWhiteSpace(row.Description)
+            ? payee
+            : string.IsNullOrWhiteSpace(row.Counterparty) || string.Equals(row.Description.Trim(), payee, StringComparison.Ordinal)
+                ? row.Description.Trim()
+                : row.Description.Trim() + ", " + payee;
+        var amount = Money(Math.Abs(unexplained));
+        var date = RandAmounts.DayShortMonth(row.Date);
+        return new WhyUnmatchedRow
+        {
+            Sentence = $"On {date}, {payee} has {amount} with no matching amount.",
+            DateLabel = date,
+            Payee = payee,
+            Description = description,
+            Amount = amount,
+            Chip = ChipText(row)
         };
     }
 
@@ -324,5 +414,16 @@ public sealed class WhyHeldSheet
     public required string GapLabel { get; init; }
     public required string GapAmount { get; init; }
     public required IReadOnlyList<string> Checks { get; init; }
+    public WhyUnmatchedRow? Unmatched { get; init; }
     public required string Foot { get; init; }
+}
+
+public sealed class WhyUnmatchedRow
+{
+    public required string Sentence { get; init; }
+    public required string DateLabel { get; init; }
+    public required string Payee { get; init; }
+    public required string Description { get; init; }
+    public required string Amount { get; init; }
+    public required string Chip { get; init; }
 }
