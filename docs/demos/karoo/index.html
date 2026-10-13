@@ -83,22 +83,6 @@
       padding: 0.7rem 0.8rem;
       font: inherit;
     }
-    .score {
-      display: flex;
-      gap: 1.25rem;
-      align-items: center;
-    }
-    .score b {
-      font-family: var(--serif);
-      font-weight: 560;
-      font-size: 3.4rem;
-      letter-spacing: -0.04em;
-      line-height: 1;
-    }
-    .score b span { font-size: 1.1rem; color: var(--muted); font-family: var(--sans); font-weight: 600; }
-    .bar { height: 0.45rem; background: var(--cream-deep); border-radius: 999px; overflow: hidden; margin-bottom: 0.35rem; }
-    .bar i { display: block; height: 100%; width: 78%; background: var(--charcoal); }
-    .zones { display: flex; justify-content: space-between; color: var(--muted); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
     .phone {
       max-width: 18rem;
       border: 1px solid var(--line);
@@ -162,7 +146,6 @@
       .wa { grid-template-columns: minmax(0, 1fr) 18rem; align-items: start; }
     }
     @media (max-width: 640px) {
-      .score { flex-direction: column; align-items: flex-start; }
       .slider-row { grid-template-columns: 1fr; }
       .branch-row { grid-template-columns: 6rem 1fr 3.6rem; }
       .branch-row .yoy { display: none; }
@@ -240,28 +223,10 @@
               <article class="paper kpi"><span>Cash on hand</span><strong>R412k</strong><em>VAT R118k due 25 Jul</em></article>
               <article class="paper kpi"><span>Food cost ratio</span><strong>34.0%</strong><em>▲ 2.5pt above average</em></article>
             </div>
-            <div class="split two">
-              <article class="paper block-pad">
-                <div class="head-row"><h2>Revenue trend, 12 months</h2><span class="meta">R thousands</span></div>
-                <div class="chart-box"><canvas id="revChart"></canvas></div>
-              </article>
-              <article class="paper" id="health">
-                <div class="block-pad" style="padding-bottom:0.4rem;">
-                  <div class="head-row"><h2>Business health score</h2><span class="meta">From this sample</span></div>
-                </div>
-                <div class="score block-pad" style="padding-top:0;">
-                  <b>78<span>/100</span></b>
-                  <div style="flex:1;">
-                    <div class="bar" aria-hidden="true"><i></i></div>
-                    <div class="zones"><span>Critical</span><span>Watch</span><span>Healthy</span><span>Strong</span></div>
-                    <p style="margin-top:0.55rem;">Revenue trend: <strong>+3pts</strong> · Margin health: <strong>−4pts</strong> · Cash cover: <strong>+5pts</strong> · Branch balance: <strong>−2pts</strong></p>
-                  </div>
-                </div>
-                <div class="block-pad" style="padding-top:0;">
-                  <div class="note">Food cost at 34.0% has triggered a watch flag. One branch (Sea Point) is pulling the score down with a 14.2% rent to revenue ratio. Both are addressable before peak season.</div>
-                </div>
-              </article>
-            </div>
+            <article class="paper block-pad">
+              <div class="head-row"><h2>Revenue trend, 12 months</h2><span class="meta">R thousands</span></div>
+              <div class="chart-box"><canvas id="revChart"></canvas></div>
+            </article>
             <article class="paper block-pad">
               <div class="head-row"><h2>Monday 13 July 2026</h2><span class="meta">Sample note · 08:00 to 3 recipients</span></div>
               <div class="stack" style="max-width:52rem;">
@@ -414,7 +379,7 @@
               <div class="log" id="chatLog" aria-live="polite"></div>
               <div class="chips">
                 <button class="chip" type="button" data-q="yoy">Revenue YoY comparison</button>
-                <button class="chip" type="button" data-q="branch">Branch profitability ranking</button>
+                <button class="chip" type="button" data-q="branch">Branch margins</button>
                 <button class="chip" type="button" data-q="hire">Headcount affordability analysis</button>
                 <button class="chip" type="button" data-q="food">Food cost variance explanation</button>
               </div>
@@ -768,12 +733,12 @@
 
       var answers = {
         yoy: "June 2026 revenue: <b>R741 200</b> vs R718 900 in June 2025, an increase of <b>3.1% YoY</b>. However, gross margin contracted: food cost ratio moved from 31.2% to 34.0%, compressing net profit by R3 000 despite higher revenue. Net margin: 11.6% (June 2026) vs 12.4% (June 2025). Volume growth is holding; the issue is input cost inflation.",
-        branch: "Branch net margin ranking for June 2026: <b>(1) Gardens, 14.8%</b> (R318k revenue), <b>(2) Stellenbosch, 11.9%</b> (R246k), <b>(3) Sea Point, 5.6%</b> (R177k). Sea Point carries a rent to revenue ratio of 14.2% vs group average of 7.4%. It is the primary drag on consolidated margin and warrants a review before the November lease break.",
+        branch: "June margins in this sample: Gardens 14.8% on R318k revenue, Stellenbosch 11.9% on R246k, Sea Point 5.6% on R177k. Sea Point rent is 14.2% of its revenue. The group average is 7.4%.",
         hire: "Two full time waiters at standard rates cost approximately <b>R15 600/month</b> (inclusive of UIF and basic uniform allowance). Against June net profit of R86 100, this is affordable in isolation. However, with R118 400 VAT due 25 July, end of July projected balance is R293k. Recommendation: <b>hire one now</b> for the Gardens weekend shift (highest revenue branch) and revisit the second position in September when summer trading recovers.",
         food: "Food cost in June: <b>34.0% of revenue</b> vs 12 month average of 31.5%, a <b>250 basis point adverse variance</b>. Root cause from supplier invoices: dairy category +11% and beef +9% since April. Sea Point also shows above average portion waste relative to the other branches. Recommended action: 4 to 6% selective menu reprice on the eight highest volume dishes to restore margin without impacting price sensitive covers.",
         _: "This sample answers the four questions above. Try one of those."
       };
-      var qMap = { yoy: "Revenue YoY comparison", branch: "Branch profitability ranking", hire: "Headcount affordability analysis", food: "Food cost variance explanation" };
+      var qMap = { yoy: "Revenue YoY comparison", branch: "Branch margins", hire: "Headcount affordability analysis", food: "Food cost variance explanation" };
       var log = $("chatLog");
       function addMsg(html, who) {
         var d = document.createElement("div");
@@ -821,7 +786,6 @@
 
       var steps = [
         { tab: "overview", sel: "#overview-kpis", title: "Executive overview", text: "June for Karoo Kitchen Group. Revenue, net profit, cash on hand, and the food cost ratio, from this sample." },
-        { tab: "overview", sel: "#health", title: "Health score", text: "78 out of 100, from this group’s own pattern: revenue trend, margin, cash cover, and how the three branches sit together." },
         { tab: "overview", sel: "#vat-alert", title: "VAT alert", text: "VAT of R118 400 is due Saturday 25 July. The sample balance that day is R293 400, with R89 000 headroom after payroll." },
         { tab: "pnl", sel: "#pnl-statement", title: "Profit and loss", text: "June 2026 against June 2025. Every line, and each line as a share of revenue." },
         { tab: "branches", sel: "#branch-results", title: "Branch results", text: "Gardens, Stellenbosch, and Sea Point. Sea Point’s rent is 14.2% of its revenue. The group average is 7.4%." },

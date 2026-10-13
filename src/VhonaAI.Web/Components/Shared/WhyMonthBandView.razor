@@ -1,0 +1,30 @@
+@using VhonaAI.Core.Calling
+@using VhonaAI.Core.Why
+
+<tr class="why-grp"><td colspan="3">@Band.Name</td></tr>
+@if (Band.Lines.Count == 0)
+{
+    <tr class="why-none"><td></td><td>No rows</td><td class="num">@Money(0)</td></tr>
+}
+else
+{
+    @foreach (var line in Band.Lines)
+    {
+        <tr>
+            <td class="why-date">@line.DateLabel</td>
+            <td>@line.Description</td>
+            <td class="num">@Money(line.Amount)</td>
+        </tr>
+    }
+    <tr class="why-sub">
+        <td></td>
+        <td>@Band.Name total</td>
+        <td class="num">@Money(Band.Total)</td>
+    </tr>
+}
+
+@code {
+    [Parameter, EditorRequired] public WhyMonthBand Band { get; set; } = null!;
+
+    private static string Money(decimal amount) => RandAmounts.Format(amount);
+}
