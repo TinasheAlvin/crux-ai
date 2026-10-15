@@ -220,9 +220,15 @@ public class WhyScreenTests
         Assert.Contains("HeldView.Unmatched", page);
         Assert.Contains("ColumnAmount", card);
         var karooPage = File.ReadAllText(Source("docs", "demos", "karoo", "index.html"));
+        var axumPage = File.ReadAllText(Source("docs", "demos", "axum-home", "index.html"));
         Assert.Contains("For awareness.", karooPage);
         Assert.Contains("R89\u00A0000", karooPage);
         Assert.DoesNotContain("Action required.", karooPage);
+        Assert.Contains("Profit and loss", karooPage);
+        Assert.DoesNotContain("In the app", karooPage + axumPage, StringComparison.Ordinal);
+        Assert.DoesNotContain("app-why.webp", karooPage + axumPage, StringComparison.Ordinal);
+        Assert.DoesNotContain("app-home.webp", karooPage + axumPage, StringComparison.Ordinal);
+        Assert.DoesNotContain("app-who.webp", karooPage + axumPage, StringComparison.Ordinal);
         Assert.Contains("With no rows behind it", File.ReadAllText(Source("src", "VhonaAI.Core", "Why", "WhyScreen.cs")));
         Assert.DoesNotContain("why-reason-rows", screen, StringComparison.Ordinal);
         Assert.DoesNotContain("@reason.Title", screen, StringComparison.Ordinal);
