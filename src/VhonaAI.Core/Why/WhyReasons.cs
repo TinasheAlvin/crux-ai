@@ -106,6 +106,55 @@ public static class WhyReasons
         return explanation.Held ? [] : explanation.Reasons;
     }
 
+    /// <summary>
+    /// When no grouping fits, the first missed attempt: the leftover and the smallest named reason.
+    /// Returns nothing when a grouping does fit.
+    /// </summary>
+    public static WhySpread? UnexplainedSpread(
+        HealthMetricKind metric,
+        IReadOnlyList<Transaction> currentRows,
+        IReadOnlyList<Transaction> previousRows,
+        decimal delta)
+    {
+        WhySpread? firstMiss = null;
+        Func<Transaction, string?>[] levels =
+        [
+            row => row.Counterparty,
+            row => row.Category,
+            row => row.Description
+        ];
+
+        foreach (var level in levels)
+        {
+            var buckets = Group(metric, currentRows, previousRows, level);
+            if (buckets is null)
+            {
+                continue;
+            }
+
+            var ordered = buckets
+                .Where(bucket => bucket.Amount != 0)
+                .OrderByDescending(bucket => Math.Abs(bucket.Amount))
+                .ThenBy(bucket => bucket.Name, StringComparer.Ordinal)
+                .ToList();
+            if (ordered.Count == 0)
+            {
+                continue;
+            }
+
+            var head = ordered.Take(MaxNamedReasons).ToList();
+            var remainder = ordered.Skip(MaxNamedReasons).Sum(bucket => bucket.Amount);
+            if (remainder == 0 || RemainderFits(remainder, head, delta))
+            {
+                return null;
+            }
+
+            firstMiss ??= new WhySpread(remainder, head.Min(bucket => Math.Abs(bucket.Amount)));
+        }
+
+        return firstMiss;
+    }
+
     private static bool RowsMatchCard(
         HealthMetricKind metric,
         IReadOnlyList<Transaction> currentRows,
@@ -342,6 +391,8 @@ public static class WhyReasons
         public List<string> RowIds { get; } = [];
     }
 }
+
+public readonly record struct WhySpread(decimal Remainder, decimal Smallest);
 
 public sealed class WhyExplanation
 {

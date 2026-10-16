@@ -1,0 +1,92 @@
+@using VhonaAI.Core.Health
+@using VhonaAI.Core.Why
+
+@if (Result is { Verified: true } && Card is not null && Current is not null && Previous is not null)
+{
+    var named = Result.Reasons.Count(reason => !reason.Remainder);
+    var hasRemainder = Result.Reasons.Any(reason => reason.Remainder);
+    var figure = Result.Reasons.Sum(reason => reason.Amount);
+    var number = 0;
+    <section class="why-card" aria-label="Reasons">
+        <div class="why-cardhead">
+            <h2>@WhyScreen.ReasonHeading(named)</h2>
+            <span class="why-colh">@WhyScreen.MovementHeading(figure, Previous)</span>
+        </div>
+        @foreach (var reason in Result.Reasons)
+        {
+            if (!reason.Remainder)
+            {
+                number++;
+            }
+
+            var sheet = WhyScreen.Rows(Card.Kind, reason, Result.CitedRows, Current, Previous);
+            var context = WhyScreen.Context(reason);
+            <details class="why-line @(reason.Remainder ? "is-else" : null)">
+                <summary>
+                    <span class="why-idx">@(reason.Remainder ? "+" : number.ToString())</span>
+                    <span class="why-rtext">
+                        @WhyScreen.PlainLabel(reason)
+                        @if (!string.IsNullOrWhiteSpace(context))
+                        {
+                            <small>@context</small>
+                        }
+                    </span>
+                    <span class="why-amt num">@WhyScreen.ColumnAmount(reason.Amount, figure)</span>
+                    <span class="why-see">
+                        <span class="show">See the rows</span>
+                        <span class="hide">Hide the rows</span>
+                        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m5 8 5 5 5-5"/></svg>
+                    </span>
+                </summary>
+                <div class="why-rows">
+                    <p class="why-rcap">@sheet.Caption</p>
+                    <table class="why-inv">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                            <tbody>
+                            <WhyMonthBandView Band="sheet.Current" />
+                            <WhyMonthBandView Band="sheet.Previous" />
+                            <tr class="why-diff">
+                                <td></td>
+                                <td>@sheet.DifferenceLabel</td>
+                                <td class="num">@WhyScreen.Money(Math.Abs(sheet.Difference))</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="why-chips">
+                        <span class="why-chip-lab">Rows used</span>
+                        @foreach (var chip in sheet.Chips)
+                        {
+                            <span class="why-chip @(chip.Extra ? "extra" : null)">@chip.Text</span>
+                        }
+                        @if (sheet.MoreCount > 0)
+                        {
+                            <span class="why-chip more">and @sheet.MoreCount more</span>
+                        }
+                    </div>
+                </div>
+            </details>
+        }
+        <div class="why-total">
+            <svg class="why-tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.2 10.6 15l5.2-6"/></svg>
+            <span class="why-total-lab">
+                Adds up to the figure
+                <small>@WhyScreen.AddsUpCaption(named, hasRemainder)</small>
+            </span>
+            <span class="why-amt num">@WhyScreen.Money(Math.Abs(figure))</span>
+            <span class="why-pad"></span>
+        </div>
+    </section>
+}
+
+@code {
+    [Parameter] public WhyAskResult? Result { get; set; }
+    [Parameter] public MetricCard? Card { get; set; }
+    [Parameter] public MonthPeriod? Current { get; set; }
+    [Parameter] public MonthPeriod? Previous { get; set; }
+}

@@ -522,60 +522,606 @@ main {
     font-weight: 600;
 }
 
+.why-screen {
+    max-width: 54rem;
+    padding-top: 0.4rem;
+}
+
+.why-screen .why-rule {
+    display: block;
+    width: 3.5rem;
+    height: 1px;
+    margin: 0.55rem 0 0.95rem;
+    background: var(--brass);
+}
+
+.why-screen .hint {
+    margin-top: 0;
+    margin-bottom: 0.85rem;
+}
+
+.why-asked {
+    font-size: 0.95rem;
+    color: var(--muted);
+    margin: 0 0 0.35rem;
+}
+
 .why-screen .why-lead {
     font-family: var(--serif);
-    font-size: clamp(1.55rem, 3vw, 2.15rem);
     font-weight: 560;
-    letter-spacing: -0.03em;
-    line-height: 1.2;
-    margin: 0.35rem 0 1rem;
+    font-size: clamp(1.7rem, 3.3vw, 2.3rem);
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+    margin: 0;
 }
 
-.why-reasons {
-    display: grid;
-    gap: 0.75rem;
+.why-screen .lede {
+    margin-top: 0.55rem;
+    color: rgba(28, 25, 23, 0.78);
+    max-width: none;
 }
 
-.why-reason {
+.why-meta {
+    margin-top: 0.85rem;
     display: flex;
     flex-wrap: wrap;
+    gap: 0.5rem 0.8rem;
+    align-items: center;
+}
+
+.why-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.16rem 0.65rem;
+    border: 1px solid #E7E0D4;
+    border-radius: 999px;
+    background: var(--paper);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--charcoal);
+}
+
+.why-pill svg {
+    width: 0.9rem;
+    height: 0.9rem;
+    color: var(--teal-dark);
+}
+
+.why-sample {
+    display: inline-block;
+    padding: 0.12rem 0.55rem;
+    border: 1px solid var(--charcoal);
+    border-radius: 999px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    line-height: 1.4;
+}
+
+.why-card {
+    background: var(--paper);
+    border: 1px solid #E7E0D4;
+    border-radius: 14px;
+    box-shadow: 0 1px 2px rgba(28, 25, 23, 0.04), 0 8px 24px rgba(28, 25, 23, 0.04);
+    margin-top: 1.5rem;
+    overflow: hidden;
+}
+
+.why-cardhead {
+    display: flex;
     justify-content: space-between;
     align-items: baseline;
-    gap: 0.35rem 1rem;
-    background: #FBF8F2;
-    border: 1px solid rgba(28, 25, 23, 0.1);
-    border-radius: 0.9rem;
-    padding: 0.95rem 1.05rem;
+    gap: 1rem;
+    padding: 1rem 1.25rem 0.7rem;
+    border-bottom: 1px solid var(--line);
 }
 
-.why-reason h2 {
-    flex: 1 1 14rem;
+.why-cardhead h2 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 1.25rem;
+    line-height: 1.2;
     margin: 0;
-    font-family: var(--sans);
-    font-size: 1.05rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    line-height: 1.35;
 }
 
-.why-reason-count {
-    display: inline-block;
-    margin-top: 0;
+.why-colh {
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.why-line {
+    border-bottom: 1px solid var(--line);
+}
+
+.why-line summary {
+    list-style: none;
+    cursor: pointer;
+    display: grid;
+    grid-template-columns: 1.9rem minmax(0, 1fr) auto 7.6rem;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.95rem 1.25rem;
+}
+
+.why-line summary::-webkit-details-marker {
+    display: none;
+}
+
+.why-idx {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--teal-dark);
+    background: rgba(13, 148, 136, 0.08);
+}
+
+.why-line.is-else .why-idx {
+    background: var(--cream-deep);
+    color: var(--charcoal);
+}
+
+.why-rtext {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 1.06rem;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.why-rtext small {
+    font-weight: 400;
+    color: var(--muted);
+    font-size: 0.92rem;
+    margin-left: 0.45rem;
+}
+
+.why-amt {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 1.06rem;
+    text-align: right;
+    color: var(--charcoal);
+}
+
+.why-see {
+    justify-self: end;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
     color: var(--teal-dark);
     font-family: var(--sans);
-    font-size: 0.92rem;
-    font-weight: 700;
+    font-weight: 600;
+    font-size: 0.95rem;
     text-decoration: underline;
-    text-underline-offset: 0.15em;
+    text-underline-offset: 3px;
+}
+
+.why-see svg {
+    width: 0.95rem;
+    height: 0.95rem;
+    transition: transform 0.15s;
+}
+
+.why-see .hide {
+    display: none;
+}
+
+.why-line[open] .why-see .show {
+    display: none;
+}
+
+.why-line[open] .why-see .hide {
+    display: inline;
+}
+
+.why-line[open] .why-see svg {
+    transform: rotate(180deg);
+}
+
+.why-line[open] summary {
+    background: rgba(13, 148, 136, 0.08);
+    box-shadow: inset 3px 0 0 var(--teal);
+}
+
+.why-line[open] .why-idx {
+    background: var(--teal);
+    color: #fff;
+}
+
+.why-line.is-else[open] .why-idx {
+    background: var(--charcoal);
+    color: #fff;
+}
+
+.why-rows {
+    padding: 1rem 1.25rem 1.2rem 4.05rem;
+    background: #FCFAF6;
+    border-top: 1px solid var(--line);
+}
+
+.why-rcap {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin: 0 0 0.5rem;
+}
+
+.why-inv {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--sans);
+    font-size: 0.95rem;
+    background: var(--paper);
+    border: 1px solid #E7E0D4;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.why-inv th {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+    padding: 0.5rem 0.7rem;
+    border-bottom: 1px solid var(--line);
+}
+
+.why-inv td {
+    padding: 0.5rem 0.7rem;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+}
+
+.why-inv th:last-child,
+.why-inv td:last-child {
+    text-align: right;
+    color: var(--charcoal);
+}
+
+.why-inv td.why-date {
+    white-space: nowrap;
+    color: var(--muted);
+    width: 5.2rem;
+    text-align: left;
+}
+
+.why-inv tr.why-grp td {
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: #FBF8F2;
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
+}
+
+.why-inv tr.why-sub td {
+    font-weight: 600;
+}
+
+.why-inv tr.why-none td {
+    color: var(--muted);
+    font-style: italic;
+}
+
+.why-inv tr.why-diff td {
+    border-bottom: 0;
+    font-weight: 700;
+    background: rgba(13, 148, 136, 0.08);
+    color: var(--charcoal);
+}
+
+.why-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.7rem;
+    align-items: center;
+    font-size: 0.82rem;
+    color: var(--muted);
+}
+
+.why-chip-lab {
+    font-weight: 600;
+    margin-right: 0.15rem;
+}
+
+.why-chip {
+    display: inline-block;
+    background: var(--cream);
+    border: 1px solid #E7E0D4;
+    border-radius: 6px;
+    padding: 0.05rem 0.45rem;
+    font-size: 0.8rem;
+    color: var(--charcoal);
+    font-variant-numeric: tabular-nums;
+}
+
+.why-chip.more {
+    display: none;
+}
+
+.why-total {
+    display: grid;
+    grid-template-columns: 1.9rem minmax(0, 1fr) auto 7.6rem;
+    gap: 0.9rem;
+    align-items: center;
+    padding: 0.95rem 1.25rem;
+    background: #FBF8F2;
+}
+
+.why-total-lab {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 1.06rem;
+}
+
+.why-total-lab small {
+    display: block;
+    font-weight: 400;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.why-total .why-amt {
+    font-size: 1.15rem;
+}
+
+.why-tick {
+    width: 1.4rem;
+    height: 1.4rem;
+    color: var(--teal-dark);
+}
+
+.why-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 1.25rem;
+}
+
+.why-foot {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: var(--muted);
 }
 
 .why-held {
-    margin: 0.2rem 0 1rem;
-    padding: 0.85rem 1rem;
-    background: #FBF8F2;
-    border: 1px solid rgba(28, 25, 23, 0.1);
-    border-radius: 0.9rem;
-    font-size: 1.05rem;
+    padding: 1.35rem 1.25rem 1.4rem;
+    border-left: 3px solid var(--charcoal);
+}
+
+.why-held-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--cream);
+    background: var(--charcoal);
+    border-radius: 6px;
+    padding: 0.18rem 0.55rem;
+}
+
+.why-held-tag svg {
+    width: 0.85rem;
+    height: 0.85rem;
+}
+
+.why-held h2 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 1.35rem;
+    line-height: 1.25;
+    margin: 0.7rem 0 0.9rem;
+    max-width: 36rem;
+}
+
+.why-gap {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--sans);
+    font-size: 1rem;
+    max-width: 30rem;
+}
+
+.why-gap td {
+    padding: 0.45rem 0;
+    border-bottom: 1px solid var(--line);
+    color: var(--charcoal);
+}
+
+.why-gap td:last-child {
+    text-align: right;
+    font-weight: 600;
+}
+
+.why-gap tr.why-gap-short td {
+    border-bottom: 0;
+    font-weight: 700;
+    padding-top: 0.6rem;
+}
+
+.why-check {
+    margin-top: 1.3rem;
+}
+
+.why-check .why-inv {
+    margin-top: 0.65rem;
+}
+
+.why-check .why-chips {
+    margin-top: 0.45rem;
+}
+
+.why-check h3 {
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 0.45rem;
+}
+
+.why-check ol {
+    list-style: none;
+    counter-reset: whycheck;
+    display: grid;
+    gap: 0.6rem;
+    padding: 0;
+    margin: 0;
+}
+
+.why-check li {
+    counter-increment: whycheck;
+    display: grid;
+    grid-template-columns: 1.75rem minmax(0, 1fr);
+    gap: 0.65rem;
+    align-items: start;
+    font-size: 1rem;
+}
+
+.why-check li::before {
+    content: counter(whycheck);
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    font-size: 0.82rem;
+    background: var(--cream-deep);
+    color: var(--charcoal);
+}
+
+.why-held .why-actions {
+    margin-top: 1.15rem;
+}
+
+.num {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+    .why-line summary {
+        grid-template-columns: 1.75rem minmax(0, 1fr) auto;
+        gap: 0.15rem 0.7rem;
+        padding: 0.85rem 0.9rem;
+        align-items: start;
+    }
+
+    .why-idx {
+        width: 1.6rem;
+        height: 1.6rem;
+        font-size: 0.8rem;
+    }
+
+    .why-rtext {
+        white-space: normal;
+        font-size: 1rem;
+        padding-top: 0.08rem;
+    }
+
+    .why-rtext small {
+        display: block;
+        margin-left: 0;
+        font-size: 0.86rem;
+    }
+
+    .why-amt {
+        font-size: 1rem;
+        padding-top: 0.08rem;
+    }
+
+    .why-see {
+        grid-column: 2 / -1;
+        justify-self: start;
+        font-size: 0.92rem;
+    }
+
+    .why-rows {
+        padding: 0.85rem 0.9rem 1rem;
+    }
+
+    .why-inv {
+        font-size: 0.88rem;
+    }
+
+    .why-inv th,
+    .why-inv td {
+        padding: 0.45rem 0.5rem;
+    }
+
+    .why-inv td.why-date {
+        width: 3.9rem;
+    }
+
+    .why-chip.extra {
+        display: none;
+    }
+
+    .why-chip.more {
+        display: inline-block;
+        background: transparent;
+        border-color: transparent;
+        color: var(--muted);
+        padding-left: 0.1rem;
+    }
+
+    .why-total {
+        grid-template-columns: 1.75rem minmax(0, 1fr) auto;
+        gap: 0.7rem;
+        padding: 0.9rem;
+    }
+
+    .why-pad {
+        display: none;
+    }
+
+    .why-cardhead {
+        padding: 0.9rem 0.9rem 0.6rem;
+    }
+
+    .why-colh {
+        display: none;
+    }
+
+    .why-held {
+        padding: 1.1rem 0.95rem 1.2rem;
+    }
+
+    .why-held h2 {
+        font-size: 1.2rem;
+    }
+
+    .why-actions {
+        flex-direction: column;
+    }
+
+    .why-actions .btn {
+        width: 100%;
+    }
 }
 
 .why-prompt {
@@ -764,6 +1310,12 @@ main {
 .trust-prompt {
     margin-top: 1rem;
     padding: 0.75rem 0 0;
+}
+
+@media (min-width: 561px) {
+    .why-screen .trust-prompt {
+        margin-top: 2.25rem;
+    }
 }
 
 .trust-prompt-q {

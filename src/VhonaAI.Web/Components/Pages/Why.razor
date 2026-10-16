@@ -1,6 +1,9 @@
 @page "/why"
 @page "/why/{MetricName}"
 @attribute [Authorize]
+@using VhonaAI.Core.Calling
+@using VhonaAI.Core.Health
+@using VhonaAI.Core.Why
 @inject IWhyAppService WhyAnswers
 @inject IHealthKpiAppService HealthKpis
 @inject IMorningBriefAppService Briefs
@@ -23,16 +26,33 @@ else if (!snapshot.HasData)
 }
 else
 {
-    <section class="panel why-screen" aria-busy="@checking">
-        <p class="eyebrow">@CurrentUser.OrganizationName · receipted why</p>
+    <section class="why-screen" aria-busy="@checking">
+        <p class="eyebrow">Why</p>
+        <span class="why-rule" aria-hidden="true"></span>
         @if (!string.IsNullOrWhiteSpace(snapshot.OpenMonthNote))
         {
             <p class="hint">@snapshot.OpenMonthNote</p>
         }
 
-        @if (Headline is not null)
+        @if (!string.IsNullOrWhiteSpace(AskedText))
         {
-            <h1 class="why-lead why-answer-body">@Headline</h1>
+            <p class="why-asked">You asked: @AskedText</p>
+        }
+
+        @if (ScreenHeadline is not null)
+        {
+            <h1 class="why-lead">@ScreenHeadline</h1>
+            <p class="lede">@ScreenLede</p>
+            <div class="why-meta">
+                <span class="why-pill">
+                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3.5" y="4.5" width="13" height="12" rx="1.6"/><path d="M3.5 8.5h13M7 3v3M13 3v3"/></svg>
+                    @CountedTo
+                </span>
+                @if (SampleBooks)
+                {
+                    <span class="why-sample">Sample</span>
+                }
+            </div>
         }
         else
         {
@@ -48,26 +68,84 @@ else
         {
             <p class="banner" role="status">@WhyMessages.Checking</p>
         }
+        else if (result is { Held: true } && HeldView is not null)
+        {
+            <section class="why-card why-held" aria-label="Held">
+                <span class="why-held-tag">
+                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7.5 5v10M12.5 5v10"/></svg>
+                    Reasons held
+                </span>
+                <h2>@HeldView.Title</h2>
+                <table class="why-gap">
+                    <tbody>
+                        <tr>
+                            <td>@HeldView.BooksLabel</td>
+                            <td class="num">@HeldView.BooksAmount</td>
+                        </tr>
+                        <tr>
+                            <td>@HeldView.RowsLabel</td>
+                            <td class="num">@HeldView.RowsAmount</td>
+                        </tr>
+                        <tr class="why-gap-short">
+                            <td>@HeldView.GapLabel</td>
+                            <td class="num">@HeldView.GapAmount</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="why-check">
+                    <h3>What to check</h3>
+                    <ol>
+                        @if (HeldView.Unmatched is { } unmatched)
+                        {
+                            <li>
+                                <span>
+                                    @unmatched.Sentence
+                                    <table class="why-inv">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Description</th>
+                                                <th>Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="why-date">@unmatched.DateLabel</td>
+                                                <td>@unmatched.Description</td>
+                                                <td class="num">@unmatched.Amount</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <div class="why-chips">
+                                        <span class="why-chip-lab">Row</span>
+                                        <span class="why-chip">@unmatched.Chip</span>
+                                    </div>
+                                </span>
+                            </li>
+                        }
+                        @foreach (var check in HeldView.Checks)
+                        {
+                            <li><span>@check</span></li>
+                        }
+                    </ol>
+                </div>
+                <div class="why-actions">
+                    <a class="btn btn-primary" href="/">Upload the file</a>
+                    <a class="btn btn-outline" href="/">Bring in the books again</a>
+                </div>
+                <p class="why-foot">@HeldView.Foot</p>
+            </section>
+        }
         else if (result is { Held: true })
         {
-            <p class="why-held" role="status">@result.Answer</p>
+            <section class="why-card why-held" role="status">
+                <h2>@result.Answer</h2>
+            </section>
         }
         else if (result is { Verified: true })
         {
-            <div class="why-reasons">
-                @for (var index = 0; index < result.Reasons.Count; index++)
-                {
-                    var reason = result.Reasons[index];
-                    <section class="why-reason">
-                        <h2>@reason.Title</h2>
-                        <a class="why-reason-count" href="@($"/receipts/{result.AnswerId}?part={index}")">@RowCount(reason.RowIds.Count)</a>
-                    </section>
-                }
-            </div>
-            <TrustPrompt AnswerId="result.AnswerId" />
-            <MorningBriefOptInSheet Preference="preference"
-                                    PreferenceChanged="OnPreferenceChanged"
-                                    ShowConfirmation="justOptedIn" />
+            <WhyReasonCard Result="result" Card="AnswerCard" Current="snapshot.CurrentPeriod" Previous="snapshot.PreviousPeriod" />
+            <p class="why-foot">Every amount here comes from the rows shown. Vhona names at most three reasons, and only when what is left over is smaller than each of them.</p>
         }
         else if (result is not null)
         {
@@ -77,58 +155,66 @@ else
             </div>
         }
 
+        @if (!checking && result is { Verified: true })
+        {
+            <TrustPrompt AnswerId="result.AnswerId" />
+            <MorningBriefOptInSheet Preference="preference"
+                                    PreferenceChanged="OnPreferenceChanged"
+                                    ShowConfirmation="justOptedIn" />
+        }
+
         <div class="why-chat">
             <label class="why-chat-label" for="why-question">Question</label>
             <InputTextArea id="why-question" @bind-Value="question" class="form-control why-chat-input"
                            placeholder="Why did revenue change?" disabled="@checking" />
-            <div class="actions">
+            <div class="why-actions">
                 <button class="btn btn-primary" type="button" @onclick="AskAsync" disabled="@checking">
                     @(checking ? "Checking…" : "Ask why")
                 </button>
-                <a class="btn btn-outline" href="/health">Back to health</a>
+                <a class="btn btn-outline" href="/">Back to Home</a>
             </div>
         </div>
-    </section>
 
-    @if (ShowLog)
-    {
-        <section class="panel">
-            <header class="panel-header">
-                <h2>Saved questions</h2>
-                <p class="lede">Each question is stored with its answer, the business, the time, and the rows it cites.</p>
-            </header>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>When</th>
-                        <th>Question</th>
-                        <th>Status</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in recent)
-                    {
+        @if (ShowLog)
+        {
+            <section class="panel">
+                <header class="panel-header">
+                    <h2>Saved questions</h2>
+                    <p class="lede">Each question is stored with its answer, the business, the time, and the rows it cites.</p>
+                </header>
+                <table class="data-table">
+                    <thead>
                         <tr>
-                            <td>@JohannesburgTime.Format(item.CreatedAt, "dd MMM HH:mm")</td>
-                            <td>@Truncate(item.Question)</td>
-                            <td>
-                                <span class="status-pill @(item.Verified ? null : "is-unverified")">
-                                    @(item.Verified ? "Cited" : "Unverified")
-                                </span>
-                            </td>
-                            <td>
-                                @if (item.Verified)
-                                {
-                                    <a href="@($"/receipts/{item.Id}")">Receipt</a>
-                                }
-                            </td>
+                            <th>When</th>
+                            <th>Question</th>
+                            <th>Status</th>
+                            <th></th>
                         </tr>
-                    }
-                </tbody>
-            </table>
-        </section>
-    }
+                    </thead>
+                    <tbody>
+                        @foreach (var item in recent)
+                        {
+                            <tr>
+                                <td>@JohannesburgTime.Format(item.CreatedAt, "dd MMM HH:mm")</td>
+                                <td>@Truncate(item.Question)</td>
+                                <td>
+                                    <span class="status-pill @(item.Verified ? null : "is-unverified")">
+                                        @StatusLabel(item)
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (item.Verified)
+                                    {
+                                        <a href="@($"/receipts/{item.Id}")">Receipt</a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </section>
+        }
+    </section>
 }
 
 @code {
@@ -149,11 +235,54 @@ else
     private MorningBriefPreferenceState preference = new();
     private bool justOptedIn;
     private bool checking => busy || pendingAutoAsk;
-    private bool ShowLog => !checking && result is { Verified: true } && recent.Count > 0;
-    private string? Headline =>
-        card is not null && snapshot?.PreviousPeriod is not null && card.PreviousValue is decimal previous
-            ? WhyReasons.Headline(LabelFor(card.Kind), card.CurrentValue, previous, snapshot.PreviousPeriod)
+    private bool ShowLog => !checking && recent.Count > 0;
+    private bool SampleBooks =>
+        CurrentUser.OrganizationName is "Karoo Kitchen Group" or "Axum Home";
+
+    private MetricCard? AnswerCard =>
+        card ?? (result?.Metric is HealthMetricKind kind ? snapshot?.Card(kind) : null);
+
+    private string? ScreenHeadline =>
+        AnswerCard is MetricCard shown && snapshot?.CurrentPeriod is MonthPeriod current && snapshot.PreviousPeriod is MonthPeriod previous && shown.PreviousValue is decimal earlier
+            ? WhyScreen.Headline(LabelFor(shown.Kind), shown.CurrentValue, earlier, current, previous)
             : null;
+
+    private string? ScreenLede =>
+        AnswerCard is MetricCard shown && snapshot?.CurrentPeriod is MonthPeriod current && snapshot.PreviousPeriod is MonthPeriod previous && shown.PreviousValue is decimal earlier
+            ? WhyScreen.Lede(LabelFor(shown.Kind), shown.CurrentValue, earlier, current, previous)
+            : null;
+
+    private string? CountedTo =>
+        snapshot?.CurrentPeriod is MonthPeriod current ? WhyScreen.CountedTo(current) : null;
+
+    private WhyHeldSheet? HeldView =>
+        result is { Held: true, Metric: HealthMetricKind kind }
+        && snapshot?.CurrentPeriod is MonthPeriod current
+        && snapshot.PreviousPeriod is MonthPeriod previous
+        && snapshot.Card(kind) is MetricCard heldCard
+        && heldCard.PreviousValue is decimal earlier
+            ? WhyScreen.Held(kind, result.Answer, heldCard.CurrentValue, earlier, result.CitedRows, current, previous)
+            : null;
+
+    private string? AskedText
+    {
+        get
+        {
+            var source = result?.Question;
+            if (string.IsNullOrWhiteSpace(source))
+            {
+                source = question;
+            }
+
+            if (string.IsNullOrWhiteSpace(source))
+            {
+                return null;
+            }
+
+            var trimmed = source.Trim();
+            return char.ToLowerInvariant(trimmed[0]) + trimmed[1..];
+        }
+    }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -240,8 +369,6 @@ else
         preference = state;
     }
 
-    private static string RowCount(int count) => count == 1 ? "1 row" : $"{count} rows";
-
     private static string LabelFor(HealthMetricKind kind) => kind switch
     {
         HealthMetricKind.Revenue => "Revenue",
@@ -250,6 +377,16 @@ else
         HealthMetricKind.Cash => "Cash",
         _ => kind.ToString()
     };
+
+    private static string StatusLabel(WhyAnswer item)
+    {
+        if (item.Verified)
+        {
+            return "Cited";
+        }
+
+        return item.Answer.StartsWith("Held", StringComparison.Ordinal) ? "Held" : "Unverified";
+    }
 
     private static string Truncate(string value) =>
         value.Length <= 90 ? value : value[..87] + "…";
